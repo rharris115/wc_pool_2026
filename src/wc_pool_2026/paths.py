@@ -27,4 +27,5 @@ def find_project_root() -> Path:
 
 PROJECT_ROOT = find_project_root()
 CONFIG_DIR = PROJECT_ROOT / "resources"
-CSV_DIR = CONFIG_DIR / "csv"
+INPUT_CSV_DIR = CONFIG_DIR / "input_csv"
+OUTPUT_CSV_DIR = CONFIG_DIR / "output_csv"

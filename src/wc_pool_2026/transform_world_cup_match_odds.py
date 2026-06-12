@@ -4,9 +4,9 @@ import math
 import pandas as pd
 
 try:
-    from .paths import CONFIG_DIR, CSV_DIR
+    from .paths import CONFIG_DIR, INPUT_CSV_DIR
 except ImportError:
-    from paths import CONFIG_DIR, CSV_DIR
+    from paths import CONFIG_DIR, INPUT_CSV_DIR
 
 try:
     from .common import (
@@ -32,7 +32,7 @@ XG_GRID_SIZE = 1000
 
 def build_output_path(raw_path: Path) -> Path:
     date_stamp = extract_date_stamp(raw_path)
-    return CSV_DIR / f"group_match_outcome_probs_{date_stamp}.csv"
+    return INPUT_CSV_DIR / f"group_match_outcome_probs_{date_stamp}.csv"
 
 
 def find_latest_raw_file() -> Path:

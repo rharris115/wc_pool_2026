@@ -3,9 +3,9 @@ from pathlib import Path
 import pandas as pd
 
 try:
-    from .paths import CONFIG_DIR, CSV_DIR
+    from .paths import CONFIG_DIR, INPUT_CSV_DIR
 except ImportError:
-    from paths import CONFIG_DIR, CSV_DIR
+    from paths import CONFIG_DIR, INPUT_CSV_DIR
 
 try:
     from .common import (
@@ -29,7 +29,7 @@ RAW_DIR = CONFIG_DIR / "raw_api"
 
 def build_output_path(raw_path: Path) -> Path:
     date_stamp = extract_date_stamp(raw_path)
-    return CSV_DIR / f"team_win_probs_{date_stamp}.csv"
+    return INPUT_CSV_DIR / f"world_cup_winner_odds_{date_stamp}.csv"
 
 
 def find_latest_raw_file() -> Path:

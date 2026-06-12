@@ -5,9 +5,9 @@ import pandas as pd
 from tqdm import tqdm
 
 try:
-    from .paths import CSV_DIR
+    from .paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
 except ImportError:
-    from paths import CSV_DIR
+    from paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
 
 try:
     from .common import (
@@ -28,7 +28,6 @@ except ImportError:
         format_whatsapp_table,
     )
 
-CONFIG_DIR = CSV_DIR
 MATCH_PROBS_PATTERN = "group_match_outcome_probs_*.csv"
 
 N_SIMULATIONS = 1000000
@@ -36,22 +35,22 @@ RANDOM_SEED = 42
 
 
 def find_latest_match_probs_file() -> Path:
-    return find_latest_file(CONFIG_DIR, MATCH_PROBS_PATTERN)
+    return find_latest_file(INPUT_CSV_DIR, MATCH_PROBS_PATTERN)
 
 
 def build_team_output_path(match_probs_file: Path) -> Path:
     date_stamp = extract_date_stamp(match_probs_file)
-    return CONFIG_DIR / f"third_prize_monte_carlo_teams_{date_stamp}.csv"
+    return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_teams_{date_stamp}.csv"
 
 
 def build_entrant_output_path(match_probs_file: Path) -> Path:
     date_stamp = extract_date_stamp(match_probs_file)
-    return CONFIG_DIR / f"third_prize_monte_carlo_entrants_{date_stamp}.csv"
+    return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_entrants_{date_stamp}.csv"
 
 
 def build_match_output_path(match_probs_file: Path) -> Path:
     date_stamp = extract_date_stamp(match_probs_file)
-    return CONFIG_DIR / f"third_prize_monte_carlo_matches_{date_stamp}.csv"
+    return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_matches_{date_stamp}.csv"
 
 
 def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
@@ -357,6 +356,7 @@ def main() -> None:
     entrant_output_path = build_entrant_output_path(match_probs_file)
     match_output_path = build_match_output_path(match_probs_file)
 
+    OUTPUT_CSV_DIR.mkdir(parents=True, exist_ok=True)
     team_results.to_csv(team_output_path, index=False)
     leaderboard.to_csv(entrant_output_path, index=False)
     match_results.to_csv(match_output_path, index=False)

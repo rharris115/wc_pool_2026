@@ -6,11 +6,11 @@ import re
 import pandas as pd
 
 try:
-    from .paths import CONFIG_DIR, CSV_DIR
+    from .paths import CONFIG_DIR, INPUT_CSV_DIR
 except ImportError:
-    from paths import CONFIG_DIR, CSV_DIR
+    from paths import CONFIG_DIR, INPUT_CSV_DIR
 
-PROB_FILE = CSV_DIR / "team_win_probs.csv"
+PROB_FILE = INPUT_CSV_DIR / "world_cup_winner_odds.csv"
 ENTRANTS_FILE = CONFIG_DIR / "entrants.json"
 TEAM_EMOJIS_FILE = CONFIG_DIR / "team_emojis.json"
 
@@ -138,8 +138,6 @@ def format_whatsapp_table(
 ) -> str:
     lines = [
         f"*{title}*",
-        subtitle,
-        "",
     ]
 
     for _, row in df.iterrows():
@@ -150,5 +148,7 @@ def format_whatsapp_table(
                 f"{row['teams']}"
             )
         )
+
+    lines.append(subtitle)
 
     return "\n\n".join(lines)
