@@ -1,32 +1,16 @@
 import pandas as pd
 from pathlib import Path
 
-try:
-    from .paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
-except ImportError:
-    from paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
-
-try:
-    from .common import (
-        ENTRANTS,
-        MEDALS,
-        TEAM_EMOJIS,
-        extract_date_stamp,
-        find_latest_file,
-        format_whatsapp_table,
-        load_probabilities,
-        validate_teams,
-    )
-except ImportError:
-    from common import (
-        ENTRANTS,
-        MEDALS,
-        TEAM_EMOJIS,
-        extract_date_stamp,
-        find_latest_file,
-        format_whatsapp_table,
-        load_probabilities,
-        validate_teams,
+from wc_pool_2026.paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
+from wc_pool_2026.common import (
+    ENTRANTS,
+    MEDALS,
+    extract_date_stamp,
+    find_latest_file,
+    format_teams_with_metric,
+    format_whatsapp_table,
+    load_probabilities,
+    validate_teams,
 )
 
 WORLD_CUP_WINNER_ODDS_PATTERN = "world_cup_winner_odds_*.csv"
@@ -35,16 +19,6 @@ WORLD_CUP_WINNER_ODDS_PATTERN = "world_cup_winner_odds_*.csv"
 def build_entrant_output_path(world_cup_winner_odds_file: Path) -> Path:
     date_stamp = extract_date_stamp(world_cup_winner_odds_file)
     return OUTPUT_CSV_DIR / f"first_prize_entrants_{date_stamp}.csv"
-
-
-def format_teams_with_win_probability(
-    teams: list[str],
-    prob_map: dict[str, float],
-) -> str:
-    return " ".join(
-        f"{TEAM_EMOJIS.get(team, '🏳️')} {team} ({prob_map[team] * 100:.2f}%)"
-        for team in teams
-    )
 
 
 def calculate_first_prize_odds() -> pd.DataFrame:
@@ -61,6 +35,10 @@ def build_first_prize_leaderboard(
 ) -> pd.DataFrame:
     prob_map = load_probabilities(world_cup_winner_odds_file)
     validate_teams(prob_map)
+    probability_pct_map = {
+        team: probability * 100
+        for team, probability in prob_map.items()
+    }
 
     rows = []
 
@@ -79,9 +57,11 @@ def build_first_prize_leaderboard(
                 "probability_pct": (
                     f"{probability_pct:.2f}%"
                 ),
-                "teams": format_teams_with_win_probability(
+                "teams": format_teams_with_metric(
                     teams=teams,
-                    prob_map=prob_map,
+                    metric_map=probability_pct_map,
+                    metric_format="{:.2f}%",
+                    separator=" ",
                 ),
             }
         )

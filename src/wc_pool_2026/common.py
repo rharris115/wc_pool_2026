@@ -5,12 +5,10 @@ import re
 
 import pandas as pd
 
-try:
-    from .paths import CONFIG_DIR, INPUT_CSV_DIR
-except ImportError:
-    from paths import CONFIG_DIR, INPUT_CSV_DIR
+from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
 
 PROB_FILE = INPUT_CSV_DIR / "world_cup_winner_odds.csv"
+MATCH_PROBS_PATTERN = "group_match_outcome_probs_*.csv"
 ENTRANTS_FILE = CONFIG_DIR / "entrants.json"
 TEAM_EMOJIS_FILE = CONFIG_DIR / "team_emojis.json"
 
@@ -82,19 +80,40 @@ def find_latest_file(directory: Path, pattern: str) -> Path:
     return files[-1]
 
 
+def find_latest_match_probs_file() -> Path:
+    return find_latest_file(INPUT_CSV_DIR, MATCH_PROBS_PATTERN)
+
+
+def require_columns(
+    df: pd.DataFrame,
+    columns: set[str],
+    source: Path,
+) -> None:
+    missing_columns = columns - set(df.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing columns in {source}: {missing_columns}"
+        )
+
+
+def sort_match_rows(df: pd.DataFrame) -> pd.DataFrame:
+    return (
+        df.sort_values(["commence_time", "team", "opponent"])
+        .reset_index(drop=True)
+    )
+
+
 def load_probabilities(
     prob_file: Path = PROB_FILE,
 ) -> dict[str, float]:
     probs = pd.read_csv(prob_file)
 
-    required_columns = {"team", "win_prob"}
-    missing_columns = required_columns - set(probs.columns)
-
-    if missing_columns:
-        raise ValueError(
-            f"Missing columns in {prob_file}: "
-            f"{missing_columns}"
-        )
+    require_columns(
+        df=probs,
+        columns={"team", "win_prob"},
+        source=prob_file,
+    )
 
     return dict(
         zip(
@@ -127,9 +146,26 @@ def format_teams(
     teams: list[str],
 ) -> str:
     return " ".join(
-        f"{TEAM_EMOJIS.get(team, '🏳️')} {team}"
+        format_team_name(team)
         for team in teams
     )
+
+
+def format_team_name(team: str) -> str:
+    return f"{TEAM_EMOJIS.get(team, '🏳️')} {team}"
+
+
+def format_teams_with_metric(
+    teams: list[str],
+    metric_map: dict[str, float],
+    metric_format: str,
+    separator: str = " | ",
+) -> str:
+    return separator.join(
+        f"{format_team_name(team)} ({metric_format.format(metric_map[team])})"
+        for team in teams
+    )
+
 
 def format_whatsapp_table(
     df,

@@ -4,35 +4,17 @@ from pathlib import Path
 
 import pandas as pd
 
-try:
-    from .paths import INPUT_CSV_DIR
-except ImportError:
-    from paths import INPUT_CSV_DIR
-
-try:
-    from .common import (
-        ENTRANTS,
-        MEDALS,
-        TEAM_EMOJIS,
-        find_latest_file,
-        format_whatsapp_table,
-    )
-except ImportError:
-    from common import (
-        ENTRANTS,
-        MEDALS,
-        TEAM_EMOJIS,
-        find_latest_file,
-        format_whatsapp_table,
-    )
-
-MATCH_PROBS_PATTERN = "group_match_outcome_probs_*.csv"
+from wc_pool_2026.common import (
+    ENTRANTS,
+    MEDALS,
+    find_latest_match_probs_file,
+    format_team_name,
+    format_teams_with_metric,
+    format_whatsapp_table,
+    require_columns,
+)
 
 POSSIBLE_POINTS = [0, 1, 2, 3, 4, 5, 6, 7, 9]
-
-
-def find_latest_match_probs_file() -> Path:
-    return find_latest_file(INPUT_CSV_DIR, MATCH_PROBS_PATTERN)
 
 
 def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
@@ -48,9 +30,11 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
         "p_loss",
     }
 
-    missing_columns = required_columns - set(rows.columns)
-    if missing_columns:
-        raise ValueError(f"Missing columns in {match_probs_file}: {missing_columns}")
+    require_columns(
+        df=rows,
+        columns=required_columns,
+        source=match_probs_file,
+    )
 
     fixtures = []
 
@@ -216,17 +200,14 @@ def build_expected_points_map(
     )
 
 
-def format_team_name(team: str) -> str:
-    return f"{TEAM_EMOJIS.get(team, '🏳️')} {team}"
-
-
 def format_teams_with_expected_points(
     teams: list[str],
     expected_points_map: dict[str, float],
 ) -> str:
-    return " | ".join(
-        f"{format_team_name(team)} ({expected_points_map[team]:.2f})"
-        for team in teams
+    return format_teams_with_metric(
+        teams=teams,
+        metric_map=expected_points_map,
+        metric_format="{:.2f}",
     )
 
 

@@ -4,38 +4,20 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-try:
-    from .paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
-except ImportError:
-    from paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
-
-try:
-    from .common import (
-        ENTRANTS,
-        MEDALS,
-        TEAM_EMOJIS,
-        extract_date_stamp,
-        find_latest_file,
-        format_whatsapp_table,
-    )
-except ImportError:
-    from common import (
-        ENTRANTS,
-        MEDALS,
-        TEAM_EMOJIS,
-        extract_date_stamp,
-        find_latest_file,
-        format_whatsapp_table,
-    )
-
-MATCH_PROBS_PATTERN = "group_match_outcome_probs_*.csv"
+from wc_pool_2026.paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
+from wc_pool_2026.common import (
+    ENTRANTS,
+    MEDALS,
+    extract_date_stamp,
+    find_latest_match_probs_file,
+    format_team_name,
+    format_teams_with_metric,
+    format_whatsapp_table,
+    require_columns,
+)
 
 N_SIMULATIONS = 1000000
 RANDOM_SEED = 42
-
-
-def find_latest_match_probs_file() -> Path:
-    return find_latest_file(INPUT_CSV_DIR, MATCH_PROBS_PATTERN)
 
 
 def find_match_results_file(match_probs_file: Path) -> Path:
@@ -81,9 +63,11 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
         "opponent_xg",
     }
 
-    missing_columns = required_columns - set(rows.columns)
-    if missing_columns:
-        raise ValueError(f"Missing columns in {match_probs_file}: {missing_columns}")
+    require_columns(
+        df=rows,
+        columns=required_columns,
+        source=match_probs_file,
+    )
 
     fixtures = []
 
@@ -128,11 +112,11 @@ def load_completed_results(match_results_file: Path) -> pd.DataFrame:
         "opponent_g",
     }
 
-    missing_columns = required_columns - set(rows.columns)
-    if missing_columns:
-        raise ValueError(
-            f"Missing columns in {match_results_file}: {missing_columns}"
-        )
+    require_columns(
+        df=rows,
+        columns=required_columns,
+        source=match_results_file,
+    )
 
     results = []
 
@@ -354,20 +338,19 @@ def build_worst_probability_map(
     )
 
 
-def format_team_name(team: str) -> str:
-    return f"{TEAM_EMOJIS.get(team, '🏳️')} {team}"
-
-
 def format_teams_with_worst_probability(
     teams: list[str],
     worst_probability_map: dict[str, float],
 ) -> str:
-    return " | ".join(
-        (
-            f"{format_team_name(team)} "
-            f"({worst_probability_map[team] * 100:.2f}%)"
-        )
-        for team in teams
+    worst_probability_pct_map = {
+        team: probability * 100
+        for team, probability in worst_probability_map.items()
+    }
+
+    return format_teams_with_metric(
+        teams=teams,
+        metric_map=worst_probability_pct_map,
+        metric_format="{:.2f}%",
     )
 
 

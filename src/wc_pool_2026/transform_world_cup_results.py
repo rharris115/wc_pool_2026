@@ -2,25 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
-try:
-    from .paths import CONFIG_DIR, INPUT_CSV_DIR
-except ImportError:
-    from paths import CONFIG_DIR, INPUT_CSV_DIR
-
-try:
-    from .common import (
-        extract_date_stamp,
-        find_latest_file,
-        load_json,
-        normalise_team,
-    )
-except ImportError:
-    from common import (
-        extract_date_stamp,
-        find_latest_file,
-        load_json,
-        normalise_team,
-    )
+from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
+from wc_pool_2026.common import (
+    extract_date_stamp,
+    find_latest_file,
+    load_json,
+    normalise_team,
+    sort_match_rows,
+)
 
 RAW_DIR = CONFIG_DIR / "raw_api"
 
@@ -131,7 +120,7 @@ def parse_results(events: list[dict]) -> pd.DataFrame:
             )
         )
 
-    return pd.DataFrame(rows)
+    return sort_match_rows(pd.DataFrame(rows))
 
 
 def main() -> None:

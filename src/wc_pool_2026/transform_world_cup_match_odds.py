@@ -3,25 +3,14 @@ import math
 
 import pandas as pd
 
-try:
-    from .paths import CONFIG_DIR, INPUT_CSV_DIR
-except ImportError:
-    from paths import CONFIG_DIR, INPUT_CSV_DIR
-
-try:
-    from .common import (
-        extract_date_stamp,
-        find_latest_file,
-        load_json,
-        normalise_team,
-    )
-except ImportError:
-    from common import (
-        extract_date_stamp,
-        find_latest_file,
-        load_json,
-        normalise_team,
-    )
+from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
+from wc_pool_2026.common import (
+    extract_date_stamp,
+    find_latest_file,
+    load_json,
+    normalise_team,
+    sort_match_rows,
+)
 
 RAW_DIR = CONFIG_DIR / "raw_api"
 TOTAL_GOALS_MARKET_POINT = 2.5
@@ -297,11 +286,7 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
             }
         )
 
-    return (
-        pd.DataFrame(rows)
-        .sort_values(["commence_time", "team"])
-        .reset_index(drop=True)
-    )
+    return sort_match_rows(pd.DataFrame(rows))
 
 
 def main() -> None:

@@ -2,27 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
-try:
-    from .paths import CONFIG_DIR, INPUT_CSV_DIR
-except ImportError:
-    from paths import CONFIG_DIR, INPUT_CSV_DIR
-
-try:
-    from .common import (
-        entrant_teams,
-        extract_date_stamp,
-        find_latest_file,
-        load_json,
-        normalise_team,
-    )
-except ImportError:
-    from common import (
-        entrant_teams,
-        extract_date_stamp,
-        find_latest_file,
-        load_json,
-        normalise_team,
-    )
+from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
+from wc_pool_2026.common import (
+    entrant_teams,
+    extract_date_stamp,
+    find_latest_file,
+    load_json,
+    normalise_team,
+)
 
 RAW_DIR = CONFIG_DIR / "raw_api"
 

@@ -4,15 +4,8 @@ import os
 import requests
 from dotenv import load_dotenv
 
-try:
-    from .paths import CONFIG_DIR
-except ImportError:
-    from paths import CONFIG_DIR
-
-try:
-    from .common import current_date_stamp
-except ImportError:
-    from common import current_date_stamp
+from wc_pool_2026.paths import CONFIG_DIR
+from wc_pool_2026.common import current_date_stamp
 
 load_dotenv()
 

@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 import json
 import os
@@ -6,10 +5,8 @@ import os
 import requests
 from dotenv import load_dotenv
 
-try:
-    from .paths import CONFIG_DIR
-except ImportError:
-    from paths import CONFIG_DIR
+from wc_pool_2026.paths import CONFIG_DIR
+from wc_pool_2026.common import current_date_stamp
 
 load_dotenv()
 
@@ -51,8 +48,7 @@ def fetch_world_cup_winner_odds() -> list[dict]:
 
 
 def build_output_path() -> Path:
-    timestamp = datetime.now().strftime("%Y%m%d")
-    return RAW_DIR / f"world_cup_winner_odds_{timestamp}.json"
+    return RAW_DIR / f"world_cup_winner_odds_{current_date_stamp()}.json"
 
 
 def main() -> None:
