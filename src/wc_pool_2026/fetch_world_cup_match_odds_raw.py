@@ -1,18 +1,20 @@
 import json
 import os
+from pathlib import Path
 
+import click
 import requests
 from dotenv import load_dotenv
 
-from wc_pool_2026.paths import CONFIG_DIR
+from wc_pool_2026.paths import (
+    build_resource_paths,
+    default_resources_path,
+)
 from wc_pool_2026.common import current_date_stamp
 
 load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
-
-
-OUTPUT_DIR = CONFIG_DIR / "raw_api"
 
 SPORT_KEY = "soccer_fifa_world_cup"
 REGIONS = "uk"
@@ -20,9 +22,22 @@ MARKETS = "h2h,totals"
 ODDS_FORMAT = "decimal"
 
 
-def main() -> None:
+@click.command()
+@click.argument(
+    "resources_path",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=Path,
+    ),
+    default=default_resources_path(),
+    required=False,
+)
+def main(resources_path: Path) -> None:
+    paths = build_resource_paths(resources_path)
 
-    OUTPUT_DIR.mkdir(
+    paths.raw_api_dir.mkdir(
         parents=True,
         exist_ok=True,
     )
@@ -50,7 +65,7 @@ def main() -> None:
     events = response.json()
 
     output_path = (
-        OUTPUT_DIR
+        paths.raw_api_dir
         / f"world_cup_match_odds_{current_date_stamp()}.json"
     )
 

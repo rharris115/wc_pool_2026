@@ -1,14 +1,21 @@
 import pandas as pd
 from pathlib import Path
 
-from wc_pool_2026.paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
+import click
+
+from wc_pool_2026.paths import (
+    ResourcePaths,
+    build_resource_paths,
+    default_resources_path,
+)
 from wc_pool_2026.common import (
-    ENTRANTS,
     MEDALS,
+    PoolResources,
     extract_date_stamp,
     find_latest_file,
     format_teams_with_metric,
     format_whatsapp_table,
+    load_pool_resources,
     load_probabilities,
     validate_teams,
 )
@@ -16,25 +23,30 @@ from wc_pool_2026.common import (
 WORLD_CUP_WINNER_ODDS_PATTERN = "world_cup_winner_odds_*.csv"
 
 
-def build_entrant_output_path(world_cup_winner_odds_file: Path) -> Path:
-    date_stamp = extract_date_stamp(world_cup_winner_odds_file)
-    return OUTPUT_CSV_DIR / f"first_prize_entrants_{date_stamp}.csv"
-
-
-def calculate_first_prize_odds() -> pd.DataFrame:
+def calculate_first_prize_odds(
+    paths: ResourcePaths,
+    resources: PoolResources,
+) -> pd.DataFrame:
     world_cup_winner_odds_file = find_latest_file(
-        INPUT_CSV_DIR,
+        paths.input_csv_dir,
         WORLD_CUP_WINNER_ODDS_PATTERN,
     )
 
-    return build_first_prize_leaderboard(world_cup_winner_odds_file)
+    return build_first_prize_leaderboard(
+        world_cup_winner_odds_file=world_cup_winner_odds_file,
+        resources=resources,
+    )
 
 
 def build_first_prize_leaderboard(
     world_cup_winner_odds_file: Path,
+    resources: PoolResources,
 ) -> pd.DataFrame:
     prob_map = load_probabilities(world_cup_winner_odds_file)
-    validate_teams(prob_map)
+    validate_teams(
+        prob_map=prob_map,
+        entrants=resources.entrants,
+    )
     probability_pct_map = {
         team: probability * 100
         for team, probability in prob_map.items()
@@ -42,7 +54,7 @@ def build_first_prize_leaderboard(
 
     rows = []
 
-    for person, teams in ENTRANTS.items():
+    for person, teams in resources.entrants.items():
         probability_pct = (
             sum(
                 prob_map[team]
@@ -61,6 +73,7 @@ def build_first_prize_leaderboard(
                     teams=teams,
                     metric_map=probability_pct_map,
                     metric_format="{:.2f}%",
+                    team_emojis=resources.team_emojis,
                     separator=" ",
                 ),
             }
@@ -90,13 +103,33 @@ def build_first_prize_leaderboard(
     return result
 
 
-def main() -> None:
+@click.command()
+@click.argument(
+    "resources_path",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=Path,
+    ),
+    default=default_resources_path(),
+    required=False,
+)
+def main(resources_path: Path) -> None:
+    paths = build_resource_paths(resources_path)
+    resources = load_pool_resources(paths.config_dir)
     world_cup_winner_odds_file = find_latest_file(
-        INPUT_CSV_DIR,
+        paths.input_csv_dir,
         WORLD_CUP_WINNER_ODDS_PATTERN,
     )
-    df = build_first_prize_leaderboard(world_cup_winner_odds_file)
-    entrant_output_path = build_entrant_output_path(world_cup_winner_odds_file)
+    df = build_first_prize_leaderboard(
+        world_cup_winner_odds_file=world_cup_winner_odds_file,
+        resources=resources,
+    )
+    entrant_output_path = (
+        paths.output_csv_dir
+        / f"first_prize_entrants_{extract_date_stamp(world_cup_winner_odds_file)}.csv"
+    )
 
     entrant_output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(entrant_output_path, index=False)

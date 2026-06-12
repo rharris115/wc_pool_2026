@@ -1,16 +1,12 @@
 import json
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 import re
 
 import pandas as pd
 
-from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
-
-PROB_FILE = INPUT_CSV_DIR / "world_cup_winner_odds.csv"
 MATCH_PROBS_PATTERN = "group_match_outcome_probs_*.csv"
-ENTRANTS_FILE = CONFIG_DIR / "entrants.json"
-TEAM_EMOJIS_FILE = CONFIG_DIR / "team_emojis.json"
 
 MEDALS = {
     1: "🥇",
@@ -33,23 +29,32 @@ TEAM_ALIASES = {
 }
 
 
+@dataclass(frozen=True)
+class PoolResources:
+    entrants: dict[str, list[str]]
+    team_emojis: dict[str, str]
+
+
 def load_json(path: Path) -> dict | list:
     with path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-ENTRANTS = load_json(ENTRANTS_FILE)
-TEAM_EMOJIS = load_json(TEAM_EMOJIS_FILE)
+def load_pool_resources(config_dir: Path) -> PoolResources:
+    return PoolResources(
+        entrants=load_json(config_dir / "entrants.json"),
+        team_emojis=load_json(config_dir / "team_emojis.json"),
+    )
 
 
 def normalise_team(name: str) -> str:
     return TEAM_ALIASES.get(name, name)
 
 
-def entrant_teams() -> set[str]:
+def entrant_teams(entrants: dict[str, list[str]]) -> set[str]:
     return {
         team
-        for teams in ENTRANTS.values()
+        for teams in entrants.values()
         for team in teams
     }
 
@@ -80,8 +85,8 @@ def find_latest_file(directory: Path, pattern: str) -> Path:
     return files[-1]
 
 
-def find_latest_match_probs_file() -> Path:
-    return find_latest_file(INPUT_CSV_DIR, MATCH_PROBS_PATTERN)
+def find_latest_match_probs_file(input_csv_dir: Path) -> Path:
+    return find_latest_file(input_csv_dir, MATCH_PROBS_PATTERN)
 
 
 def require_columns(
@@ -105,7 +110,7 @@ def sort_match_rows(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_probabilities(
-    prob_file: Path = PROB_FILE,
+    prob_file: Path,
 ) -> dict[str, float]:
     probs = pd.read_csv(prob_file)
 
@@ -125,11 +130,12 @@ def load_probabilities(
 
 def validate_teams(
     prob_map: dict[str, float],
+    entrants: dict[str, list[str]],
 ) -> None:
     missing_teams = sorted(
         {
             team
-            for teams in ENTRANTS.values()
+            for teams in entrants.values()
             for team in teams
             if team not in prob_map
         }
@@ -144,25 +150,33 @@ def validate_teams(
 
 def format_teams(
     teams: list[str],
+    team_emojis: dict[str, str],
 ) -> str:
     return " ".join(
-        format_team_name(team)
+        format_team_name(team, team_emojis)
         for team in teams
     )
 
 
-def format_team_name(team: str) -> str:
-    return f"{TEAM_EMOJIS.get(team, '🏳️')} {team}"
+def format_team_name(
+    team: str,
+    team_emojis: dict[str, str],
+) -> str:
+    return f"{team_emojis.get(team, '🏳️')} {team}"
 
 
 def format_teams_with_metric(
     teams: list[str],
     metric_map: dict[str, float],
     metric_format: str,
+    team_emojis: dict[str, str],
     separator: str = " | ",
 ) -> str:
     return separator.join(
-        f"{format_team_name(team)} ({metric_format.format(metric_map[team])})"
+        (
+            f"{format_team_name(team, team_emojis)} "
+            f"({metric_format.format(metric_map[team])})"
+        )
         for team in teams
     )
 

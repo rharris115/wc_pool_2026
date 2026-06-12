@@ -3,6 +3,7 @@ name = "wc-pool-2026"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "click",
     "numpy",
     "pandas",
     "pandas-stubs~=3.0.3",

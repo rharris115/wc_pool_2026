@@ -1,26 +1,25 @@
 from pathlib import Path
 
+import click
 import pandas as pd
 
-from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
+from wc_pool_2026.paths import (
+    ResourcePaths,
+    build_resource_paths,
+    default_resources_path,
+)
 from wc_pool_2026.common import (
     entrant_teams,
     extract_date_stamp,
     find_latest_file,
     load_json,
+    load_pool_resources,
     normalise_team,
 )
 
-RAW_DIR = CONFIG_DIR / "raw_api"
 
-
-def build_output_path(raw_path: Path) -> Path:
-    date_stamp = extract_date_stamp(raw_path)
-    return INPUT_CSV_DIR / f"world_cup_winner_odds_{date_stamp}.csv"
-
-
-def find_latest_raw_file() -> Path:
-    return find_latest_file(RAW_DIR, "world_cup_winner_odds_*.json")
+def find_latest_raw_file(paths: ResourcePaths) -> Path:
+    return find_latest_file(paths.raw_api_dir, "world_cup_winner_odds_*.json")
 
 
 def parse_outcomes(events: list[dict]) -> pd.DataFrame:
@@ -91,14 +90,28 @@ def build_probabilities(odds_df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def main() -> None:
-    raw_path = find_latest_raw_file()
+@click.command()
+@click.argument(
+    "resources_path",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=Path,
+    ),
+    default=default_resources_path(),
+    required=False,
+)
+def main(resources_path: Path) -> None:
+    paths = build_resource_paths(resources_path)
+    resources = load_pool_resources(paths.config_dir)
+    raw_path = find_latest_raw_file(paths)
     events = load_json(raw_path)
 
     odds_df = parse_outcomes(events)
     odds_df = filter_to_entrant_teams(
         odds_df=odds_df,
-        entrant_teams=entrant_teams(),
+        entrant_teams=entrant_teams(resources.entrants),
     )
     probs_df = build_probabilities(odds_df)
 
@@ -112,7 +125,10 @@ def main() -> None:
         ]
     ]
 
-    output_path = build_output_path(raw_path)
+    output_path = (
+        paths.input_csv_dir
+        / f"world_cup_winner_odds_{extract_date_stamp(raw_path)}.csv"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False)
 

@@ -1,18 +1,24 @@
 from pathlib import Path
 
+import click
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from wc_pool_2026.paths import INPUT_CSV_DIR, OUTPUT_CSV_DIR
+from wc_pool_2026.paths import (
+    ResourcePaths,
+    build_resource_paths,
+    default_resources_path,
+)
 from wc_pool_2026.common import (
-    ENTRANTS,
     MEDALS,
+    PoolResources,
     extract_date_stamp,
     find_latest_match_probs_file,
     format_team_name,
     format_teams_with_metric,
     format_whatsapp_table,
+    load_pool_resources,
     require_columns,
 )
 
@@ -20,9 +26,15 @@ N_SIMULATIONS = 1000000
 RANDOM_SEED = 42
 
 
-def find_match_results_file(match_probs_file: Path) -> Path:
+def find_match_results_file(
+    match_probs_file: Path,
+    paths: ResourcePaths,
+) -> Path:
     date_stamp = extract_date_stamp(match_probs_file)
-    match_results_file = INPUT_CSV_DIR / f"group_match_results_{date_stamp}.csv"
+    match_results_file = (
+        paths.input_csv_dir
+        / f"group_match_results_{date_stamp}.csv"
+    )
 
     if not match_results_file.is_file():
         raise FileNotFoundError(
@@ -31,21 +43,6 @@ def find_match_results_file(match_probs_file: Path) -> Path:
         )
 
     return match_results_file
-
-
-def build_team_output_path(match_probs_file: Path) -> Path:
-    date_stamp = extract_date_stamp(match_probs_file)
-    return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_teams_{date_stamp}.csv"
-
-
-def build_entrant_output_path(match_probs_file: Path) -> Path:
-    date_stamp = extract_date_stamp(match_probs_file)
-    return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_entrants_{date_stamp}.csv"
-
-
-def build_match_output_path(match_probs_file: Path) -> Path:
-    date_stamp = extract_date_stamp(match_probs_file)
-    return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_matches_{date_stamp}.csv"
 
 
 def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
@@ -194,6 +191,7 @@ def remaining_fixtures(
 def simulate_group_stage(
     fixtures: pd.DataFrame,
     completed_results: pd.DataFrame,
+    resources: PoolResources,
     n_simulations: int = N_SIMULATIONS,
     random_seed: int = RANDOM_SEED,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -257,8 +255,14 @@ def simulate_group_stage(
 
         match_rows.append(
             {
-                "team_1": format_team_name(fixture["team_1"]),
-                "team_2": format_team_name(fixture["team_2"]),
+                "team_1": format_team_name(
+                    fixture["team_1"],
+                    resources.team_emojis,
+                ),
+                "team_2": format_team_name(
+                    fixture["team_2"],
+                    resources.team_emojis,
+                ),
                 "team_1_win": fixture["p_team_1_win"],
                 "simulated_team_1_win": simulated_team_1_win,
                 "draw": fixture["p_draw"],
@@ -341,6 +345,7 @@ def build_worst_probability_map(
 def format_teams_with_worst_probability(
     teams: list[str],
     worst_probability_map: dict[str, float],
+    resources: PoolResources,
 ) -> str:
     worst_probability_pct_map = {
         team: probability * 100
@@ -351,13 +356,19 @@ def format_teams_with_worst_probability(
         teams=teams,
         metric_map=worst_probability_pct_map,
         metric_format="{:.2f}%",
+        team_emojis=resources.team_emojis,
     )
 
 
-def format_team_results_table(team_results: pd.DataFrame) -> pd.DataFrame:
+def format_team_results_table(
+    team_results: pd.DataFrame,
+    resources: PoolResources,
+) -> pd.DataFrame:
     output = team_results.copy()
 
-    output["team"] = output["team"].map(format_team_name)
+    output["team"] = output["team"].map(
+        lambda team: format_team_name(team, resources.team_emojis)
+    )
     output["worst_probability_pct"] = output["worst_probability"].map(
         lambda value: f"{value * 100:.2f}%"
     )
@@ -384,11 +395,12 @@ def format_team_results_table(team_results: pd.DataFrame) -> pd.DataFrame:
 
 def build_entrant_leaderboard(
     team_results: pd.DataFrame,
+    resources: PoolResources,
 ) -> pd.DataFrame:
     worst_probability_map = build_worst_probability_map(team_results)
     rows = []
 
-    for person, teams in ENTRANTS.items():
+    for person, teams in resources.entrants.items():
         probability = sum(worst_probability_map[team] for team in teams)
 
         rows.append(
@@ -399,6 +411,7 @@ def build_entrant_leaderboard(
                 "teams": format_teams_with_worst_probability(
                     teams=teams,
                     worst_probability_map=worst_probability_map,
+                    resources=resources,
                 ),
             }
         )
@@ -428,38 +441,75 @@ def build_entrant_leaderboard(
     ]
 
 
-def calculate_third_prize_monte_carlo() -> tuple[
+def calculate_third_prize_monte_carlo(
+    paths: ResourcePaths,
+    resources: PoolResources,
+) -> tuple[
     pd.DataFrame,
     pd.DataFrame,
     pd.DataFrame,
     Path,
 ]:
-    match_probs_file = find_latest_match_probs_file()
-    match_results_file = find_match_results_file(match_probs_file)
+    match_probs_file = find_latest_match_probs_file(paths.input_csv_dir)
+    match_results_file = find_match_results_file(
+        match_probs_file=match_probs_file,
+        paths=paths,
+    )
     fixtures = load_fixtures(match_probs_file)
     completed_results = load_completed_results(match_results_file)
     team_results, match_results = simulate_group_stage(
         fixtures=fixtures,
         completed_results=completed_results,
+        resources=resources,
     )
-    leaderboard = build_entrant_leaderboard(team_results)
+    leaderboard = build_entrant_leaderboard(
+        team_results=team_results,
+        resources=resources,
+    )
 
     return leaderboard, team_results, match_results, match_probs_file
 
 
-def main() -> None:
+@click.command()
+@click.argument(
+    "resources_path",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=Path,
+    ),
+    default=default_resources_path(),
+    required=False,
+)
+def main(resources_path: Path) -> None:
+    paths = build_resource_paths(resources_path)
+    resources = load_pool_resources(paths.config_dir)
     (
         leaderboard,
         team_results,
         match_results,
         match_probs_file,
-    ) = calculate_third_prize_monte_carlo()
+    ) = calculate_third_prize_monte_carlo(
+        paths=paths,
+        resources=resources,
+    )
 
-    team_output_path = build_team_output_path(match_probs_file)
-    entrant_output_path = build_entrant_output_path(match_probs_file)
-    match_output_path = build_match_output_path(match_probs_file)
+    date_stamp = extract_date_stamp(match_probs_file)
+    team_output_path = (
+        paths.output_csv_dir
+        / f"third_prize_monte_carlo_teams_{date_stamp}.csv"
+    )
+    entrant_output_path = (
+        paths.output_csv_dir
+        / f"third_prize_monte_carlo_entrants_{date_stamp}.csv"
+    )
+    match_output_path = (
+        paths.output_csv_dir
+        / f"third_prize_monte_carlo_matches_{date_stamp}.csv"
+    )
 
-    OUTPUT_CSV_DIR.mkdir(parents=True, exist_ok=True)
+    paths.output_csv_dir.mkdir(parents=True, exist_ok=True)
     team_results.to_csv(team_output_path, index=False)
     leaderboard.to_csv(entrant_output_path, index=False)
     match_results.to_csv(match_output_path, index=False)
@@ -469,7 +519,8 @@ def main() -> None:
     print("=" * 120)
     print(
         format_team_results_table(
-            team_results
+            team_results=team_results,
+            resources=resources,
         ).to_string(index=False)
     )
 

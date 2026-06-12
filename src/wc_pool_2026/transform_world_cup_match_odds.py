@@ -1,9 +1,14 @@
 from pathlib import Path
 import math
 
+import click
 import pandas as pd
 
-from wc_pool_2026.paths import CONFIG_DIR, INPUT_CSV_DIR
+from wc_pool_2026.paths import (
+    ResourcePaths,
+    build_resource_paths,
+    default_resources_path,
+)
 from wc_pool_2026.common import (
     extract_date_stamp,
     find_latest_file,
@@ -12,20 +17,14 @@ from wc_pool_2026.common import (
     sort_match_rows,
 )
 
-RAW_DIR = CONFIG_DIR / "raw_api"
 TOTAL_GOALS_MARKET_POINT = 2.5
 MIN_EXPECTED_GOALS = 0.05
 MAX_EXPECTED_GOALS = 8.0
 XG_GRID_SIZE = 1000
 
 
-def build_output_path(raw_path: Path) -> Path:
-    date_stamp = extract_date_stamp(raw_path)
-    return INPUT_CSV_DIR / f"group_match_outcome_probs_{date_stamp}.csv"
-
-
-def find_latest_raw_file() -> Path:
-    return find_latest_file(RAW_DIR, "world_cup_match_odds_*.json")
+def find_latest_raw_file(paths: ResourcePaths) -> Path:
+    return find_latest_file(paths.raw_api_dir, "world_cup_match_odds_*.json")
 
 
 def normalise_probs(prices: dict[str, float]) -> dict[str, float]:
@@ -289,13 +288,29 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
     return sort_match_rows(pd.DataFrame(rows))
 
 
-def main() -> None:
-    raw_path = find_latest_raw_file()
+@click.command()
+@click.argument(
+    "resources_path",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=Path,
+    ),
+    default=default_resources_path(),
+    required=False,
+)
+def main(resources_path: Path) -> None:
+    paths = build_resource_paths(resources_path)
+    raw_path = find_latest_raw_file(paths)
     events = load_json(raw_path)
 
     output = parse_match_outcomes(events)
 
-    output_path = build_output_path(raw_path)
+    output_path = (
+        paths.input_csv_dir
+        / f"group_match_outcome_probs_{extract_date_stamp(raw_path)}.csv"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     output.to_csv(output_path, index=False)

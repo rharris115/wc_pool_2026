@@ -2,15 +2,22 @@ from collections import defaultdict
 from itertools import product
 from pathlib import Path
 
+import click
 import pandas as pd
 
+from wc_pool_2026.paths import (
+    ResourcePaths,
+    build_resource_paths,
+    default_resources_path,
+)
 from wc_pool_2026.common import (
-    ENTRANTS,
     MEDALS,
+    PoolResources,
     find_latest_match_probs_file,
     format_team_name,
     format_teams_with_metric,
     format_whatsapp_table,
+    load_pool_resources,
     require_columns,
 )
 
@@ -203,20 +210,25 @@ def build_expected_points_map(
 def format_teams_with_expected_points(
     teams: list[str],
     expected_points_map: dict[str, float],
+    resources: PoolResources,
 ) -> str:
     return format_teams_with_metric(
         teams=teams,
         metric_map=expected_points_map,
         metric_format="{:.2f}",
+        team_emojis=resources.team_emojis,
     )
 
 
 def format_points_distribution_table(
     distributions: pd.DataFrame,
+    resources: PoolResources,
 ) -> pd.DataFrame:
     output = distributions.copy()
 
-    output["team"] = output["team"].map(format_team_name)
+    output["team"] = output["team"].map(
+        lambda team: format_team_name(team, resources.team_emojis)
+    )
 
     for points in POSSIBLE_POINTS:
         col = f"{points}_pts"
@@ -302,8 +314,11 @@ def calculate_team_worst_probabilities(
     return dict(team_probs)
 
 
-def calculate_third_prize_odds() -> tuple[pd.DataFrame, pd.DataFrame]:
-    match_probs_file = find_latest_match_probs_file()
+def calculate_third_prize_odds(
+    paths: ResourcePaths,
+    resources: PoolResources,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    match_probs_file = find_latest_match_probs_file(paths.input_csv_dir)
 
     fixtures = load_fixtures(match_probs_file)
     groups = assign_groups(fixtures)
@@ -334,7 +349,7 @@ def calculate_third_prize_odds() -> tuple[pd.DataFrame, pd.DataFrame]:
 
     rows = []
 
-    for person, teams in ENTRANTS.items():
+    for person, teams in resources.entrants.items():
         probability = sum(team_worst_probs[team] for team in teams)
 
         rows.append(
@@ -345,6 +360,7 @@ def calculate_third_prize_odds() -> tuple[pd.DataFrame, pd.DataFrame]:
                 "teams": format_teams_with_expected_points(
                     teams=teams,
                     expected_points_map=expected_points_map,
+                    resources=resources,
                 ),
             }
         )
@@ -377,15 +393,33 @@ def calculate_third_prize_odds() -> tuple[pd.DataFrame, pd.DataFrame]:
     )
 
 
-def main() -> None:
-    leaderboard, points_distributions = calculate_third_prize_odds()
+@click.command()
+@click.argument(
+    "resources_path",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=Path,
+    ),
+    default=default_resources_path(),
+    required=False,
+)
+def main(resources_path: Path) -> None:
+    paths = build_resource_paths(resources_path)
+    resources = load_pool_resources(paths.config_dir)
+    leaderboard, points_distributions = calculate_third_prize_odds(
+        paths=paths,
+        resources=resources,
+    )
 
     print()
     print("📊 TEAM GROUP POINTS DISTRIBUTIONS")
     print("=" * 120)
     print(
         format_points_distribution_table(
-            points_distributions
+            distributions=points_distributions,
+            resources=resources,
         ).to_string(index=False)
     )
 

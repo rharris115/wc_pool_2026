@@ -1,31 +1,25 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 
-def find_project_root() -> Path:
-    candidates = [
-        Path.cwd(),
-        *Path.cwd().parents,
-        Path(__file__).resolve().parent,
-        *Path(__file__).resolve().parents,
-    ]
+@dataclass(frozen=True)
+class ResourcePaths:
+    config_dir: Path
+    input_csv_dir: Path
+    output_csv_dir: Path
+    raw_api_dir: Path
 
-    for candidate in candidates:
-        resources_dir = candidate / "resources"
 
-        if (
-            resources_dir.is_dir()
-            and (resources_dir / "entrants.json").is_file()
-            and (resources_dir / "team_emojis.json").is_file()
-        ):
-            return candidate
+def default_resources_path() -> Path:
+    return Path(__file__).resolve().parent / ".." / ".." / "resources"
 
-    raise FileNotFoundError(
-        "Could not find project root containing resources/entrants.json "
-        "and resources/team_emojis.json"
+
+def build_resource_paths(resources_path: str | Path) -> ResourcePaths:
+    config_dir = Path(resources_path).expanduser().resolve()
+
+    return ResourcePaths(
+        config_dir=config_dir,
+        input_csv_dir=config_dir / "input_csv",
+        output_csv_dir=config_dir / "output_csv",
+        raw_api_dir=config_dir / "raw_api",
     )
-
-
-PROJECT_ROOT = find_project_root()
-CONFIG_DIR = PROJECT_ROOT / "resources"
-INPUT_CSV_DIR = CONFIG_DIR / "input_csv"
-OUTPUT_CSV_DIR = CONFIG_DIR / "output_csv"
