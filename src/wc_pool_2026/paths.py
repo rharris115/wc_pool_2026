@@ -28,4 +28,3 @@ def find_project_root() -> Path:
 PROJECT_ROOT = find_project_root()
 CONFIG_DIR = PROJECT_ROOT / "resources"
 CSV_DIR = CONFIG_DIR / "csv"
-ENV_FILE = PROJECT_ROOT / ".env"

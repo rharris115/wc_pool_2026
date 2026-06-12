@@ -7,13 +7,13 @@ import requests
 from dotenv import load_dotenv
 
 try:
-    from .paths import CONFIG_DIR, ENV_FILE
+    from .paths import CONFIG_DIR
 except ImportError:
-    from paths import CONFIG_DIR, ENV_FILE
+    from paths import CONFIG_DIR
 
-load_dotenv(ENV_FILE)
+load_dotenv()
 
-API_KEY = os.getenv("api_key")
+API_KEY = os.getenv("API_KEY")
 
 RAW_DIR = CONFIG_DIR / "raw_api"
 

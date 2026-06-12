@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 import json
 import os
@@ -7,13 +6,19 @@ import requests
 from dotenv import load_dotenv
 
 try:
-    from .paths import CONFIG_DIR, ENV_FILE
+    from .paths import CONFIG_DIR
 except ImportError:
-    from paths import CONFIG_DIR, ENV_FILE
+    from paths import CONFIG_DIR
 
-load_dotenv(ENV_FILE)
+try:
+    from .common import current_date_stamp
+except ImportError:
+    from common import current_date_stamp
 
-API_KEY = os.getenv("api_key")
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+
 
 OUTPUT_DIR = CONFIG_DIR / "raw_api"
 
@@ -24,10 +29,6 @@ ODDS_FORMAT = "decimal"
 
 
 def main() -> None:
-    if not API_KEY:
-        raise RuntimeError(
-            "Missing api_key in .env"
-        )
 
     OUTPUT_DIR.mkdir(
         parents=True,
@@ -56,13 +57,9 @@ def main() -> None:
 
     events = response.json()
 
-    timestamp = datetime.now().strftime(
-        "%Y%m%d_%H%M%S"
-    )
-
     output_path = (
         OUTPUT_DIR
-        / f"world_cup_match_odds_{timestamp}.json"
+        / f"world_cup_match_odds_{current_date_stamp()}.json"
     )
 
     with output_path.open(

@@ -1,9 +1,11 @@
 pyproject.toml
 src/wc_pool_2026/__init__.py
 src/wc_pool_2026/calculate_first_prize_probs.py
+src/wc_pool_2026/calculate_third_prize_monte_carlo.py
 src/wc_pool_2026/calculate_third_prize_odds.py
 src/wc_pool_2026/common.py
 src/wc_pool_2026/fetch_world_cup_match_odds_raw.py
+src/wc_pool_2026/fetch_world_cup_results.py
 src/wc_pool_2026/fetch_world_cup_winner_odds_raw.py
 src/wc_pool_2026/paths.py
 src/wc_pool_2026/the_odds_api.py

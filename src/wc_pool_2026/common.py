@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 import re
 
@@ -64,6 +65,10 @@ def extract_date_stamp(path: Path) -> str:
         )
 
     return match.group(1)
+
+
+def current_date_stamp() -> str:
+    return datetime.now().strftime("%Y%m%d")
 
 
 def find_latest_file(directory: Path, pattern: str) -> Path:

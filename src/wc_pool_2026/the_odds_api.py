@@ -4,12 +4,7 @@ import requests
 
 from dotenv import load_dotenv
 
-try:
-    from .paths import ENV_FILE
-except ImportError:
-    from paths import ENV_FILE
-
-load_dotenv(ENV_FILE)
+load_dotenv()
 
 API_KEY = os.getenv("api_key")
 
