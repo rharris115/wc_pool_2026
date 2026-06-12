@@ -243,7 +243,7 @@ def infer_xg(
 def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
     rows = []
 
-    for match_number, event in enumerate(events, start=1):
+    for event in events:
         team_1 = normalise_team(event["home_team"])
         team_2 = normalise_team(event["away_team"])
 
@@ -268,7 +268,6 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
         rows.append(
             {
                 "match_id": event["id"],
-                "match_number": match_number,
                 "commence_time": event["commence_time"],
                 "team": team_1,
                 "opponent": team_2,
@@ -285,7 +284,6 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
         rows.append(
             {
                 "match_id": event["id"],
-                "match_number": match_number,
                 "commence_time": event["commence_time"],
                 "team": team_2,
                 "opponent": team_1,
@@ -301,7 +299,7 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
 
     return (
         pd.DataFrame(rows)
-        .sort_values(["commence_time", "match_number", "team"])
+        .sort_values(["commence_time", "team"])
         .reset_index(drop=True)
     )
 

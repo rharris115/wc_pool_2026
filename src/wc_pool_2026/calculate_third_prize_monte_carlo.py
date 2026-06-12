@@ -85,7 +85,6 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
         fixtures.append(
             {
                 "match_id": match_id,
-                "match_number": row["match_number"],
                 "commence_time": row["commence_time"],
                 "team_1": row["team"],
                 "team_2": row["opponent"],

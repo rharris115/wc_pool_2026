@@ -7,4 +7,5 @@ fetch-world-cup-results = wc_pool_2026.fetch_world_cup_results:main
 fetch-world-cup-winner-odds-raw = wc_pool_2026.fetch_world_cup_winner_odds_raw:main
 list-odds-api-sports = wc_pool_2026.the_odds_api:main
 transform-world-cup-match-odds = wc_pool_2026.transform_world_cup_match_odds:main
+transform-world-cup-results = wc_pool_2026.transform_world_cup_results:main
 transform-world-cup-winner-odds = wc_pool_2026.transform_world_cup_winner_odds:main
