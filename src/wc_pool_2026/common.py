@@ -6,7 +6,9 @@ import re
 
 import pandas as pd
 
-MATCH_PROBS_PATTERN = "group_match_outcome_probs_*.csv"
+from wc_pool_2026.paths import ResourcePaths
+
+MATCH_PROBS_FILE = "group_match_outcome_probs.csv"
 
 MEDALS = {
     1: "🥇",
@@ -59,34 +61,59 @@ def entrant_teams(entrants: dict[str, list[str]]) -> set[str]:
     }
 
 
-def extract_date_stamp(path: Path) -> str:
-    match = re.search(r"_(\d{8})(?:_\d{6})?\.[^.]+$", path.name)
-
-    if not match:
-        raise ValueError(
-            f"Could not extract date stamp from file name: {path.name}"
-        )
-
-    return match.group(1)
-
-
 def current_date_stamp() -> str:
     return datetime.now().strftime("%Y%m%d")
 
 
-def find_latest_file(directory: Path, pattern: str) -> Path:
-    files = sorted(directory.glob(pattern))
+def dated_snapshot_dirs(resources: ResourcePaths) -> list[Path]:
+    return sorted(
+        path
+        for path in resources.config_dir.iterdir()
+        if path.is_dir() and re.fullmatch(r"\d{8}", path.name)
+    )
+
+
+def snapshot_date_stamp(path: Path) -> str:
+    snapshot_dir = path.parent.parent
+
+    if not re.fullmatch(r"\d{8}", snapshot_dir.name):
+        raise ValueError(
+            f"Could not determine dated snapshot directory for {path}"
+        )
+
+    return snapshot_dir.name
+
+
+def find_latest_dated_file(
+    resources: ResourcePaths,
+    subdirectory: str,
+    filename: str,
+) -> Path:
+    files = [
+        file
+        for snapshot_dir in dated_snapshot_dirs(resources)
+        if (file := snapshot_dir / subdirectory / filename).is_file()
+    ]
 
     if not files:
         raise FileNotFoundError(
-            f"No files matching {pattern} found in {directory.resolve()}"
+            "No file named "
+            f"{filename} found under dated {subdirectory} directories in "
+            f"{resources.config_dir.resolve()}"
         )
 
-    return files[-1]
+    return sorted(
+        files,
+        key=snapshot_date_stamp,
+    )[-1]
 
 
-def find_latest_match_probs_file(input_csv_dir: Path) -> Path:
-    return find_latest_file(input_csv_dir, MATCH_PROBS_PATTERN)
+def find_latest_match_probs_file(resources: ResourcePaths) -> Path:
+    return find_latest_dated_file(
+        resources=resources,
+        subdirectory="input_csv",
+        filename=MATCH_PROBS_FILE,
+    )
 
 
 def require_columns(

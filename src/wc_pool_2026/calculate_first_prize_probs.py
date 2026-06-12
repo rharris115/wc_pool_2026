@@ -5,31 +5,33 @@ import click
 
 from wc_pool_2026.paths import (
     ResourcePaths,
+    build_dated_resource_paths,
     build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    extract_date_stamp,
-    find_latest_file,
+    find_latest_dated_file,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
     load_probabilities,
+    snapshot_date_stamp,
     validate_teams,
 )
 
-WORLD_CUP_WINNER_ODDS_PATTERN = "world_cup_winner_odds_*.csv"
+WORLD_CUP_WINNER_ODDS_FILE = "world_cup_winner_odds.csv"
 
 
 def calculate_first_prize_odds(
     paths: ResourcePaths,
     resources: PoolResources,
 ) -> pd.DataFrame:
-    world_cup_winner_odds_file = find_latest_file(
-        paths.input_csv_dir,
-        WORLD_CUP_WINNER_ODDS_PATTERN,
+    world_cup_winner_odds_file = find_latest_dated_file(
+        resources=paths,
+        subdirectory="input_csv",
+        filename=WORLD_CUP_WINNER_ODDS_FILE,
     )
 
     return build_first_prize_leaderboard(
@@ -118,17 +120,22 @@ def build_first_prize_leaderboard(
 def main(resources_path: Path) -> None:
     paths = build_resource_paths(resources_path)
     resources = load_pool_resources(paths.config_dir)
-    world_cup_winner_odds_file = find_latest_file(
-        paths.input_csv_dir,
-        WORLD_CUP_WINNER_ODDS_PATTERN,
+    world_cup_winner_odds_file = find_latest_dated_file(
+        resources=paths,
+        subdirectory="input_csv",
+        filename=WORLD_CUP_WINNER_ODDS_FILE,
+    )
+    dated_paths = build_dated_resource_paths(
+        resources=paths,
+        date_stamp=snapshot_date_stamp(world_cup_winner_odds_file),
     )
     df = build_first_prize_leaderboard(
         world_cup_winner_odds_file=world_cup_winner_odds_file,
         resources=resources,
     )
     entrant_output_path = (
-        paths.output_csv_dir
-        / f"first_prize_entrants_{extract_date_stamp(world_cup_winner_odds_file)}.csv"
+        dated_paths.output_csv_dir
+        / "first_prize_entrants.csv"
     )
 
     entrant_output_path.parent.mkdir(parents=True, exist_ok=True)

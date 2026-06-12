@@ -7,6 +7,7 @@ import requests
 from dotenv import load_dotenv
 
 from wc_pool_2026.paths import (
+    build_dated_resource_paths,
     build_resource_paths,
     default_resources_path,
 )
@@ -33,8 +34,12 @@ SPORT_KEY = "soccer_fifa_world_cup"
 )
 def main(resources_path: Path) -> None:
     paths = build_resource_paths(resources_path)
+    dated_paths = build_dated_resource_paths(
+        resources=paths,
+        date_stamp=current_date_stamp(),
+    )
 
-    paths.raw_api_dir.mkdir(parents=True, exist_ok=True)
+    dated_paths.raw_api_dir.mkdir(parents=True, exist_ok=True)
 
     response = requests.get(
         f"https://api.the-odds-api.com/v4/sports/{SPORT_KEY}/scores/",
@@ -58,8 +63,8 @@ def main(resources_path: Path) -> None:
     data = response.json()
 
     output_path = (
-        paths.raw_api_dir
-        / f"world_cup_scores_{current_date_stamp()}.json"
+        dated_paths.raw_api_dir
+        / "world_cup_scores.json"
     )
 
     with output_path.open("w", encoding="utf-8") as f:

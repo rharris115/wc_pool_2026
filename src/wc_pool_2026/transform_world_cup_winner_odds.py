@@ -5,21 +5,26 @@ import pandas as pd
 
 from wc_pool_2026.paths import (
     ResourcePaths,
+    build_dated_resource_paths,
     build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
     entrant_teams,
-    extract_date_stamp,
-    find_latest_file,
+    find_latest_dated_file,
     load_json,
     load_pool_resources,
     normalise_team,
+    snapshot_date_stamp,
 )
 
 
 def find_latest_raw_file(paths: ResourcePaths) -> Path:
-    return find_latest_file(paths.raw_api_dir, "world_cup_winner_odds_*.json")
+    return find_latest_dated_file(
+        resources=paths,
+        subdirectory="raw_api",
+        filename="world_cup_winner_odds.json",
+    )
 
 
 def parse_outcomes(events: list[dict]) -> pd.DataFrame:
@@ -124,10 +129,14 @@ def main(resources_path: Path) -> None:
             "bookmaker_count",
         ]
     ]
+    dated_paths = build_dated_resource_paths(
+        resources=paths,
+        date_stamp=snapshot_date_stamp(raw_path),
+    )
 
     output_path = (
-        paths.input_csv_dir
-        / f"world_cup_winner_odds_{extract_date_stamp(raw_path)}.csv"
+        dated_paths.input_csv_dir
+        / "world_cup_winner_odds.csv"
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False)

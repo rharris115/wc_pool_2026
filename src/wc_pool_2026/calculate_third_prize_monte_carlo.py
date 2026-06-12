@@ -7,19 +7,20 @@ from tqdm import tqdm
 
 from wc_pool_2026.paths import (
     ResourcePaths,
+    build_dated_resource_paths,
     build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    extract_date_stamp,
     find_latest_match_probs_file,
     format_team_name,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
     require_columns,
+    snapshot_date_stamp,
 )
 
 N_SIMULATIONS = 1000000
@@ -30,10 +31,13 @@ def find_match_results_file(
     match_probs_file: Path,
     paths: ResourcePaths,
 ) -> Path:
-    date_stamp = extract_date_stamp(match_probs_file)
+    dated_paths = build_dated_resource_paths(
+        resources=paths,
+        date_stamp=snapshot_date_stamp(match_probs_file),
+    )
     match_results_file = (
-        paths.input_csv_dir
-        / f"group_match_results_{date_stamp}.csv"
+        dated_paths.input_csv_dir
+        / "group_match_results.csv"
     )
 
     if not match_results_file.is_file():
@@ -450,7 +454,7 @@ def calculate_third_prize_monte_carlo(
     pd.DataFrame,
     Path,
 ]:
-    match_probs_file = find_latest_match_probs_file(paths.input_csv_dir)
+    match_probs_file = find_latest_match_probs_file(paths)
     match_results_file = find_match_results_file(
         match_probs_file=match_probs_file,
         paths=paths,
@@ -495,21 +499,24 @@ def main(resources_path: Path) -> None:
         resources=resources,
     )
 
-    date_stamp = extract_date_stamp(match_probs_file)
+    dated_paths = build_dated_resource_paths(
+        resources=paths,
+        date_stamp=snapshot_date_stamp(match_probs_file),
+    )
     team_output_path = (
-        paths.output_csv_dir
-        / f"third_prize_monte_carlo_teams_{date_stamp}.csv"
+        dated_paths.output_csv_dir
+        / "third_prize_monte_carlo_teams.csv"
     )
     entrant_output_path = (
-        paths.output_csv_dir
-        / f"third_prize_monte_carlo_entrants_{date_stamp}.csv"
+        dated_paths.output_csv_dir
+        / "third_prize_monte_carlo_entrants.csv"
     )
     match_output_path = (
-        paths.output_csv_dir
-        / f"third_prize_monte_carlo_matches_{date_stamp}.csv"
+        dated_paths.output_csv_dir
+        / "third_prize_monte_carlo_matches.csv"
     )
 
-    paths.output_csv_dir.mkdir(parents=True, exist_ok=True)
+    dated_paths.output_csv_dir.mkdir(parents=True, exist_ok=True)
     team_results.to_csv(team_output_path, index=False)
     leaderboard.to_csv(entrant_output_path, index=False)
     match_results.to_csv(match_output_path, index=False)

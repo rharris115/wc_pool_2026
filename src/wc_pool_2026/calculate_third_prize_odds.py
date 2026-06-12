@@ -318,7 +318,7 @@ def calculate_third_prize_odds(
     paths: ResourcePaths,
     resources: PoolResources,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    match_probs_file = find_latest_match_probs_file(paths.input_csv_dir)
+    match_probs_file = find_latest_match_probs_file(paths)
 
     fixtures = load_fixtures(match_probs_file)
     groups = assign_groups(fixtures)
