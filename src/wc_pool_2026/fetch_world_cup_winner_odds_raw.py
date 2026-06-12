@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 from wc_pool_2026.paths import (
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import current_date_stamp
@@ -63,18 +62,15 @@ def fetch_world_cup_winner_odds() -> list[dict]:
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
+    resources_path = resources_path.expanduser().resolve()
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=current_date_stamp(),
     )
     dated_paths.raw_api_dir.mkdir(parents=True, exist_ok=True)
 
     events = fetch_world_cup_winner_odds()
-    output_path = (
-        dated_paths.raw_api_dir
-        / "world_cup_winner_odds.json"
-    )
+    output_path = dated_paths.raw_api_dir / "world_cup_winner_odds.json"
 
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(events, f, indent=2, ensure_ascii=False)

@@ -6,9 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from wc_pool_2026.paths import (
-    ResourcePaths,
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
@@ -29,16 +27,13 @@ RANDOM_SEED = 42
 
 def find_match_results_file(
     match_probs_file: Path,
-    paths: ResourcePaths,
+    resources_path: Path,
 ) -> Path:
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=snapshot_date_stamp(match_probs_file),
     )
-    match_results_file = (
-        dated_paths.input_csv_dir
-        / "group_match_results.csv"
-    )
+    match_results_file = dated_paths.input_csv_dir / "group_match_results.csv"
 
     if not match_results_file.is_file():
         raise FileNotFoundError(
@@ -94,11 +89,7 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
             }
         )
 
-    return (
-        pd.DataFrame(fixtures)
-        .sort_values("commence_time")
-        .reset_index(drop=True)
-    )
+    return pd.DataFrame(fixtures).sort_values("commence_time").reset_index(drop=True)
 
 
 def load_completed_results(match_results_file: Path) -> pd.DataFrame:
@@ -140,11 +131,7 @@ def load_completed_results(match_results_file: Path) -> pd.DataFrame:
             }
         )
 
-    return (
-        pd.DataFrame(results)
-        .sort_values("commence_time")
-        .reset_index(drop=True)
-    )
+    return pd.DataFrame(results).sort_values("commence_time").reset_index(drop=True)
 
 
 def apply_completed_results(
@@ -184,11 +171,8 @@ def remaining_fixtures(
 
     completed_match_ids = set(completed_results["match_id"])
 
-    return (
-        fixtures[
-            ~fixtures["match_id"].isin(completed_match_ids)
-        ]
-        .reset_index(drop=True)
+    return fixtures[~fixtures["match_id"].isin(completed_match_ids)].reset_index(
+        drop=True
     )
 
 
@@ -295,13 +279,9 @@ def simulate_group_stage(
 
         candidates = simulation_points == simulation_points.min()
         candidates &= (
-            simulation_goal_difference
-            == simulation_goal_difference[candidates].min()
+            simulation_goal_difference == simulation_goal_difference[candidates].min()
         )
-        candidates &= (
-            simulation_goals_for
-            == simulation_goals_for[candidates].min()
-        )
+        candidates &= simulation_goals_for == simulation_goals_for[candidates].min()
 
         worst_counts[candidates] += 1 / candidates.sum()
 
@@ -319,8 +299,7 @@ def simulate_group_stage(
                 "expected_goals_for": expected_goals_for,
                 "expected_goals_against": expected_goals_against,
                 "expected_goal_difference": (
-                    expected_goals_for
-                    - expected_goals_against
+                    expected_goals_for - expected_goals_against
                 ),
             }
         )
@@ -352,8 +331,7 @@ def format_teams_with_worst_probability(
     resources: PoolResources,
 ) -> str:
     worst_probability_pct_map = {
-        team: probability * 100
-        for team, probability in worst_probability_map.items()
+        team: probability * 100 for team, probability in worst_probability_map.items()
     }
 
     return format_teams_with_metric(
@@ -429,10 +407,7 @@ def build_entrant_leaderboard(
     leaderboard.insert(
         0,
         "rank",
-        [
-            MEDALS.get(i + 1, str(i + 1))
-            for i in range(len(leaderboard))
-        ],
+        [MEDALS.get(i + 1, str(i + 1)) for i in range(len(leaderboard))],
     )
 
     return leaderboard[
@@ -446,7 +421,7 @@ def build_entrant_leaderboard(
 
 
 def calculate_third_prize_monte_carlo(
-    paths: ResourcePaths,
+    resources_path: Path,
     resources: PoolResources,
 ) -> tuple[
     pd.DataFrame,
@@ -454,10 +429,10 @@ def calculate_third_prize_monte_carlo(
     pd.DataFrame,
     Path,
 ]:
-    match_probs_file = find_latest_match_probs_file(paths)
+    match_probs_file = find_latest_match_probs_file(resources_path)
     match_results_file = find_match_results_file(
         match_probs_file=match_probs_file,
-        paths=paths,
+        resources_path=resources_path,
     )
     fixtures = load_fixtures(match_probs_file)
     completed_results = load_completed_results(match_results_file)
@@ -487,33 +462,27 @@ def calculate_third_prize_monte_carlo(
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
-    resources = load_pool_resources(paths.config_dir)
+    resources = load_pool_resources(resources_path)
     (
         leaderboard,
         team_results,
         match_results,
         match_probs_file,
     ) = calculate_third_prize_monte_carlo(
-        paths=paths,
+        resources_path=resources_path,
         resources=resources,
     )
 
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=snapshot_date_stamp(match_probs_file),
     )
-    team_output_path = (
-        dated_paths.output_csv_dir
-        / "third_prize_monte_carlo_teams.csv"
-    )
+    team_output_path = dated_paths.output_csv_dir / "third_prize_monte_carlo_teams.csv"
     entrant_output_path = (
-        dated_paths.output_csv_dir
-        / "third_prize_monte_carlo_entrants.csv"
+        dated_paths.output_csv_dir / "third_prize_monte_carlo_entrants.csv"
     )
     match_output_path = (
-        dated_paths.output_csv_dir
-        / "third_prize_monte_carlo_matches.csv"
+        dated_paths.output_csv_dir / "third_prize_monte_carlo_matches.csv"
     )
 
     dated_paths.output_csv_dir.mkdir(parents=True, exist_ok=True)

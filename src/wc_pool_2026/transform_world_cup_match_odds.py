@@ -5,9 +5,7 @@ import click
 import pandas as pd
 
 from wc_pool_2026.paths import (
-    ResourcePaths,
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
@@ -24,26 +22,20 @@ MAX_EXPECTED_GOALS = 8.0
 XG_GRID_SIZE = 1000
 
 
-def find_latest_raw_file(paths: ResourcePaths) -> Path:
+def find_latest_raw_file(resources_path: Path) -> Path:
     return find_latest_dated_file(
-        resources=paths,
+        resources_path=resources_path,
         subdirectory="raw_api",
         filename="world_cup_match_odds.json",
     )
 
 
 def normalise_probs(prices: dict[str, float]) -> dict[str, float]:
-    raw = {
-        outcome: 1 / price
-        for outcome, price in prices.items()
-    }
+    raw = {outcome: 1 / price for outcome, price in prices.items()}
 
     total = sum(raw.values())
 
-    return {
-        outcome: prob / total
-        for outcome, prob in raw.items()
-    }
+    return {outcome: prob / total for outcome, prob in raw.items()}
 
 
 def extract_bookmaker_h2h_probs(event: dict) -> list[dict[str, float]]:
@@ -71,22 +63,16 @@ def consensus_h2h_probs(event: dict) -> dict[str, float]:
     bookmaker_probs = extract_bookmaker_h2h_probs(event)
 
     if not bookmaker_probs:
-        raise RuntimeError(
-            f"No h2h markets found for {team_1} vs {team_2}"
-        )
+        raise RuntimeError(f"No h2h markets found for {team_1} vs {team_2}")
 
     expected_outcomes = {team_1, team_2, "Draw"}
 
     valid_probs = [
-        probs
-        for probs in bookmaker_probs
-        if expected_outcomes <= set(probs)
+        probs for probs in bookmaker_probs if expected_outcomes <= set(probs)
     ]
 
     if not valid_probs:
-        raise RuntimeError(
-            f"No complete h2h markets found for {team_1} vs {team_2}"
-        )
+        raise RuntimeError(f"No complete h2h markets found for {team_1} vs {team_2}")
 
     return {
         outcome: sum(probs[outcome] for probs in valid_probs) / len(valid_probs)
@@ -126,14 +112,7 @@ def consensus_over_25_prob(event: dict) -> float:
 
 
 def poisson_under_25_prob(expected_goals: float) -> float:
-    return (
-        math.exp(-expected_goals)
-        * (
-            1
-            + expected_goals
-            + (expected_goals**2 / 2)
-        )
-    )
+    return math.exp(-expected_goals) * (1 + expected_goals + (expected_goals**2 / 2))
 
 
 def infer_expected_total_goals(p_over_25: float) -> float:
@@ -156,11 +135,7 @@ def poisson_probs(expected_goals: float, max_goals: int) -> list[float]:
     probs = [math.exp(-expected_goals)]
 
     for goals in range(1, max_goals + 1):
-        probs.append(
-            probs[-1]
-            * expected_goals
-            / goals
-        )
+        probs.append(probs[-1] * expected_goals / goals)
 
     return probs
 
@@ -246,9 +221,7 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
         p_draw = probs["Draw"]
         p_team_2_win = probs[team_2]
 
-        expected_total_goals = infer_expected_total_goals(
-            consensus_over_25_prob(event)
-        )
+        expected_total_goals = infer_expected_total_goals(consensus_over_25_prob(event))
         team_1_xg, team_2_xg = infer_xg(
             p_team_win=p_team_1_win,
             p_draw=p_draw,
@@ -306,20 +279,17 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
-    raw_path = find_latest_raw_file(paths)
+    resources_path = resources_path.expanduser().resolve()
+    raw_path = find_latest_raw_file(resources_path)
     events = load_json(raw_path)
 
     output = parse_match_outcomes(events)
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=snapshot_date_stamp(raw_path),
     )
 
-    output_path = (
-        dated_paths.input_csv_dir
-        / "group_match_outcome_probs.csv"
-    )
+    output_path = dated_paths.input_csv_dir / "group_match_outcome_probs.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     output.to_csv(output_path, index=False)

@@ -6,8 +6,6 @@ import click
 import pandas as pd
 
 from wc_pool_2026.paths import (
-    ResourcePaths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
@@ -65,11 +63,7 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
             }
         )
 
-    return (
-        pd.DataFrame(fixtures)
-        .sort_values("commence_time")
-        .reset_index(drop=True)
-    )
+    return pd.DataFrame(fixtures).sort_values("commence_time").reset_index(drop=True)
 
 
 def assign_groups(fixtures: pd.DataFrame) -> list[dict]:
@@ -102,8 +96,7 @@ def assign_groups(fixtures: pd.DataFrame) -> list[dict]:
             stack.extend(graph[current] - seen)
 
         group_fixtures = fixtures[
-            fixtures["team_1"].isin(component)
-            & fixtures["team_2"].isin(component)
+            fixtures["team_1"].isin(component) & fixtures["team_2"].isin(component)
         ].copy()
 
         groups.append(
@@ -145,9 +138,7 @@ def enumerate_group_scenarios(group: dict) -> list[dict]:
 
         min_points = min(points.values())
         min_teams = [
-            team
-            for team, team_points in points.items()
-            if team_points == min_points
+            team for team, team_points in points.items() if team_points == min_points
         ]
 
         scenarios.append(
@@ -183,8 +174,7 @@ def calculate_team_points_distributions(
                 row[f"{points}_pts"] = point_probs[points]
 
             row["expected_points"] = sum(
-                points * point_probs[points]
-                for points in POSSIBLE_POINTS
+                points * point_probs[points] for points in POSSIBLE_POINTS
             )
 
             rows.append(row)
@@ -315,18 +305,15 @@ def calculate_team_worst_probabilities(
 
 
 def calculate_third_prize_odds(
-    paths: ResourcePaths,
+    resources_path: Path,
     resources: PoolResources,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    match_probs_file = find_latest_match_probs_file(paths)
+    match_probs_file = find_latest_match_probs_file(resources_path)
 
     fixtures = load_fixtures(match_probs_file)
     groups = assign_groups(fixtures)
 
-    group_scenarios = [
-        enumerate_group_scenarios(group)
-        for group in groups
-    ]
+    group_scenarios = [enumerate_group_scenarios(group) for group in groups]
 
     points_distributions = calculate_team_points_distributions(
         group_scenarios=group_scenarios,
@@ -374,10 +361,7 @@ def calculate_third_prize_odds(
     leaderboard.insert(
         0,
         "rank",
-        [
-            MEDALS.get(i + 1, str(i + 1))
-            for i in range(len(leaderboard))
-        ],
+        [MEDALS.get(i + 1, str(i + 1)) for i in range(len(leaderboard))],
     )
 
     return (
@@ -406,10 +390,9 @@ def calculate_third_prize_odds(
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
-    resources = load_pool_resources(paths.config_dir)
+    resources = load_pool_resources(resources_path)
     leaderboard, points_distributions = calculate_third_prize_odds(
-        paths=paths,
+        resources_path=resources_path,
         resources=resources,
     )
 

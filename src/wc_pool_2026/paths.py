@@ -3,11 +3,6 @@ from pathlib import Path
 
 
 @dataclass(frozen=True)
-class ResourcePaths:
-    config_dir: Path
-
-
-@dataclass(frozen=True)
 class DatedResourcePaths:
     date_stamp: str
     snapshot_dir: Path
@@ -17,22 +12,14 @@ class DatedResourcePaths:
 
 
 def default_resources_path() -> Path:
-    return Path(__file__).resolve().parent / ".." / ".." / "resources"
-
-
-def build_resource_paths(resources_path: str | Path) -> ResourcePaths:
-    config_dir = Path(resources_path).expanduser().resolve()
-
-    return ResourcePaths(
-        config_dir=config_dir,
-    )
+    return (Path(__file__).resolve().parent / ".." / ".." / "resources").resolve()
 
 
 def build_dated_resource_paths(
-    resources: ResourcePaths,
+    resources_path: str | Path,
     date_stamp: str,
 ) -> DatedResourcePaths:
-    snapshot_dir = resources.config_dir / date_stamp
+    snapshot_dir = Path(resources_path).expanduser().resolve() / date_stamp
 
     return DatedResourcePaths(
         date_stamp=date_stamp,

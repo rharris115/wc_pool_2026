@@ -4,9 +4,7 @@ import click
 import pandas as pd
 
 from wc_pool_2026.paths import (
-    ResourcePaths,
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
@@ -17,9 +15,10 @@ from wc_pool_2026.common import (
     sort_match_rows,
 )
 
-def find_latest_raw_file(paths: ResourcePaths) -> Path:
+
+def find_latest_raw_file(resources_path: Path) -> Path:
     return find_latest_dated_file(
-        resources=paths,
+        resources_path=resources_path,
         subdirectory="raw_api",
         filename="world_cup_scores.json",
     )
@@ -31,10 +30,7 @@ def score_map(event: dict) -> dict[str, int]:
     if not scores:
         raise ValueError(f"Missing scores for match_id={event['id']}")
 
-    return {
-        normalise_team(score["name"]): int(score["score"])
-        for score in scores
-    }
+    return {normalise_team(score["name"]): int(score["score"]) for score in scores}
 
 
 def outcome_probs(
@@ -79,11 +75,7 @@ def result_row(
 
 def parse_results(events: list[dict]) -> pd.DataFrame:
     completed_events = sorted(
-        (
-            event
-            for event in events
-            if event.get("completed") and event.get("scores")
-        ),
+        (event for event in events if event.get("completed") and event.get("scores")),
         key=lambda event: event["commence_time"],
     )
 
@@ -138,20 +130,17 @@ def parse_results(events: list[dict]) -> pd.DataFrame:
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
-    raw_path = find_latest_raw_file(paths)
+    resources_path = resources_path.expanduser().resolve()
+    raw_path = find_latest_raw_file(resources_path)
     events = load_json(raw_path)
 
     output = parse_results(events)
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=snapshot_date_stamp(raw_path),
     )
 
-    output_path = (
-        dated_paths.input_csv_dir
-        / "group_match_results.csv"
-    )
+    output_path = dated_paths.input_csv_dir / "group_match_results.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False)
 

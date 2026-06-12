@@ -4,9 +4,7 @@ from pathlib import Path
 import click
 
 from wc_pool_2026.paths import (
-    ResourcePaths,
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
@@ -25,11 +23,11 @@ WORLD_CUP_WINNER_ODDS_FILE = "world_cup_winner_odds.csv"
 
 
 def calculate_first_prize_odds(
-    paths: ResourcePaths,
+    resources_path: Path,
     resources: PoolResources,
 ) -> pd.DataFrame:
     world_cup_winner_odds_file = find_latest_dated_file(
-        resources=paths,
+        resources_path=resources_path,
         subdirectory="input_csv",
         filename=WORLD_CUP_WINNER_ODDS_FILE,
     )
@@ -50,27 +48,18 @@ def build_first_prize_leaderboard(
         entrants=resources.entrants,
     )
     probability_pct_map = {
-        team: probability * 100
-        for team, probability in prob_map.items()
+        team: probability * 100 for team, probability in prob_map.items()
     }
 
     rows = []
 
     for person, teams in resources.entrants.items():
-        probability_pct = (
-            sum(
-                prob_map[team]
-                for team in teams
-            )
-            * 100
-        )
+        probability_pct = sum(prob_map[team] for team in teams) * 100
 
         rows.append(
             {
                 "person": person,
-                "probability_pct": (
-                    f"{probability_pct:.2f}%"
-                ),
+                "probability_pct": (f"{probability_pct:.2f}%"),
                 "teams": format_teams_with_metric(
                     teams=teams,
                     metric_map=probability_pct_map,
@@ -86,9 +75,7 @@ def build_first_prize_leaderboard(
         .sort_values(
             "probability_pct",
             ascending=False,
-            key=lambda s: (
-                s.str.rstrip("%").astype(float)
-            ),
+            key=lambda s: (s.str.rstrip("%").astype(float)),
         )
         .reset_index(drop=True)
     )
@@ -96,10 +83,7 @@ def build_first_prize_leaderboard(
     result.insert(
         0,
         "rank",
-        [
-            MEDALS.get(i + 1, str(i + 1))
-            for i in range(len(result))
-        ],
+        [MEDALS.get(i + 1, str(i + 1)) for i in range(len(result))],
     )
 
     return result
@@ -118,25 +102,21 @@ def build_first_prize_leaderboard(
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
-    resources = load_pool_resources(paths.config_dir)
+    resources = load_pool_resources(resources_path)
     world_cup_winner_odds_file = find_latest_dated_file(
-        resources=paths,
+        resources_path=resources_path,
         subdirectory="input_csv",
         filename=WORLD_CUP_WINNER_ODDS_FILE,
     )
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=snapshot_date_stamp(world_cup_winner_odds_file),
     )
     df = build_first_prize_leaderboard(
         world_cup_winner_odds_file=world_cup_winner_odds_file,
         resources=resources,
     )
-    entrant_output_path = (
-        dated_paths.output_csv_dir
-        / "first_prize_entrants.csv"
-    )
+    entrant_output_path = dated_paths.output_csv_dir / "first_prize_entrants.csv"
 
     entrant_output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(entrant_output_path, index=False)
@@ -147,9 +127,7 @@ def main(resources_path: Path) -> None:
     message = format_whatsapp_table(
         df=df,
         title="🥇 WORLD CUP SWEEPSTAKE – 1ST PRIZE ODDS",
-        subtitle=(
-            "Criterion: One of your teams wins the 2026 FIFA World Cup."
-        ),
+        subtitle=("Criterion: One of your teams wins the 2026 FIFA World Cup."),
     )
 
     print(message)

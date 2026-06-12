@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 from wc_pool_2026.paths import (
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import current_date_stamp
@@ -36,9 +35,9 @@ ODDS_FORMAT = "decimal"
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
+    resources_path = resources_path.expanduser().resolve()
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=current_date_stamp(),
     )
 
@@ -69,10 +68,7 @@ def main(resources_path: Path) -> None:
 
     events = response.json()
 
-    output_path = (
-        dated_paths.raw_api_dir
-        / "world_cup_match_odds.json"
-    )
+    output_path = dated_paths.raw_api_dir / "world_cup_match_odds.json"
 
     with output_path.open(
         "w",
@@ -85,20 +81,12 @@ def main(resources_path: Path) -> None:
             ensure_ascii=False,
         )
 
-    print(
-        f"\nWrote {len(events)} events to:"
-    )
+    print(f"\nWrote {len(events)} events to:")
     print(output_path)
 
     if events:
-        print(
-            "\nFirst fixture:"
-        )
-        print(
-            f"{events[0].get('home_team')} "
-            f"vs "
-            f"{events[0].get('away_team')}"
-        )
+        print("\nFirst fixture:")
+        print(f"{events[0].get('home_team')} " f"vs " f"{events[0].get('away_team')}")
 
 
 if __name__ == "__main__":

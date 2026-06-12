@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 from wc_pool_2026.paths import (
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import current_date_stamp
@@ -33,9 +32,9 @@ SPORT_KEY = "soccer_fifa_world_cup"
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
+    resources_path = resources_path.expanduser().resolve()
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=current_date_stamp(),
     )
 
@@ -62,10 +61,7 @@ def main(resources_path: Path) -> None:
 
     data = response.json()
 
-    output_path = (
-        dated_paths.raw_api_dir
-        / "world_cup_scores.json"
-    )
+    output_path = dated_paths.raw_api_dir / "world_cup_scores.json"
 
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)

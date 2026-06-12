@@ -6,8 +6,6 @@ import re
 
 import pandas as pd
 
-from wc_pool_2026.paths import ResourcePaths
-
 MATCH_PROBS_FILE = "group_match_outcome_probs.csv"
 
 MEDALS = {
@@ -54,21 +52,17 @@ def normalise_team(name: str) -> str:
 
 
 def entrant_teams(entrants: dict[str, list[str]]) -> set[str]:
-    return {
-        team
-        for teams in entrants.values()
-        for team in teams
-    }
+    return {team for teams in entrants.values() for team in teams}
 
 
 def current_date_stamp() -> str:
     return datetime.now().strftime("%Y%m%d")
 
 
-def dated_snapshot_dirs(resources: ResourcePaths) -> list[Path]:
+def dated_snapshot_dirs(resources_path: Path) -> list[Path]:
     return sorted(
         path
-        for path in resources.config_dir.iterdir()
+        for path in resources_path.iterdir()
         if path.is_dir() and re.fullmatch(r"\d{8}", path.name)
     )
 
@@ -77,21 +71,19 @@ def snapshot_date_stamp(path: Path) -> str:
     snapshot_dir = path.parent.parent
 
     if not re.fullmatch(r"\d{8}", snapshot_dir.name):
-        raise ValueError(
-            f"Could not determine dated snapshot directory for {path}"
-        )
+        raise ValueError(f"Could not determine dated snapshot directory for {path}")
 
     return snapshot_dir.name
 
 
 def find_latest_dated_file(
-    resources: ResourcePaths,
+    resources_path: Path,
     subdirectory: str,
     filename: str,
 ) -> Path:
     files = [
         file
-        for snapshot_dir in dated_snapshot_dirs(resources)
+        for snapshot_dir in dated_snapshot_dirs(resources_path)
         if (file := snapshot_dir / subdirectory / filename).is_file()
     ]
 
@@ -99,7 +91,7 @@ def find_latest_dated_file(
         raise FileNotFoundError(
             "No file named "
             f"{filename} found under dated {subdirectory} directories in "
-            f"{resources.config_dir.resolve()}"
+            f"{resources_path.resolve()}"
         )
 
     return sorted(
@@ -108,9 +100,9 @@ def find_latest_dated_file(
     )[-1]
 
 
-def find_latest_match_probs_file(resources: ResourcePaths) -> Path:
+def find_latest_match_probs_file(resources_path: Path) -> Path:
     return find_latest_dated_file(
-        resources=resources,
+        resources_path=resources_path,
         subdirectory="input_csv",
         filename=MATCH_PROBS_FILE,
     )
@@ -124,16 +116,11 @@ def require_columns(
     missing_columns = columns - set(df.columns)
 
     if missing_columns:
-        raise ValueError(
-            f"Missing columns in {source}: {missing_columns}"
-        )
+        raise ValueError(f"Missing columns in {source}: {missing_columns}")
 
 
 def sort_match_rows(df: pd.DataFrame) -> pd.DataFrame:
-    return (
-        df.sort_values(["commence_time", "team", "opponent"])
-        .reset_index(drop=True)
-    )
+    return df.sort_values(["commence_time", "team", "opponent"]).reset_index(drop=True)
 
 
 def load_probabilities(
@@ -160,29 +147,18 @@ def validate_teams(
     entrants: dict[str, list[str]],
 ) -> None:
     missing_teams = sorted(
-        {
-            team
-            for teams in entrants.values()
-            for team in teams
-            if team not in prob_map
-        }
+        {team for teams in entrants.values() for team in teams if team not in prob_map}
     )
 
     if missing_teams:
-        raise ValueError(
-            f"Missing probabilities for teams: "
-            f"{missing_teams}"
-        )
+        raise ValueError(f"Missing probabilities for teams: " f"{missing_teams}")
 
 
 def format_teams(
     teams: list[str],
     team_emojis: dict[str, str],
 ) -> str:
-    return " ".join(
-        format_team_name(team, team_emojis)
-        for team in teams
-    )
+    return " ".join(format_team_name(team, team_emojis) for team in teams)
 
 
 def format_team_name(

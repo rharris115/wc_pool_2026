@@ -4,9 +4,7 @@ import click
 import pandas as pd
 
 from wc_pool_2026.paths import (
-    ResourcePaths,
     build_dated_resource_paths,
-    build_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
@@ -19,9 +17,9 @@ from wc_pool_2026.common import (
 )
 
 
-def find_latest_raw_file(paths: ResourcePaths) -> Path:
+def find_latest_raw_file(resources_path: Path) -> Path:
     return find_latest_dated_file(
-        resources=paths,
+        resources_path=resources_path,
         subdirectory="raw_api",
         filename="world_cup_winner_odds.json",
     )
@@ -57,18 +55,12 @@ def filter_to_entrant_teams(
     odds_df: pd.DataFrame,
     entrant_teams: set[str],
 ) -> pd.DataFrame:
-    filtered = odds_df[
-        odds_df["team"].isin(entrant_teams)
-    ].copy()
+    filtered = odds_df[odds_df["team"].isin(entrant_teams)].copy()
 
-    missing_teams = sorted(
-        entrant_teams - set(filtered["team"])
-    )
+    missing_teams = sorted(entrant_teams - set(filtered["team"]))
 
     if missing_teams:
-        raise ValueError(
-            f"Missing odds for entrant teams: {missing_teams}"
-        )
+        raise ValueError(f"Missing odds for entrant teams: {missing_teams}")
 
     return filtered
 
@@ -85,14 +77,10 @@ def build_probabilities(odds_df: pd.DataFrame) -> pd.DataFrame:
     )
 
     team_probs["win_prob"] = (
-        team_probs["raw_implied_prob"]
-        / team_probs["raw_implied_prob"].sum()
+        team_probs["raw_implied_prob"] / team_probs["raw_implied_prob"].sum()
     )
 
-    return (
-        team_probs.sort_values("win_prob", ascending=False)
-        .reset_index(drop=True)
-    )
+    return team_probs.sort_values("win_prob", ascending=False).reset_index(drop=True)
 
 
 @click.command()
@@ -108,9 +96,8 @@ def build_probabilities(odds_df: pd.DataFrame) -> pd.DataFrame:
     required=False,
 )
 def main(resources_path: Path) -> None:
-    paths = build_resource_paths(resources_path)
-    resources = load_pool_resources(paths.config_dir)
-    raw_path = find_latest_raw_file(paths)
+    resources = load_pool_resources(resources_path)
+    raw_path = find_latest_raw_file(resources_path)
     events = load_json(raw_path)
 
     odds_df = parse_outcomes(events)
@@ -130,14 +117,11 @@ def main(resources_path: Path) -> None:
         ]
     ]
     dated_paths = build_dated_resource_paths(
-        resources=paths,
+        resources_path=resources_path,
         date_stamp=snapshot_date_stamp(raw_path),
     )
 
-    output_path = (
-        dated_paths.input_csv_dir
-        / "world_cup_winner_odds.csv"
-    )
+    output_path = dated_paths.input_csv_dir / "world_cup_winner_odds.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False)
 
