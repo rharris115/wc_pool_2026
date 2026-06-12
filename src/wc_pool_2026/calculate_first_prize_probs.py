@@ -126,10 +126,9 @@ def main() -> None:
 
     message = format_whatsapp_table(
         df=df,
-        title="🏆 WORLD CUP SWEEPSTAKE – 1ST PRIZE ODDS",
+        title="🥇 WORLD CUP SWEEPSTAKE – 1ST PRIZE ODDS",
         subtitle=(
-            "Criterion: probability that one of your teams "
-            "wins the 2026 FIFA World Cup"
+            "Criterion: One of your teams wins the 2026 FIFA World Cup."
         ),
     )
 

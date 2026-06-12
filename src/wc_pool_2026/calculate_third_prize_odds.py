@@ -412,10 +412,10 @@ def main() -> None:
 
     message = format_whatsapp_table(
         df=leaderboard,
-        title="💀 WORLD CUP SWEEPSTAKE – 3RD PRIZE ODDS",
+        title="🥉 WORLD CUP SWEEPSTAKE – 3RD PRIZE ODDS",
         subtitle=(
-            "Criterion: probability of owning the team with the lowest "
-            "group-stage points. Equal split if teams tie on points."
+            "Criterion: Your teams include the team with the lowest "
+            "group-stage points. Ties on points are split equally."
         ),
     )
 

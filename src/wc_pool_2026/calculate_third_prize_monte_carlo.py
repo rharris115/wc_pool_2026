@@ -38,6 +38,19 @@ def find_latest_match_probs_file() -> Path:
     return find_latest_file(INPUT_CSV_DIR, MATCH_PROBS_PATTERN)
 
 
+def find_match_results_file(match_probs_file: Path) -> Path:
+    date_stamp = extract_date_stamp(match_probs_file)
+    match_results_file = INPUT_CSV_DIR / f"group_match_results_{date_stamp}.csv"
+
+    if not match_results_file.is_file():
+        raise FileNotFoundError(
+            "No matching results CSV found for "
+            f"{match_probs_file.name}: expected {match_results_file}"
+        )
+
+    return match_results_file
+
+
 def build_team_output_path(match_probs_file: Path) -> Path:
     date_stamp = extract_date_stamp(match_probs_file)
     return OUTPUT_CSV_DIR / f"third_prize_monte_carlo_teams_{date_stamp}.csv"
@@ -103,25 +116,133 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
     )
 
 
+def load_completed_results(match_results_file: Path) -> pd.DataFrame:
+    rows = pd.read_csv(match_results_file)
+
+    required_columns = {
+        "match_id",
+        "commence_time",
+        "team",
+        "opponent",
+        "team_g",
+        "opponent_g",
+    }
+
+    missing_columns = required_columns - set(rows.columns)
+    if missing_columns:
+        raise ValueError(
+            f"Missing columns in {match_results_file}: {missing_columns}"
+        )
+
+    results = []
+
+    for match_id, match_rows in rows.groupby("match_id"):
+        if len(match_rows) != 2:
+            raise ValueError(
+                f"Expected 2 rows for match_id={match_id}, got {len(match_rows)}"
+            )
+
+        row = match_rows.iloc[0]
+
+        results.append(
+            {
+                "match_id": match_id,
+                "commence_time": row["commence_time"],
+                "team_1": row["team"],
+                "team_2": row["opponent"],
+                "team_1_goals": row["team_g"],
+                "team_2_goals": row["opponent_g"],
+            }
+        )
+
+    return (
+        pd.DataFrame(results)
+        .sort_values("commence_time")
+        .reset_index(drop=True)
+    )
+
+
+def apply_completed_results(
+    completed_results: pd.DataFrame,
+    team_index: dict[str, int],
+    points: np.ndarray,
+    goals_for: np.ndarray,
+    goals_against: np.ndarray,
+) -> None:
+    for result in completed_results.to_dict("records"):
+        team_1_index = team_index[result["team_1"]]
+        team_2_index = team_index[result["team_2"]]
+
+        team_1_goals = result["team_1_goals"]
+        team_2_goals = result["team_2_goals"]
+
+        goals_for[:, team_1_index] += team_1_goals
+        goals_against[:, team_1_index] += team_2_goals
+        goals_for[:, team_2_index] += team_2_goals
+        goals_against[:, team_2_index] += team_1_goals
+
+        if team_1_goals > team_2_goals:
+            points[:, team_1_index] += 3
+        elif team_1_goals < team_2_goals:
+            points[:, team_2_index] += 3
+        else:
+            points[:, team_1_index] += 1
+            points[:, team_2_index] += 1
+
+
+def remaining_fixtures(
+    fixtures: pd.DataFrame,
+    completed_results: pd.DataFrame,
+) -> pd.DataFrame:
+    if completed_results.empty:
+        return fixtures
+
+    completed_match_ids = set(completed_results["match_id"])
+
+    return (
+        fixtures[
+            ~fixtures["match_id"].isin(completed_match_ids)
+        ]
+        .reset_index(drop=True)
+    )
+
+
 def simulate_group_stage(
     fixtures: pd.DataFrame,
+    completed_results: pd.DataFrame,
     n_simulations: int = N_SIMULATIONS,
     random_seed: int = RANDOM_SEED,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    teams = sorted(set(fixtures["team_1"]) | set(fixtures["team_2"]))
+    teams = sorted(
+        set(fixtures["team_1"])
+        | set(fixtures["team_2"])
+        | set(completed_results["team_1"])
+        | set(completed_results["team_2"])
+    )
     team_index = {team: index for index, team in enumerate(teams)}
 
     points = np.zeros((n_simulations, len(teams)), dtype=np.int16)
     goals_for = np.zeros((n_simulations, len(teams)), dtype=np.int16)
     goals_against = np.zeros((n_simulations, len(teams)), dtype=np.int16)
 
+    apply_completed_results(
+        completed_results=completed_results,
+        team_index=team_index,
+        points=points,
+        goals_for=goals_for,
+        goals_against=goals_against,
+    )
+
     rng = np.random.default_rng(random_seed)
 
-    fixture_records = fixtures.to_dict("records")
+    remaining_fixture_records = remaining_fixtures(
+        fixtures=fixtures,
+        completed_results=completed_results,
+    ).to_dict("records")
     match_rows = []
 
     for fixture in tqdm(
-        fixture_records,
+        remaining_fixture_records,
         desc="Simulating fixtures",
         unit="match",
     ):
@@ -178,14 +299,9 @@ def simulate_group_stage(
     ):
         simulation_points = points[simulation_index]
         simulation_goals_for = goals_for[simulation_index]
-        simulation_goals_against = goals_against[simulation_index]
         simulation_goal_difference = goal_difference[simulation_index]
 
         candidates = simulation_points == simulation_points.min()
-        candidates &= (
-            simulation_goals_against
-            == simulation_goals_against[candidates].max()
-        )
         candidates &= (
             simulation_goal_difference
             == simulation_goal_difference[candidates].min()
@@ -336,8 +452,13 @@ def calculate_third_prize_monte_carlo() -> tuple[
     Path,
 ]:
     match_probs_file = find_latest_match_probs_file()
+    match_results_file = find_match_results_file(match_probs_file)
     fixtures = load_fixtures(match_probs_file)
-    team_results, match_results = simulate_group_stage(fixtures)
+    completed_results = load_completed_results(match_results_file)
+    team_results, match_results = simulate_group_stage(
+        fixtures=fixtures,
+        completed_results=completed_results,
+    )
     leaderboard = build_entrant_leaderboard(team_results)
 
     return leaderboard, team_results, match_results, match_probs_file
@@ -377,11 +498,12 @@ def main() -> None:
 
     message = format_whatsapp_table(
         df=leaderboard,
-        title="💀 WORLD CUP SWEEPSTAKE – 3RD PRIZE MONTE CARLO",
+        title="🥉 WORLD CUP SWEEPSTAKE – 3RD PRIZE MONTE CARLO",
         subtitle=(
-            "Criterion: probability of owning the worst group-stage team "
-            "after simulated scores, ranked by lowest points, most goals "
-            "against, worst goal difference, then fewest goals for."
+            "Criterion: Your teams include the worst group-stage team, "
+            "ranked by lowest points, worst goal difference, then fewest "
+            "goals for. "
+            "Ties are split equally."
         ),
     )
 
