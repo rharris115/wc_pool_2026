@@ -21,7 +21,7 @@ from wc_pool_2026.common import (
     snapshot_date_stamp,
 )
 
-N_SIMULATIONS = 1000000
+N_SIMULATIONS = 10000000
 RANDOM_SEED = 42
 
 
