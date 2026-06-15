@@ -100,11 +100,43 @@ def find_latest_dated_file(
     )[-1]
 
 
+def find_dated_file(
+    resources_path: Path,
+    subdirectory: str,
+    filename: str,
+    date_stamp: str | None = None,
+) -> Path:
+    if date_stamp is None:
+        return find_latest_dated_file(
+            resources_path=resources_path,
+            subdirectory=subdirectory,
+            filename=filename,
+        )
+
+    file = resources_path / date_stamp / subdirectory / filename
+
+    if not file.is_file():
+        raise FileNotFoundError(f"No file named {filename} found at {file}")
+
+    return file
+
+
 def find_latest_match_probs_file(resources_path: Path) -> Path:
-    return find_latest_dated_file(
+    return find_match_probs_file(
+        resources_path=resources_path,
+        date_stamp=None,
+    )
+
+
+def find_match_probs_file(
+    resources_path: Path,
+    date_stamp: str | None = None,
+) -> Path:
+    return find_dated_file(
         resources_path=resources_path,
         subdirectory="input_csv",
         filename=MATCH_PROBS_FILE,
+        date_stamp=date_stamp,
     )
 
 

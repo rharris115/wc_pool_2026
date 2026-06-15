@@ -12,13 +12,13 @@ from wc_pool_2026.paths import (
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    find_latest_match_probs_file,
+    find_match_probs_file,
     format_team_name,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
     require_columns,
-    snapshot_date_stamp,
+    snapshot_date_stamp as infer_snapshot_date_stamp,
 )
 
 N_SIMULATIONS = 10000000
@@ -31,7 +31,7 @@ def find_match_results_file(
 ) -> Path:
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=snapshot_date_stamp(match_probs_file),
+        date_stamp=infer_snapshot_date_stamp(match_probs_file),
     )
     match_results_file = dated_paths.input_csv_dir / "group_match_results.csv"
 
@@ -423,13 +423,17 @@ def build_entrant_leaderboard(
 def calculate_third_prize_monte_carlo(
     resources_path: Path,
     resources: PoolResources,
+    date_stamp: str | None = None,
 ) -> tuple[
     pd.DataFrame,
     pd.DataFrame,
     pd.DataFrame,
     Path,
 ]:
-    match_probs_file = find_latest_match_probs_file(resources_path)
+    match_probs_file = find_match_probs_file(
+        resources_path=resources_path,
+        date_stamp=date_stamp,
+    )
     match_results_file = find_match_results_file(
         match_probs_file=match_probs_file,
         resources_path=resources_path,
@@ -461,7 +465,17 @@ def calculate_third_prize_monte_carlo(
     default=default_resources_path(),
     required=False,
 )
-def main(resources_path: Path) -> None:
+@click.option(
+    "--snapshot-date-stamp",
+    "--date-stamp",
+    "snapshot_date_stamp",
+    default=None,
+    help=(
+        "Dated resource snapshot to read/write, for example 20260614. "
+        "Defaults to inferring the latest matching snapshot from resources."
+    ),
+)
+def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     resources = load_pool_resources(resources_path)
     (
         leaderboard,
@@ -471,11 +485,12 @@ def main(resources_path: Path) -> None:
     ) = calculate_third_prize_monte_carlo(
         resources_path=resources_path,
         resources=resources,
+        date_stamp=snapshot_date_stamp,
     )
 
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=snapshot_date_stamp(match_probs_file),
+        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(match_probs_file),
     )
     team_output_path = dated_paths.output_csv_dir / "third_prize_monte_carlo_teams.csv"
     entrant_output_path = (

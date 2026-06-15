@@ -10,12 +10,12 @@ from wc_pool_2026.paths import (
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    find_latest_dated_file,
+    find_dated_file,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
     load_probabilities,
-    snapshot_date_stamp,
+    snapshot_date_stamp as infer_snapshot_date_stamp,
     validate_teams,
 )
 
@@ -25,11 +25,13 @@ WORLD_CUP_WINNER_ODDS_FILE = "world_cup_winner_odds.csv"
 def calculate_first_prize_odds(
     resources_path: Path,
     resources: PoolResources,
+    date_stamp: str | None = None,
 ) -> pd.DataFrame:
-    world_cup_winner_odds_file = find_latest_dated_file(
+    world_cup_winner_odds_file = find_dated_file(
         resources_path=resources_path,
         subdirectory="input_csv",
         filename=WORLD_CUP_WINNER_ODDS_FILE,
+        date_stamp=date_stamp,
     )
 
     return build_first_prize_leaderboard(
@@ -101,16 +103,28 @@ def build_first_prize_leaderboard(
     default=default_resources_path(),
     required=False,
 )
-def main(resources_path: Path) -> None:
+@click.option(
+    "--snapshot-date-stamp",
+    "--date-stamp",
+    "snapshot_date_stamp",
+    default=None,
+    help=(
+        "Dated resource snapshot to read/write, for example 20260614. "
+        "Defaults to inferring the latest matching snapshot from resources."
+    ),
+)
+def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     resources = load_pool_resources(resources_path)
-    world_cup_winner_odds_file = find_latest_dated_file(
+    world_cup_winner_odds_file = find_dated_file(
         resources_path=resources_path,
         subdirectory="input_csv",
         filename=WORLD_CUP_WINNER_ODDS_FILE,
+        date_stamp=snapshot_date_stamp,
     )
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=snapshot_date_stamp(world_cup_winner_odds_file),
+        date_stamp=snapshot_date_stamp
+        or infer_snapshot_date_stamp(world_cup_winner_odds_file),
     )
     df = build_first_prize_leaderboard(
         world_cup_winner_odds_file=world_cup_winner_odds_file,

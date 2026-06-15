@@ -10,10 +10,11 @@ from wc_pool_2026.paths import (
     default_resources_path,
 )
 from wc_pool_2026.common import (
+    find_dated_file,
     find_latest_dated_file,
     load_json,
     normalise_team,
-    snapshot_date_stamp,
+    snapshot_date_stamp as infer_snapshot_date_stamp,
     sort_match_rows,
 )
 
@@ -29,6 +30,18 @@ def find_latest_raw_file(resources_path: Path) -> Path:
         resources_path=resources_path,
         subdirectory="raw_api",
         filename="world_cup_match_odds.json",
+    )
+
+
+def find_raw_file(
+    resources_path: Path,
+    date_stamp: str | None = None,
+) -> Path:
+    return find_dated_file(
+        resources_path=resources_path,
+        subdirectory="raw_api",
+        filename="world_cup_match_odds.json",
+        date_stamp=date_stamp,
     )
 
 
@@ -321,15 +334,28 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
     default=default_resources_path(),
     required=False,
 )
-def main(resources_path: Path) -> None:
+@click.option(
+    "--snapshot-date-stamp",
+    "--date-stamp",
+    "snapshot_date_stamp",
+    default=None,
+    help=(
+        "Dated resource snapshot to read/write, for example 20260614. "
+        "Defaults to inferring the latest matching snapshot from resources."
+    ),
+)
+def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     resources_path = resources_path.expanduser().resolve()
-    raw_path = find_latest_raw_file(resources_path)
+    raw_path = find_raw_file(
+        resources_path=resources_path,
+        date_stamp=snapshot_date_stamp,
+    )
     events = load_json(raw_path)
 
     output = parse_match_outcomes(events)
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=snapshot_date_stamp(raw_path),
+        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(raw_path),
     )
 
     output_path = dated_paths.input_csv_dir / "group_match_outcome_probs.csv"

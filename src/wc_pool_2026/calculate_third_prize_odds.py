@@ -11,7 +11,7 @@ from wc_pool_2026.paths import (
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    find_latest_match_probs_file,
+    find_match_probs_file,
     format_team_name,
     format_teams_with_metric,
     format_whatsapp_table,
@@ -307,8 +307,12 @@ def calculate_team_worst_probabilities(
 def calculate_third_prize_odds(
     resources_path: Path,
     resources: PoolResources,
+    date_stamp: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    match_probs_file = find_latest_match_probs_file(resources_path)
+    match_probs_file = find_match_probs_file(
+        resources_path=resources_path,
+        date_stamp=date_stamp,
+    )
 
     fixtures = load_fixtures(match_probs_file)
     groups = assign_groups(fixtures)
@@ -389,11 +393,22 @@ def calculate_third_prize_odds(
     default=default_resources_path(),
     required=False,
 )
-def main(resources_path: Path) -> None:
+@click.option(
+    "--snapshot-date-stamp",
+    "--date-stamp",
+    "snapshot_date_stamp",
+    default=None,
+    help=(
+        "Dated resource snapshot to read/write, for example 20260614. "
+        "Defaults to inferring the latest matching snapshot from resources."
+    ),
+)
+def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     resources = load_pool_resources(resources_path)
     leaderboard, points_distributions = calculate_third_prize_odds(
         resources_path=resources_path,
         resources=resources,
+        date_stamp=snapshot_date_stamp,
     )
 
     print()
