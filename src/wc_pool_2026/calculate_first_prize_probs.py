@@ -17,6 +17,7 @@ from wc_pool_2026.common import (
     load_probabilities,
     snapshot_date_stamp as infer_snapshot_date_stamp,
     validate_teams,
+    write_text_output,
 )
 
 WORLD_CUP_WINNER_ODDS_FILE = "world_cup_winner_odds.csv"
@@ -135,16 +136,19 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     entrant_output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(entrant_output_path, index=False)
 
-    print(f"Wrote first prize entrant CSV to {entrant_output_path}")
-    print()
-
     message = format_whatsapp_table(
         df=df,
         title="🥇 WORLD CUP SWEEPSTAKE – 1ST PRIZE ODDS",
         subtitle=("Criterion: One of your teams wins the 2026 FIFA World Cup."),
     )
 
-    print(message)
+    text_output_path = dated_paths.output_txt_dir / "calculate_first_prize_probs.txt"
+    write_text_output(
+        path=text_output_path,
+        text=message,
+    )
+    click.echo(f"Wrote first prize entrant CSV to {entrant_output_path}")
+    click.echo(f"Wrote WhatsApp text to {text_output_path}")
 
 
 if __name__ == "__main__":

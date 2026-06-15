@@ -22,7 +22,7 @@ MARKETS = "outrights"
 ODDS_FORMAT = "decimal"
 
 
-def fetch_world_cup_winner_odds() -> list[dict]:
+def fetch_world_cup_winner_odds() -> tuple[list[dict], dict]:
     if not API_KEY:
         raise RuntimeError("Missing api_key in .env")
 
@@ -39,14 +39,7 @@ def fetch_world_cup_winner_odds() -> list[dict]:
 
     response.raise_for_status()
 
-    print(
-        "API credits:",
-        f"remaining={response.headers.get('x-requests-remaining')}",
-        f"used={response.headers.get('x-requests-used')}",
-        f"last={response.headers.get('x-requests-last')}",
-    )
-
-    return response.json()
+    return response.json(), response.headers
 
 
 @click.command()
@@ -69,14 +62,26 @@ def main(resources_path: Path) -> None:
     )
     dated_paths.raw_api_dir.mkdir(parents=True, exist_ok=True)
 
-    events = fetch_world_cup_winner_odds()
+    events, headers = fetch_world_cup_winner_odds()
     output_path = dated_paths.raw_api_dir / "world_cup_winner_odds.json"
 
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(events, f, indent=2, ensure_ascii=False)
 
-    print(f"\nWrote raw JSON to {output_path}")
-    print(f"Events returned: {len(events)}")
+    text_output = "\n".join(
+        [
+            (
+                "API credits: "
+                f"remaining={headers.get('x-requests-remaining')} "
+                f"used={headers.get('x-requests-used')} "
+                f"last={headers.get('x-requests-last')}"
+            ),
+            "",
+            f"Wrote raw JSON to {output_path}",
+            f"Events returned: {len(events)}",
+        ]
+    )
+    click.echo(text_output)
 
 
 if __name__ == "__main__":

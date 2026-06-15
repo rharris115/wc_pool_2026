@@ -170,11 +170,17 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False)
 
-    print(f"Read raw JSON from {raw_path}")
-    print(f"Wrote CSV to {output_path}")
-    print(output.to_string(index=False))
-    print("\nNumber of completed fixtures:", output["match_id"].nunique())
-    print("Number of team-match rows:", len(output))
+    text_output = "\n".join(
+        [
+            f"Read raw JSON from {raw_path}",
+            f"Wrote CSV to {output_path}",
+            output.to_string(index=False),
+            "",
+            f"Number of completed fixtures: {output['match_id'].nunique()}",
+            f"Number of team-match rows: {len(output)}",
+        ]
+    )
+    click.echo(text_output)
 
 
 if __name__ == "__main__":

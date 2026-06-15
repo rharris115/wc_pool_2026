@@ -151,11 +151,17 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False)
 
-    print(f"Read raw JSON from {raw_path}")
-    print(f"Wrote CSV to {output_path}")
-    print(output.to_string(index=False))
-    print("\nProbability sum:", round(output["win_prob"].sum(), 6))
-    print("Number of teams:", len(output))
+    text_output = "\n".join(
+        [
+            f"Read raw JSON from {raw_path}",
+            f"Wrote CSV to {output_path}",
+            output.to_string(index=False),
+            "",
+            f"Probability sum: {round(output['win_prob'].sum(), 6)}",
+            f"Number of teams: {len(output)}",
+        ]
+    )
+    click.echo(text_output)
 
 
 if __name__ == "__main__":

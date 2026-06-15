@@ -200,9 +200,7 @@ def fit_market_implied_xg(
     initial_total_goals = infer_expected_total_goals(p_over_25)
     team_1_share_denominator = p_team_1_win + p_team_2_win
     team_1_share = (
-        p_team_1_win / team_1_share_denominator
-        if team_1_share_denominator > 0
-        else 0.5
+        p_team_1_win / team_1_share_denominator if team_1_share_denominator > 0 else 0.5
     )
     lambda_1_initial = max(initial_total_goals * team_1_share, EPS)
     lambda_2_initial = max(initial_total_goals * (1 - team_1_share), EPS)
@@ -258,7 +256,9 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
         p_draw = probs["Draw"]
         p_team_2_win = probs[team_2]
 
-        p_over_25, p_under_25, totals_bookmaker_count = consensus_total_goal_probs(event)
+        p_over_25, p_under_25, totals_bookmaker_count = consensus_total_goal_probs(
+            event
+        )
         fit = fit_market_implied_xg(
             p_team_1_win=p_team_1_win,
             p_draw=p_draw,
@@ -363,11 +363,17 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
 
     output.to_csv(output_path, index=False)
 
-    print(f"Read raw JSON from {raw_path}")
-    print(f"Wrote CSV to {output_path}")
-    print(output.to_string(index=False))
-    print("\nNumber of fixtures:", output["match_id"].nunique())
-    print("Number of team-match rows:", len(output))
+    text_output = "\n".join(
+        [
+            f"Read raw JSON from {raw_path}",
+            f"Wrote CSV to {output_path}",
+            output.to_string(index=False),
+            "",
+            f"Number of fixtures: {output['match_id'].nunique()}",
+            f"Number of team-match rows: {len(output)}",
+        ]
+    )
+    click.echo(text_output)
 
 
 if __name__ == "__main__":

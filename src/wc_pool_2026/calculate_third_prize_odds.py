@@ -6,17 +6,19 @@ import click
 import pandas as pd
 
 from wc_pool_2026.paths import (
+    build_dated_resource_paths,
     default_resources_path,
 )
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
     find_match_probs_file,
-    format_team_name,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
     require_columns,
+    snapshot_date_stamp as infer_snapshot_date_stamp,
+    write_text_output,
 )
 
 POSSIBLE_POINTS = [0, 1, 2, 3, 4, 5, 6, 7, 9]
@@ -43,7 +45,7 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
 
     fixtures = []
 
-    for match_id, match_rows in rows.groupby("match_id"):
+    for match_id, match_rows in rows.groupby("match_id", sort=False):
         if len(match_rows) != 2:
             raise ValueError(
                 f"Expected 2 rows for match_id={match_id}, got {len(match_rows)}"
@@ -63,7 +65,7 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
             }
         )
 
-    return pd.DataFrame(fixtures).sort_values("commence_time").reset_index(drop=True)
+    return pd.DataFrame(fixtures).reset_index(drop=True)
 
 
 def assign_groups(fixtures: pd.DataFrame) -> list[dict]:
@@ -208,27 +210,6 @@ def format_teams_with_expected_points(
         metric_format="{:.2f}",
         team_emojis=resources.team_emojis,
     )
-
-
-def format_points_distribution_table(
-    distributions: pd.DataFrame,
-    resources: PoolResources,
-) -> pd.DataFrame:
-    output = distributions.copy()
-
-    output["team"] = output["team"].map(
-        lambda team: format_team_name(team, resources.team_emojis)
-    )
-
-    for points in POSSIBLE_POINTS:
-        col = f"{points}_pts"
-        output[col] = output[col].mul(100).map(lambda value: f"{value:.1f}%")
-
-    output["expected_points"] = output["expected_points"].map(
-        lambda value: f"{value:.2f}"
-    )
-
-    return output
 
 
 def count_distribution_for_other_groups(
@@ -405,23 +386,19 @@ def calculate_third_prize_odds(
 )
 def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     resources = load_pool_resources(resources_path)
+    match_probs_file = find_match_probs_file(
+        resources_path=resources_path,
+        date_stamp=snapshot_date_stamp,
+    )
+    dated_paths = build_dated_resource_paths(
+        resources_path=resources_path,
+        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(match_probs_file),
+    )
     leaderboard, points_distributions = calculate_third_prize_odds(
         resources_path=resources_path,
         resources=resources,
         date_stamp=snapshot_date_stamp,
     )
-
-    print()
-    print("📊 TEAM GROUP POINTS DISTRIBUTIONS")
-    print("=" * 120)
-    print(
-        format_points_distribution_table(
-            distributions=points_distributions,
-            resources=resources,
-        ).to_string(index=False)
-    )
-
-    print("\n")
 
     message = format_whatsapp_table(
         df=leaderboard,
@@ -432,7 +409,12 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
         ),
     )
 
-    print(message)
+    text_output_path = dated_paths.output_txt_dir / "calculate_third_prize_odds.txt"
+    write_text_output(
+        path=text_output_path,
+        text=message,
+    )
+    click.echo(f"Wrote WhatsApp text to {text_output_path}")
 
 
 if __name__ == "__main__":

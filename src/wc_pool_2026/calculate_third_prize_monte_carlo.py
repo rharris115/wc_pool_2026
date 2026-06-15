@@ -19,6 +19,7 @@ from wc_pool_2026.common import (
     load_pool_resources,
     require_columns,
     snapshot_date_stamp as infer_snapshot_date_stamp,
+    write_text_output,
 )
 
 N_SIMULATIONS = 10000000
@@ -67,7 +68,7 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
 
     fixtures = []
 
-    for match_id, match_rows in rows.groupby("match_id"):
+    for match_id, match_rows in rows.groupby("match_id", sort=False):
         if len(match_rows) != 2:
             raise ValueError(
                 f"Expected 2 rows for match_id={match_id}, got {len(match_rows)}"
@@ -89,10 +90,18 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
             }
         )
 
-    return pd.DataFrame(fixtures).sort_values("commence_time").reset_index(drop=True)
+    return pd.DataFrame(fixtures).reset_index(drop=True)
 
 
 def load_completed_results(match_results_file: Path) -> pd.DataFrame:
+    result_columns = [
+        "match_id",
+        "commence_time",
+        "team_1",
+        "team_2",
+        "team_1_goals",
+        "team_2_goals",
+    ]
     rows = pd.read_csv(match_results_file)
 
     required_columns = {
@@ -112,7 +121,7 @@ def load_completed_results(match_results_file: Path) -> pd.DataFrame:
 
     results = []
 
-    for match_id, match_rows in rows.groupby("match_id"):
+    for match_id, match_rows in rows.groupby("match_id", sort=False):
         if len(match_rows) != 2:
             raise ValueError(
                 f"Expected 2 rows for match_id={match_id}, got {len(match_rows)}"
@@ -131,7 +140,7 @@ def load_completed_results(match_results_file: Path) -> pd.DataFrame:
             }
         )
 
-    return pd.DataFrame(results).sort_values("commence_time").reset_index(drop=True)
+    return pd.DataFrame(results, columns=result_columns).reset_index(drop=True)
 
 
 def apply_completed_results(
@@ -342,39 +351,6 @@ def format_teams_with_worst_probability(
     )
 
 
-def format_team_results_table(
-    team_results: pd.DataFrame,
-    resources: PoolResources,
-) -> pd.DataFrame:
-    output = team_results.copy()
-
-    output["team"] = output["team"].map(
-        lambda team: format_team_name(team, resources.team_emojis)
-    )
-    output["worst_probability_pct"] = output["worst_probability"].map(
-        lambda value: f"{value * 100:.2f}%"
-    )
-
-    for column in [
-        "expected_points",
-        "expected_goals_for",
-        "expected_goals_against",
-        "expected_goal_difference",
-    ]:
-        output[column] = output[column].map(lambda value: f"{value:.2f}")
-
-    return output[
-        [
-            "team",
-            "worst_probability_pct",
-            "expected_points",
-            "expected_goals_for",
-            "expected_goals_against",
-            "expected_goal_difference",
-        ]
-    ]
-
-
 def build_entrant_leaderboard(
     team_results: pd.DataFrame,
     resources: PoolResources,
@@ -505,22 +481,6 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     leaderboard.to_csv(entrant_output_path, index=False)
     match_results.to_csv(match_output_path, index=False)
 
-    print()
-    print("🎲 TEAM MONTE CARLO THIRD PRIZE PROBABILITIES")
-    print("=" * 120)
-    print(
-        format_team_results_table(
-            team_results=team_results,
-            resources=resources,
-        ).to_string(index=False)
-    )
-
-    print("\n")
-    print(f"Wrote team Monte Carlo CSV to {team_output_path}")
-    print(f"Wrote entrant Monte Carlo CSV to {entrant_output_path}")
-    print(f"Wrote match Monte Carlo CSV to {match_output_path}")
-    print("\n")
-
     message = format_whatsapp_table(
         df=leaderboard,
         title="🥉 WORLD CUP SWEEPSTAKE – 3RD PRIZE MONTE CARLO",
@@ -532,7 +492,17 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
         ),
     )
 
-    print(message)
+    text_output_path = (
+        dated_paths.output_txt_dir / "calculate_third_prize_monte_carlo.txt"
+    )
+    write_text_output(
+        path=text_output_path,
+        text=message,
+    )
+    click.echo(f"Wrote team Monte Carlo CSV to {team_output_path}")
+    click.echo(f"Wrote entrant Monte Carlo CSV to {entrant_output_path}")
+    click.echo(f"Wrote match Monte Carlo CSV to {match_output_path}")
+    click.echo(f"Wrote WhatsApp text to {text_output_path}")
 
 
 if __name__ == "__main__":

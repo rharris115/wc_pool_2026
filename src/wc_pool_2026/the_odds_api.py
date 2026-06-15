@@ -1,4 +1,6 @@
 import os
+
+import click
 import pandas as pd
 import requests
 
@@ -18,7 +20,7 @@ def main() -> None:
 
     df = pd.DataFrame(sports)
 
-    print(
+    click.echo(
         df[
             df["key"].str.contains("soccer", case=False, na=False)
             & df["has_outrights"].fillna(False)

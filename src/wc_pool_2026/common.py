@@ -40,6 +40,11 @@ def load_json(path: Path) -> dict | list:
         return json.load(f)
 
 
+def write_text_output(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"{text.rstrip()}\n", encoding="utf-8")
+
+
 def load_pool_resources(config_dir: Path) -> PoolResources:
     return PoolResources(
         entrants=load_json(config_dir / "entrants.json"),

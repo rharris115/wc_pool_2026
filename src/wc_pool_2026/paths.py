@@ -8,6 +8,7 @@ class DatedResourcePaths:
     snapshot_dir: Path
     input_csv_dir: Path
     output_csv_dir: Path
+    output_txt_dir: Path
     raw_api_dir: Path
 
 
@@ -26,5 +27,6 @@ def build_dated_resource_paths(
         snapshot_dir=snapshot_dir,
         input_csv_dir=snapshot_dir / "input_csv",
         output_csv_dir=snapshot_dir / "output_csv",
+        output_txt_dir=snapshot_dir / "output_txt",
         raw_api_dir=snapshot_dir / "raw_api",
     )

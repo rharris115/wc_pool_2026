@@ -52,13 +52,6 @@ def main(resources_path: Path) -> None:
 
     response.raise_for_status()
 
-    print(
-        "API credits:",
-        f"remaining={response.headers.get('x-requests-remaining')}",
-        f"used={response.headers.get('x-requests-used')}",
-        f"last={response.headers.get('x-requests-last')}",
-    )
-
     data = response.json()
 
     output_path = dated_paths.raw_api_dir / "world_cup_scores.json"
@@ -66,7 +59,18 @@ def main(resources_path: Path) -> None:
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-    print(f"Wrote {len(data)} score records to {output_path}")
+    text_output = "\n".join(
+        [
+            (
+                "API credits: "
+                f"remaining={response.headers.get('x-requests-remaining')} "
+                f"used={response.headers.get('x-requests-used')} "
+                f"last={response.headers.get('x-requests-last')}"
+            ),
+            f"Wrote {len(data)} score records to {output_path}",
+        ]
+    )
+    click.echo(text_output)
 
 
 if __name__ == "__main__":

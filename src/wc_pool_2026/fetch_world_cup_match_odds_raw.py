@@ -59,13 +59,6 @@ def main(resources_path: Path) -> None:
 
     response.raise_for_status()
 
-    print(
-        "API credits:",
-        f"remaining={response.headers.get('x-requests-remaining')}",
-        f"used={response.headers.get('x-requests-used')}",
-        f"last={response.headers.get('x-requests-last')}",
-    )
-
     events = response.json()
 
     output_path = dated_paths.raw_api_dir / "world_cup_match_odds.json"
@@ -81,12 +74,28 @@ def main(resources_path: Path) -> None:
             ensure_ascii=False,
         )
 
-    print(f"\nWrote {len(events)} events to:")
-    print(output_path)
-
+    output_lines = [
+        (
+            "API credits: "
+            f"remaining={response.headers.get('x-requests-remaining')} "
+            f"used={response.headers.get('x-requests-used')} "
+            f"last={response.headers.get('x-requests-last')}"
+        ),
+        "",
+        f"Wrote {len(events)} events to:",
+        str(output_path),
+    ]
     if events:
-        print("\nFirst fixture:")
-        print(f"{events[0].get('home_team')} " f"vs " f"{events[0].get('away_team')}")
+        output_lines.extend(
+            [
+                "",
+                "First fixture:",
+                f"{events[0].get('home_team')} vs {events[0].get('away_team')}",
+            ]
+        )
+
+    text_output = "\n".join(output_lines)
+    click.echo(text_output)
 
 
 if __name__ == "__main__":
