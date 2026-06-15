@@ -1,4 +1,5 @@
 from html import escape
+import re
 from pathlib import Path
 
 import click
@@ -107,7 +108,8 @@ SVG_CHART_STYLE = """
 
   .series-label {
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", sans-serif;
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
     font-size: 12px;
     font-weight: 700;
     paint-order: stroke;
@@ -273,11 +275,12 @@ def build_svg_line_chart(
     title: str,
     marker_column: str,
     label_column: str | None = None,
+    show_label_rank: bool = True,
 ) -> str:
-    width = 860
+    width = 1160
     height = 940
     margin_left = 62
-    margin_right = 230
+    margin_right = 390
     margin_top = 42
     margin_bottom = 56
     plot_width = width - margin_left - margin_right
@@ -296,10 +299,30 @@ def build_svg_line_chart(
     def y_for_value(value: float) -> float:
         return margin_top + plot_height - (value / max_value) * plot_height
 
+    marker_base_id = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    arrowhead_ids = {
+        color: f"label-arrowhead-{marker_base_id}-{index}"
+        for index, color in enumerate(CHART_COLORS)
+    }
+    marker_defs = ["<defs>"]
+
+    for color, marker_id in arrowhead_ids.items():
+        marker_defs.extend(
+            [
+                f'<marker id="{marker_id}" viewBox="0 0 8 8" refX="7" '
+                'refY="4" markerWidth="6" markerHeight="6" orient="auto">',
+                f'<path d="M 0 0 L 8 4 L 0 8 z" fill="{color}" />',
+                "</marker>",
+            ]
+        )
+
+    marker_defs.append("</defs>")
+
     elements = [
         f'<svg viewBox="0 0 {width} {height}" role="img" '
         f'aria-label="{escape(title)}">',
         f"<style>{SVG_CHART_STYLE}</style>",
+        *marker_defs,
         f'<text class="chart-title" x="{margin_left}" y="24">{escape(title)}</text>',
     ]
 
@@ -376,50 +399,44 @@ def build_svg_line_chart(
                 "color": color,
                 "point_x": x_for_day(int(final_row["match_day"])),
                 "point_y": y_for_value(float(final_row[value_column])),
+                "latest_value": float(final_row[value_column]),
+                "arrowhead_id": arrowhead_ids[color],
             }
         )
 
-    endpoint_labels.sort(key=lambda item: item["point_y"])
-    min_label_gap = 16 if len(endpoint_labels) <= 24 else 13
-    min_label_y = margin_top + 8
-    max_label_y = height - margin_bottom - 8
-    previous_y = None
+    medal_prefixes = {1: "🥇", 2: "🥈", 3: "🥉"}
+    endpoint_labels.sort(
+        key=lambda item: (-item["latest_value"], str(item["label"]).casefold())
+    )
+    label_x = width - margin_right + 150
+    label_top = margin_top + 12
+    label_bottom = height - margin_bottom - 12
+    label_gap = (
+        0
+        if len(endpoint_labels) <= 1
+        else (label_bottom - label_top) / (len(endpoint_labels) - 1)
+    )
 
-    for item in endpoint_labels:
-        label_y = item["point_y"]
-
-        if previous_y is not None:
-            label_y = max(label_y, previous_y + min_label_gap)
-
-        item["label_y"] = label_y
-        previous_y = label_y
-
-    if endpoint_labels:
-        overflow = endpoint_labels[-1]["label_y"] - max_label_y
-
-        if overflow > 0:
-            for item in endpoint_labels:
-                item["label_y"] -= overflow
-
-        underflow = min_label_y - endpoint_labels[0]["label_y"]
-
-        if underflow > 0:
-            for item in endpoint_labels:
-                item["label_y"] += underflow
-
-    label_x = width - margin_right + 34
-
-    for item in endpoint_labels:
+    for index, item in enumerate(endpoint_labels):
+        item["label_y"] = (
+            margin_top + plot_height / 2
+            if len(endpoint_labels) <= 1
+            else label_top + index * label_gap
+        )
+        rank = index + 1
+        prefix = medal_prefixes.get(rank, f"{rank}.")
+        label_text = f"{prefix} {item['label']}" if show_label_rank else item["label"]
         elements.append(
             f'<path class="label-connector" '
-            f'd="M {item["point_x"] + 10:.1f} {item["point_y"]:.1f} '
-            f'L {label_x - 8:.1f} {item["label_y"]:.1f}" '
-            f'stroke="{item["color"]}" />'
+            f'd="M {label_x - 10:.1f} {item["label_y"]:.1f} '
+            f'L {item["point_x"] + 13:.1f} {item["point_y"]:.1f}" '
+            f'stroke="{item["color"]}" '
+            f'marker-end="url(#{item["arrowhead_id"]})" />'
         )
         elements.append(
             f'<text class="series-label" x="{label_x:.1f}" '
             f'y="{item["label_y"]:.1f}" fill="{item["color"]}" '
-            f'dominant-baseline="central">{escape(item["label"])}</text>'
+            f'dominant-baseline="central">{escape(label_text)}</text>'
         )
 
     elements.append("</svg>")
@@ -477,6 +494,7 @@ def build_html(
         title="Team Champion Probability",
         marker_column="marker",
         label_column="team",
+        show_label_rank=False,
     )
     team_worst = build_svg_line_chart(
         df=team_history,
@@ -485,6 +503,7 @@ def build_html(
         title="Team Worst Group-Stage Probability",
         marker_column="marker",
         label_column="team",
+        show_label_rank=False,
     )
 
     return f"""<!doctype html>
