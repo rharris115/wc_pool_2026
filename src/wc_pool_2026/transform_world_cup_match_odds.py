@@ -3,6 +3,7 @@ import math
 
 import click
 import pandas as pd
+from scipy.optimize import minimize
 
 from wc_pool_2026.paths import (
     build_dated_resource_paths,
@@ -17,9 +18,10 @@ from wc_pool_2026.common import (
 )
 
 TOTAL_GOALS_MARKET_POINT = 2.5
-MIN_EXPECTED_GOALS = 0.05
-MAX_EXPECTED_GOALS = 8.0
-XG_GRID_SIZE = 1000
+FALLBACK_P_OVER_25 = 0.45
+TOTALS_WEIGHT = 1.0
+MAX_GOALS_FOR_FIT = 12
+EPS = 1e-12
 
 
 def find_latest_raw_file(resources_path: Path) -> Path:
@@ -100,15 +102,15 @@ def extract_bookmaker_total_goal_probs(event: dict) -> list[dict[str, float]]:
     return bookmaker_probs
 
 
-def consensus_over_25_prob(event: dict) -> float:
+def consensus_total_goal_probs(event: dict) -> tuple[float, float, int]:
     bookmaker_probs = extract_bookmaker_total_goal_probs(event)
 
     if not bookmaker_probs:
-        raise RuntimeError(
-            f"No totals market found for {event['home_team']} vs {event['away_team']}"
-        )
+        return FALLBACK_P_OVER_25, 1 - FALLBACK_P_OVER_25, 0
 
-    return sum(probs["Over"] for probs in bookmaker_probs) / len(bookmaker_probs)
+    p_over_25 = sum(probs["Over"] for probs in bookmaker_probs) / len(bookmaker_probs)
+
+    return p_over_25, 1 - p_over_25, len(bookmaker_probs)
 
 
 def poisson_under_25_prob(expected_goals: float) -> float:
@@ -116,8 +118,11 @@ def poisson_under_25_prob(expected_goals: float) -> float:
 
 
 def infer_expected_total_goals(p_over_25: float) -> float:
-    low = MIN_EXPECTED_GOALS
-    high = MAX_EXPECTED_GOALS
+    low = 0.0
+    high = 1.0
+
+    while 1 - poisson_under_25_prob(high) < p_over_25:
+        high *= 2
 
     for _ in range(60):
         mid = (low + high) / 2
@@ -128,7 +133,7 @@ def infer_expected_total_goals(p_over_25: float) -> float:
         else:
             high = mid
 
-    return (low + high) / 2
+    return max((low + high) / 2, EPS)
 
 
 def poisson_probs(expected_goals: float, max_goals: int) -> list[float]:
@@ -140,17 +145,9 @@ def poisson_probs(expected_goals: float, max_goals: int) -> list[float]:
     return probs
 
 
-def h2h_probs_from_xg(
-    team_xg: float,
-    opponent_xg: float,
-) -> dict[str, float]:
-    max_goals = max(
-        12,
-        math.ceil(team_xg + opponent_xg + 8),
-    )
-
-    team_goal_probs = poisson_probs(team_xg, max_goals)
-    opponent_goal_probs = poisson_probs(opponent_xg, max_goals)
+def model_probs_from_xg(lambda_1: float, lambda_2: float) -> dict[str, float]:
+    team_goal_probs = poisson_probs(lambda_1, MAX_GOALS_FOR_FIT)
+    opponent_goal_probs = poisson_probs(lambda_2, MAX_GOALS_FOR_FIT)
 
     p_win = 0.0
     p_draw = 0.0
@@ -167,45 +164,72 @@ def h2h_probs_from_xg(
             else:
                 p_loss += probability
 
-    total = p_win + p_draw + p_loss
+    h2h_total = p_win + p_draw + p_loss
+    expected_total_goals = lambda_1 + lambda_2
+    p_under_25 = poisson_under_25_prob(expected_total_goals)
 
     return {
-        "win": p_win / total,
-        "draw": p_draw / total,
-        "loss": p_loss / total,
+        "win": p_win / h2h_total,
+        "draw": p_draw / h2h_total,
+        "loss": p_loss / h2h_total,
+        "under_25": p_under_25,
+        "over_25": 1 - p_under_25,
     }
 
 
-def infer_xg(
-    p_team_win: float,
+def fit_market_implied_xg(
+    p_team_1_win: float,
     p_draw: float,
-    p_team_loss: float,
-    expected_total_goals: float,
-) -> tuple[float, float]:
-    best_team_xg = expected_total_goals / 2
-    best_error = float("inf")
+    p_team_2_win: float,
+    p_over_25: float,
+    p_under_25: float,
+) -> dict[str, float]:
+    initial_total_goals = infer_expected_total_goals(p_over_25)
+    team_1_share_denominator = p_team_1_win + p_team_2_win
+    team_1_share = (
+        p_team_1_win / team_1_share_denominator
+        if team_1_share_denominator > 0
+        else 0.5
+    )
+    lambda_1_initial = max(initial_total_goals * team_1_share, EPS)
+    lambda_2_initial = max(initial_total_goals * (1 - team_1_share), EPS)
 
-    for i in range(1, XG_GRID_SIZE):
-        team_share = i / XG_GRID_SIZE
-        team_xg = expected_total_goals * team_share
-        opponent_xg = expected_total_goals - team_xg
+    def negative_log_likelihood(theta) -> float:
+        lambda_1 = math.exp(theta[0])
+        lambda_2 = math.exp(theta[1])
+        model_probs = model_probs_from_xg(lambda_1=lambda_1, lambda_2=lambda_2)
 
-        probs = h2h_probs_from_xg(
-            team_xg=team_xg,
-            opponent_xg=opponent_xg,
+        return -(
+            p_team_1_win * math.log(model_probs["win"] + EPS)
+            + p_draw * math.log(model_probs["draw"] + EPS)
+            + p_team_2_win * math.log(model_probs["loss"] + EPS)
+            + TOTALS_WEIGHT
+            * (
+                p_over_25 * math.log(model_probs["over_25"] + EPS)
+                + p_under_25 * math.log(model_probs["under_25"] + EPS)
+            )
         )
 
-        error = (
-            (probs["win"] - p_team_win) ** 2
-            + (probs["draw"] - p_draw) ** 2
-            + (probs["loss"] - p_team_loss) ** 2
-        )
+    result = minimize(
+        negative_log_likelihood,
+        x0=[math.log(lambda_1_initial), math.log(lambda_2_initial)],
+        method="L-BFGS-B",
+    )
 
-        if error < best_error:
-            best_error = error
-            best_team_xg = team_xg
+    lambda_1 = math.exp(result.x[0])
+    lambda_2 = math.exp(result.x[1])
+    fitted_probs = model_probs_from_xg(lambda_1=lambda_1, lambda_2=lambda_2)
 
-    return best_team_xg, expected_total_goals - best_team_xg
+    return {
+        "lambda_1": lambda_1,
+        "lambda_2": lambda_2,
+        "expected_total_goals": lambda_1 + lambda_2,
+        "fit_model_p_win": fitted_probs["win"],
+        "fit_model_p_draw": fitted_probs["draw"],
+        "fit_model_p_loss": fitted_probs["loss"],
+        "fit_model_p_over_25": fitted_probs["over_25"],
+        "fit_loss": float(result.fun),
+    }
 
 
 def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
@@ -221,13 +245,16 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
         p_draw = probs["Draw"]
         p_team_2_win = probs[team_2]
 
-        expected_total_goals = infer_expected_total_goals(consensus_over_25_prob(event))
-        team_1_xg, team_2_xg = infer_xg(
-            p_team_win=p_team_1_win,
+        p_over_25, p_under_25, totals_bookmaker_count = consensus_total_goal_probs(event)
+        fit = fit_market_implied_xg(
+            p_team_1_win=p_team_1_win,
             p_draw=p_draw,
-            p_team_loss=p_team_2_win,
-            expected_total_goals=expected_total_goals,
+            p_team_2_win=p_team_2_win,
+            p_over_25=p_over_25,
+            p_under_25=p_under_25,
         )
+        team_1_xg = fit["lambda_1"]
+        team_2_xg = fit["lambda_2"]
 
         bookmaker_count = len(extract_bookmaker_h2h_probs(event))
 
@@ -242,7 +269,15 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
                 "p_loss": p_team_2_win,
                 "team_xg": team_1_xg,
                 "opponent_xg": team_2_xg,
-                "expected_total_goals": expected_total_goals,
+                "expected_total_goals": fit["expected_total_goals"],
+                "p_over_25": p_over_25,
+                "p_under_25": p_under_25,
+                "totals_bookmaker_count": totals_bookmaker_count,
+                "fit_model_p_win": fit["fit_model_p_win"],
+                "fit_model_p_draw": fit["fit_model_p_draw"],
+                "fit_model_p_loss": fit["fit_model_p_loss"],
+                "fit_model_p_over_25": fit["fit_model_p_over_25"],
+                "fit_loss": fit["fit_loss"],
                 "bookmaker_count": bookmaker_count,
             }
         )
@@ -258,7 +293,15 @@ def parse_match_outcomes(events: list[dict]) -> pd.DataFrame:
                 "p_loss": p_team_1_win,
                 "team_xg": team_2_xg,
                 "opponent_xg": team_1_xg,
-                "expected_total_goals": expected_total_goals,
+                "expected_total_goals": fit["expected_total_goals"],
+                "p_over_25": p_over_25,
+                "p_under_25": p_under_25,
+                "totals_bookmaker_count": totals_bookmaker_count,
+                "fit_model_p_win": fit["fit_model_p_loss"],
+                "fit_model_p_draw": fit["fit_model_p_draw"],
+                "fit_model_p_loss": fit["fit_model_p_win"],
+                "fit_model_p_over_25": fit["fit_model_p_over_25"],
+                "fit_loss": fit["fit_loss"],
                 "bookmaker_count": bookmaker_count,
             }
         )

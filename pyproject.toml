@@ -9,6 +9,7 @@ dependencies = [
     "pandas-stubs~=3.0.3",
     "python-dotenv",
     "requests",
+    "scipy",
     "tqdm",
 ]
 
