@@ -92,6 +92,51 @@ def build_first_prize_leaderboard(
     return result
 
 
+def build_first_prize_team_table(
+    world_cup_winner_odds_file: Path,
+    resources: PoolResources,
+) -> pd.DataFrame:
+    odds = pd.read_csv(world_cup_winner_odds_file)
+    required_columns = {
+        "team",
+        "win_prob",
+        "best_decimal_odds",
+        "worst_decimal_odds",
+        "bookmaker_count",
+    }
+    missing_columns = required_columns - set(odds.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing columns in {world_cup_winner_odds_file}: {missing_columns}"
+        )
+
+    result = odds.copy()
+    result["team_display"] = result["team"].map(
+        lambda team: f"{resources.team_emojis.get(team, '🏳️')} {team}"
+    )
+    result = result.rename(columns={"win_prob": "champion_probability"})
+    result["probability_pct"] = result["champion_probability"].map(
+        lambda probability: f"{probability * 100:.2f}%"
+    )
+
+    return (
+        result[
+            [
+                "team",
+                "team_display",
+                "champion_probability",
+                "probability_pct",
+                "best_decimal_odds",
+                "worst_decimal_odds",
+                "bookmaker_count",
+            ]
+        ]
+        .sort_values("champion_probability", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
 @click.command()
 @click.argument(
     "resources_path",
@@ -131,10 +176,16 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
         world_cup_winner_odds_file=world_cup_winner_odds_file,
         resources=resources,
     )
+    team_df = build_first_prize_team_table(
+        world_cup_winner_odds_file=world_cup_winner_odds_file,
+        resources=resources,
+    )
     entrant_output_path = dated_paths.output_csv_dir / "first_prize_entrants.csv"
+    team_output_path = dated_paths.output_csv_dir / "first_prize_teams.csv"
 
     entrant_output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(entrant_output_path, index=False)
+    team_df.to_csv(team_output_path, index=False)
 
     message = format_whatsapp_table(
         df=df,
@@ -148,6 +199,7 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
         text=message,
     )
     click.echo(f"Wrote first prize entrant CSV to {entrant_output_path}")
+    click.echo(f"Wrote first prize team CSV to {team_output_path}")
     click.echo(f"Wrote WhatsApp text to {text_output_path}")
 
 

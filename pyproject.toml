@@ -14,6 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
+build-leader-table-visualisations = "wc_pool_2026.build_leader_table_visualisations:main"
 calculate-first-prize-probs = "wc_pool_2026.calculate_first_prize_probs:main"
 calculate-third-prize-monte-carlo = "wc_pool_2026.calculate_third_prize_monte_carlo:main"
 fetch-world-cup-match-odds-raw = "wc_pool_2026.fetch_world_cup_match_odds_raw:main"

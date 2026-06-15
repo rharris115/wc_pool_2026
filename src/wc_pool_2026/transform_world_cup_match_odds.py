@@ -196,7 +196,9 @@ def infer_expected_total_goals(p_over: float, point: float) -> float:
     return max((low + high) / 2, EPS)
 
 
-def model_total_goal_probs(expected_total_goals: float, point: float) -> dict[str, float]:
+def model_total_goal_probs(
+    expected_total_goals: float, point: float
+) -> dict[str, float]:
     p_under = poisson_under_prob(
         expected_goals=expected_total_goals,
         point=point,
@@ -246,10 +248,9 @@ def fit_market_implied_xg(
                 expected_total_goals=expected_total_goals,
                 point=probs["point"],
             )
-            totals_log_likelihood += (
-                probs["Over"] * math.log(model_totals_probs["Over"] + EPS)
-                + probs["Under"] * math.log(model_totals_probs["Under"] + EPS)
-            )
+            totals_log_likelihood += probs["Over"] * math.log(
+                model_totals_probs["Over"] + EPS
+            ) + probs["Under"] * math.log(model_totals_probs["Under"] + EPS)
 
         return -(
             p_team_1_win * math.log(model_probs["win"] + EPS)
