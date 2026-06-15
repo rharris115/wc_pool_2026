@@ -12,10 +12,11 @@ from wc_pool_2026.paths import (
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    find_match_probs_file,
+    find_match_xg_file,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
+    outcome_probs_from_xg,
     require_columns,
     snapshot_date_stamp as infer_snapshot_date_stamp,
     write_text_output,
@@ -24,23 +25,22 @@ from wc_pool_2026.common import (
 POSSIBLE_POINTS = [0, 1, 2, 3, 4, 5, 6, 7, 9]
 
 
-def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
-    rows = pd.read_csv(match_probs_file)
+def load_fixtures(match_xg_file: Path) -> pd.DataFrame:
+    rows = pd.read_csv(match_xg_file)
 
     required_columns = {
         "match_id",
         "commence_time",
         "team",
         "opponent",
-        "p_win",
-        "p_draw",
-        "p_loss",
+        "team_xg",
+        "opponent_xg",
     }
 
     require_columns(
         df=rows,
         columns=required_columns,
-        source=match_probs_file,
+        source=match_xg_file,
     )
 
     fixtures = []
@@ -52,6 +52,10 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
             )
 
         row = match_rows.iloc[0]
+        outcome_probs = outcome_probs_from_xg(
+            team_xg=row["team_xg"],
+            opponent_xg=row["opponent_xg"],
+        )
 
         fixtures.append(
             {
@@ -59,9 +63,9 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
                 "commence_time": row["commence_time"],
                 "team_1": row["team"],
                 "team_2": row["opponent"],
-                "p_team_1_win": row["p_win"],
-                "p_draw": row["p_draw"],
-                "p_team_2_win": row["p_loss"],
+                "p_team_1_win": outcome_probs["win"],
+                "p_draw": outcome_probs["draw"],
+                "p_team_2_win": outcome_probs["loss"],
             }
         )
 
@@ -290,12 +294,12 @@ def calculate_third_prize_odds(
     resources: PoolResources,
     date_stamp: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    match_probs_file = find_match_probs_file(
+    match_xg_file = find_match_xg_file(
         resources_path=resources_path,
         date_stamp=date_stamp,
     )
 
-    fixtures = load_fixtures(match_probs_file)
+    fixtures = load_fixtures(match_xg_file)
     groups = assign_groups(fixtures)
 
     group_scenarios = [enumerate_group_scenarios(group) for group in groups]
@@ -386,13 +390,13 @@ def calculate_third_prize_odds(
 )
 def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     resources = load_pool_resources(resources_path)
-    match_probs_file = find_match_probs_file(
+    match_xg_file = find_match_xg_file(
         resources_path=resources_path,
         date_stamp=snapshot_date_stamp,
     )
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(match_probs_file),
+        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(match_xg_file),
     )
     leaderboard, points_distributions = calculate_third_prize_odds(
         resources_path=resources_path,

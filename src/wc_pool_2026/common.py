@@ -1,12 +1,14 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
+import math
 from pathlib import Path
 import re
 
 import pandas as pd
 
-MATCH_PROBS_FILE = "group_match_outcome_probs.csv"
+MATCH_XG_FILE = "group_match_outcome_xg.csv"
+MAX_GOALS_FOR_OUTCOME_PROBS = 12
 
 MEDALS = {
     1: "🥇",
@@ -126,21 +128,21 @@ def find_dated_file(
     return file
 
 
-def find_latest_match_probs_file(resources_path: Path) -> Path:
-    return find_match_probs_file(
+def find_latest_match_xg_file(resources_path: Path) -> Path:
+    return find_match_xg_file(
         resources_path=resources_path,
         date_stamp=None,
     )
 
 
-def find_match_probs_file(
+def find_match_xg_file(
     resources_path: Path,
     date_stamp: str | None = None,
 ) -> Path:
     return find_dated_file(
         resources_path=resources_path,
         subdirectory="input_csv",
-        filename=MATCH_PROBS_FILE,
+        filename=MATCH_XG_FILE,
         date_stamp=date_stamp,
     )
 
@@ -154,6 +156,47 @@ def require_columns(
 
     if missing_columns:
         raise ValueError(f"Missing columns in {source}: {missing_columns}")
+
+
+def poisson_probs(expected_goals: float, max_goals: int) -> list[float]:
+    probs = [math.exp(-expected_goals)]
+
+    for goals in range(1, max_goals + 1):
+        probs.append(probs[-1] * expected_goals / goals)
+
+    return probs
+
+
+def outcome_probs_from_xg(
+    team_xg: float,
+    opponent_xg: float,
+    max_goals: int = MAX_GOALS_FOR_OUTCOME_PROBS,
+) -> dict[str, float]:
+    team_goal_probs = poisson_probs(team_xg, max_goals)
+    opponent_goal_probs = poisson_probs(opponent_xg, max_goals)
+
+    p_win = 0.0
+    p_draw = 0.0
+    p_loss = 0.0
+
+    for team_goals, team_prob in enumerate(team_goal_probs):
+        for opponent_goals, opponent_prob in enumerate(opponent_goal_probs):
+            probability = team_prob * opponent_prob
+
+            if team_goals > opponent_goals:
+                p_win += probability
+            elif team_goals == opponent_goals:
+                p_draw += probability
+            else:
+                p_loss += probability
+
+    total = p_win + p_draw + p_loss
+
+    return {
+        "win": p_win / total,
+        "draw": p_draw / total,
+        "loss": p_loss / total,
+    }
 
 
 def sort_match_rows(df: pd.DataFrame) -> pd.DataFrame:

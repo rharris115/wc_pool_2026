@@ -12,11 +12,11 @@ from wc_pool_2026.paths import (
 from wc_pool_2026.common import (
     MEDALS,
     PoolResources,
-    find_match_probs_file,
-    format_team_name,
+    find_match_xg_file,
     format_teams_with_metric,
     format_whatsapp_table,
     load_pool_resources,
+    outcome_probs_from_xg,
     require_columns,
     snapshot_date_stamp as infer_snapshot_date_stamp,
     write_text_output,
@@ -27,35 +27,32 @@ RANDOM_SEED = 42
 
 
 def find_match_results_file(
-    match_probs_file: Path,
+    match_xg_file: Path,
     resources_path: Path,
 ) -> Path:
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=infer_snapshot_date_stamp(match_probs_file),
+        date_stamp=infer_snapshot_date_stamp(match_xg_file),
     )
     match_results_file = dated_paths.input_csv_dir / "group_match_results.csv"
 
     if not match_results_file.is_file():
         raise FileNotFoundError(
             "No matching results CSV found for "
-            f"{match_probs_file.name}: expected {match_results_file}"
+            f"{match_xg_file.name}: expected {match_results_file}"
         )
 
     return match_results_file
 
 
-def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
-    rows = pd.read_csv(match_probs_file)
+def load_fixtures(match_xg_file: Path) -> pd.DataFrame:
+    rows = pd.read_csv(match_xg_file)
 
     required_columns = {
         "match_id",
         "commence_time",
         "team",
         "opponent",
-        "p_win",
-        "p_draw",
-        "p_loss",
         "team_xg",
         "opponent_xg",
     }
@@ -63,7 +60,7 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
     require_columns(
         df=rows,
         columns=required_columns,
-        source=match_probs_file,
+        source=match_xg_file,
     )
 
     fixtures = []
@@ -75,6 +72,10 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
             )
 
         row = match_rows.iloc[0]
+        outcome_probs = outcome_probs_from_xg(
+            team_xg=row["team_xg"],
+            opponent_xg=row["opponent_xg"],
+        )
 
         fixtures.append(
             {
@@ -82,9 +83,9 @@ def load_fixtures(match_probs_file: Path) -> pd.DataFrame:
                 "commence_time": row["commence_time"],
                 "team_1": row["team"],
                 "team_2": row["opponent"],
-                "p_team_1_win": row["p_win"],
-                "p_draw": row["p_draw"],
-                "p_team_2_win": row["p_loss"],
+                "p_team_1_win": outcome_probs["win"],
+                "p_draw": outcome_probs["draw"],
+                "p_team_2_win": outcome_probs["loss"],
                 "team_1_xg": row["team_xg"],
                 "team_2_xg": row["opponent_xg"],
             }
@@ -188,10 +189,9 @@ def remaining_fixtures(
 def simulate_group_stage(
     fixtures: pd.DataFrame,
     completed_results: pd.DataFrame,
-    resources: PoolResources,
     n_simulations: int = N_SIMULATIONS,
     random_seed: int = RANDOM_SEED,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
+) -> pd.DataFrame:
     teams = sorted(
         set(fixtures["team_1"])
         | set(fixtures["team_2"])
@@ -218,7 +218,6 @@ def simulate_group_stage(
         fixtures=fixtures,
         completed_results=completed_results,
     ).to_dict("records")
-    match_rows = []
 
     for fixture in tqdm(
         remaining_fixture_records,
@@ -245,29 +244,6 @@ def simulate_group_stage(
         team_1_wins = team_1_goals > team_2_goals
         team_2_wins = team_2_goals > team_1_goals
         draws = team_1_goals == team_2_goals
-
-        simulated_team_1_win = team_1_wins.mean()
-        simulated_draw = draws.mean()
-        simulated_team_2_win = team_2_wins.mean()
-
-        match_rows.append(
-            {
-                "team_1": format_team_name(
-                    fixture["team_1"],
-                    resources.team_emojis,
-                ),
-                "team_2": format_team_name(
-                    fixture["team_2"],
-                    resources.team_emojis,
-                ),
-                "team_1_win": fixture["p_team_1_win"],
-                "simulated_team_1_win": simulated_team_1_win,
-                "draw": fixture["p_draw"],
-                "simulated_draw": simulated_draw,
-                "team_2_win": fixture["p_team_2_win"],
-                "simulated_team_2_win": simulated_team_2_win,
-            }
-        )
 
         points[team_1_wins, team_1_index] += 3
         points[team_2_wins, team_2_index] += 3
@@ -318,9 +294,8 @@ def simulate_group_stage(
         .sort_values("worst_probability", ascending=False)
         .reset_index(drop=True)
     )
-    match_results = pd.DataFrame(match_rows)
 
-    return team_results, match_results
+    return team_results
 
 
 def build_worst_probability_map(
@@ -403,30 +378,28 @@ def calculate_third_prize_monte_carlo(
 ) -> tuple[
     pd.DataFrame,
     pd.DataFrame,
-    pd.DataFrame,
     Path,
 ]:
-    match_probs_file = find_match_probs_file(
+    match_xg_file = find_match_xg_file(
         resources_path=resources_path,
         date_stamp=date_stamp,
     )
     match_results_file = find_match_results_file(
-        match_probs_file=match_probs_file,
+        match_xg_file=match_xg_file,
         resources_path=resources_path,
     )
-    fixtures = load_fixtures(match_probs_file)
+    fixtures = load_fixtures(match_xg_file)
     completed_results = load_completed_results(match_results_file)
-    team_results, match_results = simulate_group_stage(
+    team_results = simulate_group_stage(
         fixtures=fixtures,
         completed_results=completed_results,
-        resources=resources,
     )
     leaderboard = build_entrant_leaderboard(
         team_results=team_results,
         resources=resources,
     )
 
-    return leaderboard, team_results, match_results, match_probs_file
+    return leaderboard, team_results, match_xg_file
 
 
 @click.command()
@@ -456,8 +429,7 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     (
         leaderboard,
         team_results,
-        match_results,
-        match_probs_file,
+        match_xg_file,
     ) = calculate_third_prize_monte_carlo(
         resources_path=resources_path,
         resources=resources,
@@ -466,20 +438,16 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
 
     dated_paths = build_dated_resource_paths(
         resources_path=resources_path,
-        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(match_probs_file),
+        date_stamp=snapshot_date_stamp or infer_snapshot_date_stamp(match_xg_file),
     )
     team_output_path = dated_paths.output_csv_dir / "third_prize_monte_carlo_teams.csv"
     entrant_output_path = (
         dated_paths.output_csv_dir / "third_prize_monte_carlo_entrants.csv"
     )
-    match_output_path = (
-        dated_paths.output_csv_dir / "third_prize_monte_carlo_matches.csv"
-    )
 
     dated_paths.output_csv_dir.mkdir(parents=True, exist_ok=True)
     team_results.to_csv(team_output_path, index=False)
     leaderboard.to_csv(entrant_output_path, index=False)
-    match_results.to_csv(match_output_path, index=False)
 
     message = format_whatsapp_table(
         df=leaderboard,
@@ -501,7 +469,6 @@ def main(resources_path: Path, snapshot_date_stamp: str | None) -> None:
     )
     click.echo(f"Wrote team Monte Carlo CSV to {team_output_path}")
     click.echo(f"Wrote entrant Monte Carlo CSV to {entrant_output_path}")
-    click.echo(f"Wrote match Monte Carlo CSV to {match_output_path}")
     click.echo(f"Wrote WhatsApp text to {text_output_path}")
 
 
