@@ -24,6 +24,7 @@ from wc_pool_2026.common import (
 
 N_SIMULATIONS = 10000000
 RANDOM_SEED = 42
+TIEBREAKER_CHUNK_SIZE = 250000
 
 
 def find_match_results_file(
@@ -72,6 +73,28 @@ def load_fixtures(match_xg_file: Path) -> pd.DataFrame:
             )
 
         row = match_rows.iloc[0]
+        reverse_row = match_rows.iloc[1]
+
+        if (
+            row["team"] != reverse_row["opponent"]
+            or row["opponent"] != reverse_row["team"]
+        ):
+            raise ValueError(
+                f"Expected reciprocal team rows for match_id={match_id}, got "
+                f"{row['team']} vs {row['opponent']} and "
+                f"{reverse_row['team']} vs {reverse_row['opponent']}"
+            )
+
+        if not np.isclose(row["team_xg"], reverse_row["opponent_xg"]) or not np.isclose(
+            row["opponent_xg"],
+            reverse_row["team_xg"],
+        ):
+            raise ValueError(
+                f"Expected reciprocal xG rows for match_id={match_id}, got "
+                f"{row['team_xg']}-{row['opponent_xg']} and "
+                f"{reverse_row['team_xg']}-{reverse_row['opponent_xg']}"
+            )
+
         outcome_probs = outcome_probs_from_xg(
             team_xg=row["team_xg"],
             opponent_xg=row["opponent_xg"],
@@ -186,6 +209,54 @@ def remaining_fixtures(
     )
 
 
+def apply_worst_team_tiebreakers(
+    points: np.ndarray,
+    goals_for: np.ndarray,
+    goal_difference: np.ndarray,
+    chunk_size: int = TIEBREAKER_CHUNK_SIZE,
+) -> np.ndarray:
+    worst_counts = np.zeros(points.shape[1], dtype=np.float64)
+    sentinel = np.iinfo(np.int16).max
+
+    for start in tqdm(
+        range(0, points.shape[0], chunk_size),
+        desc="Applying worst-team tiebreakers",
+        unit="chunk",
+    ):
+        stop = min(start + chunk_size, points.shape[0])
+        chunk_points = points[start:stop]
+        chunk_goals_for = goals_for[start:stop]
+        chunk_goal_difference = goal_difference[start:stop]
+
+        min_points = chunk_points.min(axis=1)
+        point_candidates = chunk_points == min_points[:, np.newaxis]
+
+        candidate_goal_difference = np.where(
+            point_candidates,
+            chunk_goal_difference,
+            sentinel,
+        )
+        min_goal_difference = candidate_goal_difference.min(axis=1)
+        goal_difference_candidates = point_candidates & (
+            chunk_goal_difference == min_goal_difference[:, np.newaxis]
+        )
+
+        candidate_goals_for = np.where(
+            goal_difference_candidates,
+            chunk_goals_for,
+            sentinel,
+        )
+        min_goals_for = candidate_goals_for.min(axis=1)
+        worst_candidates = goal_difference_candidates & (
+            chunk_goals_for == min_goals_for[:, np.newaxis]
+        )
+
+        tie_counts = worst_candidates.sum(axis=1)
+        worst_counts += (worst_candidates / tie_counts[:, np.newaxis]).sum(axis=0)
+
+    return worst_counts
+
+
 def simulate_group_stage(
     fixtures: pd.DataFrame,
     completed_results: pd.DataFrame,
@@ -251,24 +322,11 @@ def simulate_group_stage(
         points[draws, team_2_index] += 1
 
     goal_difference = goals_for - goals_against
-    worst_counts = np.zeros(len(teams), dtype=np.float64)
-
-    for simulation_index in tqdm(
-        range(n_simulations),
-        desc="Applying worst-team tiebreakers",
-        unit="sim",
-    ):
-        simulation_points = points[simulation_index]
-        simulation_goals_for = goals_for[simulation_index]
-        simulation_goal_difference = goal_difference[simulation_index]
-
-        candidates = simulation_points == simulation_points.min()
-        candidates &= (
-            simulation_goal_difference == simulation_goal_difference[candidates].min()
-        )
-        candidates &= simulation_goals_for == simulation_goals_for[candidates].min()
-
-        worst_counts[candidates] += 1 / candidates.sum()
+    worst_counts = apply_worst_team_tiebreakers(
+        points=points,
+        goals_for=goals_for,
+        goal_difference=goal_difference,
+    )
 
     rows = []
 
