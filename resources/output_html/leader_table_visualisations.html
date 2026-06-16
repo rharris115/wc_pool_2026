@@ -63,11 +63,12 @@
       overflow-x: auto;
     }
 
+
     .chart-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .copy-chart {
@@ -78,10 +79,10 @@
       color: var(--text);
       cursor: pointer;
       font: inherit;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 650;
       line-height: 1;
-      padding: 8px 10px;
+      padding: 7px 9px;
     }
 
     .copy-chart:hover {
@@ -99,6 +100,7 @@
       font-size: 12px;
       min-height: 1em;
     }
+
 
     svg {
       display: block;
@@ -434,17 +436,25 @@
     </section>
   </main>
   <script>
-    async function svgToPngBlob(svg) {
+
+    async function svgToPngBlob(svg, stats) {
       const clone = svg.cloneNode(true);
       clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
       const viewBox = clone.viewBox.baseVal;
       const width = viewBox && viewBox.width ? viewBox.width : clone.clientWidth;
       const height = viewBox && viewBox.height ? viewBox.height : clone.clientHeight;
+      const statTexts = stats
+        ? Array.from(stats.querySelectorAll("span")).map((span) =>
+            span.textContent.trim()
+          )
+        : [];
+      const statsHeight = statTexts.length ? 32 : 0;
+      const exportHeight = height + statsHeight;
       const scale = Math.max(2, window.devicePixelRatio || 1);
       clone.setAttribute("width", width);
-      clone.setAttribute("height", height);
-      clone.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      clone.setAttribute("height", exportHeight);
+      clone.setAttribute("viewBox", `0 0 ${width} ${exportHeight}`);
 
       const background = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -453,9 +463,38 @@
       background.setAttribute("x", "0");
       background.setAttribute("y", "0");
       background.setAttribute("width", width);
-      background.setAttribute("height", height);
+      background.setAttribute("height", exportHeight);
       background.setAttribute("fill", "#ffffff");
       clone.insertBefore(background, clone.firstChild);
+
+      if (statTexts.length) {
+        const statsGroup = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+        const columnWidth = width / statTexts.length;
+
+        statTexts.forEach((statText, index) => {
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("x", columnWidth * index + columnWidth / 2);
+          text.setAttribute("y", height + 21);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("fill", "#667085");
+          text.setAttribute("font-size", "10.5");
+          text.setAttribute("font-weight", "650");
+          text.setAttribute(
+            "font-family",
+            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          );
+          text.textContent = statText;
+          statsGroup.appendChild(text);
+        });
+
+        clone.appendChild(statsGroup);
+      }
 
       const serializer = new XMLSerializer();
       const svgText = serializer.serializeToString(clone);
@@ -472,7 +511,7 @@
 
         const canvas = document.createElement("canvas");
         canvas.width = Math.ceil(width * scale);
-        canvas.height = Math.ceil(height * scale);
+        canvas.height = Math.ceil(exportHeight * scale);
 
         const context = canvas.getContext("2d");
         context.fillStyle = "#ffffff";
@@ -493,34 +532,48 @@
       }
     }
 
+    function downloadPngBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename || "chart.png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
     async function copyChartAsPng(button) {
       const block = button.closest(".chart-block");
       const svg = block.querySelector("svg");
+      const stats = block.querySelector(".stats");
       const status = block.querySelector(".copy-status");
-
-      if (!navigator.clipboard || !window.ClipboardItem) {
-        status.textContent = "PNG clipboard copy is not supported in this browser.";
-        return;
-      }
 
       button.disabled = true;
       status.textContent = "Copying...";
 
       try {
-        const blob = await svgToPngBlob(svg);
+        const blob = await svgToPngBlob(svg, stats);
+        if (!navigator.clipboard || !window.ClipboardItem) {
+          downloadPngBlob(blob, button.dataset.filename);
+          status.textContent = "Downloaded";
+          return;
+        }
+
         await navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob,
-          }),
+          new ClipboardItem({ "image/png": blob }),
         ]);
-        status.textContent = "Copied PNG";
+        status.textContent = "Copied";
       } catch (error) {
         console.error(error);
-        status.textContent = "Copy failed. Try opening this page in Chrome or Safari.";
+        status.textContent = "Copy failed";
       } finally {
         button.disabled = false;
         window.setTimeout(() => {
-          if (status.textContent === "Copied PNG") {
+          if (
+            status.textContent === "Copied" ||
+            status.textContent === "Downloaded"
+          ) {
             status.textContent = "";
           }
         }, 2200);
@@ -530,6 +583,7 @@
     document.querySelectorAll(".copy-chart").forEach((button) => {
       button.addEventListener("click", () => copyChartAsPng(button));
     });
+
   </script>
 </body>
 </html>

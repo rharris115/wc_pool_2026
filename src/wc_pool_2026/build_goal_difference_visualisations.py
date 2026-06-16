@@ -2,7 +2,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from html import escape
 from pathlib import Path
-import re
 
 import click
 import pandas as pd
@@ -16,6 +15,12 @@ from wc_pool_2026.common import (
     write_text_output,
 )
 from wc_pool_2026.paths import default_resources_path
+from wc_pool_2026.viz_common import (
+    COPY_CHART_CONTROLS_CSS,
+    COPY_CHART_PNG_SCRIPT,
+    copy_chart_button,
+    filename_slug,
+)
 
 HTML_FILE = "goal_difference_histograms.html"
 PROBABILITY_THRESHOLD_FOR_AXIS = 0.0005
@@ -74,11 +79,6 @@ SVG_CHART_STYLE = """
     opacity: 0.78;
   }
 """
-
-
-def filename_slug(value: str) -> str:
-    slug = re.sub(r"[^A-Za-z0-9]+", "-", value).strip("-").lower()
-    return slug or "chart"
 
 
 @dataclass(frozen=True)
@@ -250,9 +250,9 @@ def build_match_histogram_svg(
         f"<style>{SVG_CHART_STYLE}</style>",
         f'<text class="match-title" x="{width / 2:.1f}" y="17" '
         f'text-anchor="middle">'
-        f'{escape(display_match_time(match.commence_time))}</text>',
+        f"{escape(display_match_time(match.commence_time))}</text>",
         f'<text class="side-label" x="{margin_left}" y="34" text-anchor="start">'
-        f'{escape(negative_label)}</text>',
+        f"{escape(negative_label)}</text>",
         f'<text class="side-label" x="{width - margin_right}" y="34" '
         f'text-anchor="end">{escape(positive_label)}</text>',
     ]
@@ -290,9 +290,7 @@ def build_match_histogram_svg(
         bar_class = (
             "positive-bar"
             if goal_difference > 0
-            else "negative-bar"
-            if goal_difference < 0
-            else "zero-bar"
+            else "negative-bar" if goal_difference < 0 else "zero-bar"
         )
         elements.append(
             f'<rect class="{bar_class}" x="{x:.1f}" y="{y:.1f}" '
@@ -325,15 +323,15 @@ def build_match_histogram_svg(
 
     return (
         '<article class="card chart-block">'
-        '<div class="chart-actions">'
-        f'<button class="save-chart" type="button" '
-        f'data-filename="{filename_slug(match.commence_time)}-'
-        f'{filename_slug(match.team)}-vs-{filename_slug(match.opponent)}.png" '
-        f'aria-label="Copy {escape(match.team)} versus {escape(match.opponent)} as PNG">'
-        "Copy PNG</button>"
-        '<span class="save-status" aria-live="polite"></span>'
-        "</div>"
-        f'{"".join(elements)}'
+        + copy_chart_button(
+            label=f"{match.team} versus {match.opponent}",
+            filename=(
+                f"{filename_slug(match.commence_time)}-"
+                f"{filename_slug(match.team)}-vs-"
+                f"{filename_slug(match.opponent)}.png"
+            ),
+        )
+        + f'{"".join(elements)}'
         '<div class="stats">'
         f"<span>xG {match.team_xg:.2f}-{match.opponent_xg:.2f}</span>"
         f"<span>Mean GD {expected:+.2f}</span>"
@@ -446,42 +444,7 @@ def build_html(
       padding: 10px 10px 8px;
     }}
 
-    .chart-actions {{
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }}
-
-    .save-chart {{
-      appearance: none;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #ffffff;
-      color: var(--text);
-      cursor: pointer;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 650;
-      line-height: 1;
-      padding: 7px 9px;
-    }}
-
-    .save-chart:hover {{
-      border-color: #aeb7c6;
-      background: #f9fafb;
-    }}
-
-    .save-chart:disabled {{
-      cursor: progress;
-      opacity: 0.64;
-    }}
-
-    .save-status {{
-      color: var(--muted);
-      font-size: 12px;
-      min-height: 1em;
-    }}
+{COPY_CHART_CONTROLS_CSS}
 
     .histogram {{
       display: block;
@@ -585,150 +548,7 @@ def build_html(
     </div>
   </main>
   <script>
-    async function svgToPngBlob(svg, stats) {{
-      const clone = svg.cloneNode(true);
-      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-
-      const viewBox = clone.viewBox.baseVal;
-      const width = viewBox && viewBox.width ? viewBox.width : clone.clientWidth;
-      const height = viewBox && viewBox.height ? viewBox.height : clone.clientHeight;
-      const statTexts = Array.from(stats.querySelectorAll("span")).map(
-        (span) => span.textContent.trim()
-      );
-      const statsHeight = statTexts.length ? 32 : 0;
-      const exportHeight = height + statsHeight;
-      const scale = Math.max(2, window.devicePixelRatio || 1);
-      clone.setAttribute("width", width);
-      clone.setAttribute("height", exportHeight);
-      clone.setAttribute("viewBox", `0 0 ${{width}} ${{exportHeight}}`);
-
-      const background = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "rect"
-      );
-      background.setAttribute("x", "0");
-      background.setAttribute("y", "0");
-      background.setAttribute("width", width);
-      background.setAttribute("height", exportHeight);
-      background.setAttribute("fill", "#ffffff");
-      clone.insertBefore(background, clone.firstChild);
-
-      if (statTexts.length) {{
-        const statsGroup = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "g"
-        );
-        const columnWidth = width / statTexts.length;
-
-        statTexts.forEach((statText, index) => {{
-          const text = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "text"
-          );
-          text.setAttribute("x", columnWidth * index + columnWidth / 2);
-          text.setAttribute("y", height + 21);
-          text.setAttribute("text-anchor", "middle");
-          text.setAttribute("fill", "#667085");
-          text.setAttribute("font-size", "10.5");
-          text.setAttribute("font-weight", "650");
-          text.setAttribute(
-            "font-family",
-            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-          );
-          text.textContent = statText;
-          statsGroup.appendChild(text);
-        }});
-
-        clone.appendChild(statsGroup);
-      }}
-
-      const serializer = new XMLSerializer();
-      const svgText = serializer.serializeToString(clone);
-      const svgBlob = new Blob([svgText], {{
-        type: "image/svg+xml;charset=utf-8",
-      }});
-      const url = URL.createObjectURL(svgBlob);
-
-      try {{
-        const image = new Image();
-        image.decoding = "async";
-        image.src = url;
-        await image.decode();
-
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.ceil(width * scale);
-        canvas.height = Math.ceil(exportHeight * scale);
-
-        const context = canvas.getContext("2d");
-        context.fillStyle = "#ffffff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        return await new Promise((resolve, reject) => {{
-          canvas.toBlob((blob) => {{
-            if (blob) {{
-              resolve(blob);
-            }} else {{
-              reject(new Error("Could not create PNG"));
-            }}
-          }}, "image/png");
-        }});
-      }} finally {{
-        URL.revokeObjectURL(url);
-      }}
-    }}
-
-    function downloadPngBlob(blob, filename) {{
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename || "goal-difference.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    }}
-
-    async function copyChartAsPng(button) {{
-      const block = button.closest(".chart-block");
-      const svg = block.querySelector("svg");
-      const stats = block.querySelector(".stats");
-      const status = block.querySelector(".save-status");
-
-      button.disabled = true;
-      status.textContent = "Copying...";
-
-      try {{
-        const blob = await svgToPngBlob(svg, stats);
-        if (!navigator.clipboard || !window.ClipboardItem) {{
-          downloadPngBlob(blob, button.dataset.filename);
-          status.textContent = "Downloaded";
-          return;
-        }}
-
-        await navigator.clipboard.write([
-          new ClipboardItem({{ "image/png": blob }}),
-        ]);
-        status.textContent = "Copied";
-      }} catch (error) {{
-        console.error(error);
-        status.textContent = "Copy failed";
-      }} finally {{
-        button.disabled = false;
-        window.setTimeout(() => {{
-          if (
-            status.textContent === "Copied" ||
-            status.textContent === "Downloaded"
-          ) {{
-            status.textContent = "";
-          }}
-        }}, 2200);
-      }}
-    }}
-
-    document.querySelectorAll(".save-chart").forEach((button) => {{
-      button.addEventListener("click", () => copyChartAsPng(button));
-    }});
+{COPY_CHART_PNG_SCRIPT}
   </script>
 </body>
 </html>"""

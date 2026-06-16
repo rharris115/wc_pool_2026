@@ -12,6 +12,11 @@ from wc_pool_2026.common import (
     require_columns,
 )
 from wc_pool_2026.paths import default_resources_path
+from wc_pool_2026.viz_common import (
+    COPY_CHART_CONTROLS_CSS,
+    COPY_CHART_PNG_SCRIPT,
+    copy_chart_button,
+)
 
 ENTRANT_HISTORY_FILE = "leader_table_entrant_history.csv"
 TEAM_HISTORY_FILE = "leader_table_team_history.csv"
@@ -443,12 +448,8 @@ def build_svg_line_chart(
 
     return (
         '<div class="chart-block">'
-        '<div class="chart-actions">'
-        f'<button class="copy-chart" type="button" aria-label="Copy {escape(title)} as PNG">'
-        "Copy PNG</button>"
-        '<span class="copy-status" aria-live="polite"></span>'
-        "</div>"
-        f'{"".join(elements)}'
+        + copy_chart_button(label=title)
+        + f'{"".join(elements)}'
         "</div>"
     )
 
@@ -571,42 +572,7 @@ def build_html(
       overflow-x: auto;
     }}
 
-    .chart-actions {{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }}
-
-    .copy-chart {{
-      appearance: none;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #ffffff;
-      color: var(--text);
-      cursor: pointer;
-      font: inherit;
-      font-size: 13px;
-      font-weight: 650;
-      line-height: 1;
-      padding: 8px 10px;
-    }}
-
-    .copy-chart:hover {{
-      border-color: #aeb7c6;
-      background: #f9fafb;
-    }}
-
-    .copy-chart:disabled {{
-      cursor: progress;
-      opacity: 0.64;
-    }}
-
-    .copy-status {{
-      color: var(--muted);
-      font-size: 12px;
-      min-height: 1em;
-    }}
+{COPY_CHART_CONTROLS_CSS}
 
     svg {{
       display: block;
@@ -694,102 +660,7 @@ def build_html(
     </section>
   </main>
   <script>
-    async function svgToPngBlob(svg) {{
-      const clone = svg.cloneNode(true);
-      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-
-      const viewBox = clone.viewBox.baseVal;
-      const width = viewBox && viewBox.width ? viewBox.width : clone.clientWidth;
-      const height = viewBox && viewBox.height ? viewBox.height : clone.clientHeight;
-      const scale = Math.max(2, window.devicePixelRatio || 1);
-      clone.setAttribute("width", width);
-      clone.setAttribute("height", height);
-      clone.setAttribute("viewBox", `0 0 ${{width}} ${{height}}`);
-
-      const background = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "rect"
-      );
-      background.setAttribute("x", "0");
-      background.setAttribute("y", "0");
-      background.setAttribute("width", width);
-      background.setAttribute("height", height);
-      background.setAttribute("fill", "#ffffff");
-      clone.insertBefore(background, clone.firstChild);
-
-      const serializer = new XMLSerializer();
-      const svgText = serializer.serializeToString(clone);
-      const svgBlob = new Blob([svgText], {{
-        type: "image/svg+xml;charset=utf-8",
-      }});
-      const url = URL.createObjectURL(svgBlob);
-
-      try {{
-        const image = new Image();
-        image.decoding = "async";
-        image.src = url;
-        await image.decode();
-
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.ceil(width * scale);
-        canvas.height = Math.ceil(height * scale);
-
-        const context = canvas.getContext("2d");
-        context.fillStyle = "#ffffff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        return await new Promise((resolve, reject) => {{
-          canvas.toBlob((blob) => {{
-            if (blob) {{
-              resolve(blob);
-            }} else {{
-              reject(new Error("Could not create PNG"));
-            }}
-          }}, "image/png");
-        }});
-      }} finally {{
-        URL.revokeObjectURL(url);
-      }}
-    }}
-
-    async function copyChartAsPng(button) {{
-      const block = button.closest(".chart-block");
-      const svg = block.querySelector("svg");
-      const status = block.querySelector(".copy-status");
-
-      if (!navigator.clipboard || !window.ClipboardItem) {{
-        status.textContent = "PNG clipboard copy is not supported in this browser.";
-        return;
-      }}
-
-      button.disabled = true;
-      status.textContent = "Copying...";
-
-      try {{
-        const blob = await svgToPngBlob(svg);
-        await navigator.clipboard.write([
-          new ClipboardItem({{
-            [blob.type]: blob,
-          }}),
-        ]);
-        status.textContent = "Copied PNG";
-      }} catch (error) {{
-        console.error(error);
-        status.textContent = "Copy failed. Try opening this page in Chrome or Safari.";
-      }} finally {{
-        button.disabled = false;
-        window.setTimeout(() => {{
-          if (status.textContent === "Copied PNG") {{
-            status.textContent = "";
-          }}
-        }}, 2200);
-      }}
-    }}
-
-    document.querySelectorAll(".copy-chart").forEach((button) => {{
-      button.addEventListener("click", () => copyChartAsPng(button));
-    }});
+{COPY_CHART_PNG_SCRIPT}
   </script>
 </body>
 </html>
