@@ -24,7 +24,6 @@ from wc_pool_2026.common import (
 
 N_SIMULATIONS = 10000000
 RANDOM_SEED = 42
-TIEBREAKER_CHUNK_SIZE = 250000
 
 
 def find_match_results_file(
@@ -213,46 +212,61 @@ def apply_worst_team_tiebreakers(
     points: np.ndarray,
     goals_for: np.ndarray,
     goal_difference: np.ndarray,
-    chunk_size: int = TIEBREAKER_CHUNK_SIZE,
 ) -> np.ndarray:
     worst_counts = np.zeros(points.shape[1], dtype=np.float64)
     sentinel = np.iinfo(np.int16).max
 
-    for start in tqdm(
-        range(0, points.shape[0], chunk_size),
-        desc="Applying worst-team tiebreakers",
-        unit="chunk",
-    ):
-        stop = min(start + chunk_size, points.shape[0])
-        chunk_points = points[start:stop]
-        chunk_goals_for = goals_for[start:stop]
-        chunk_goal_difference = goal_difference[start:stop]
+    min_points = points.min(axis=1)
+    point_candidates = points == min_points[:, np.newaxis]
+    point_tie_counts = point_candidates.sum(axis=1)
+    unique_worst_on_points = point_candidates & (point_tie_counts[:, np.newaxis] == 1)
+    worst_counts += unique_worst_on_points.sum(axis=0)
 
-        min_points = chunk_points.min(axis=1)
-        point_candidates = chunk_points == min_points[:, np.newaxis]
+    candidate_goal_difference = np.where(
+        point_candidates,
+        goal_difference,
+        sentinel,
+    )
+    min_goal_difference = candidate_goal_difference.min(axis=1)
+    goal_difference_candidates = point_candidates & (
+        goal_difference == min_goal_difference[:, np.newaxis]
+    )
+    goal_difference_tie_counts = goal_difference_candidates.sum(axis=1)
+    unique_worst_on_goal_difference = (
+        goal_difference_candidates
+        & (point_tie_counts[:, np.newaxis] > 1)
+        & (goal_difference_tie_counts[:, np.newaxis] == 1)
+    )
+    worst_counts += unique_worst_on_goal_difference.sum(axis=0)
 
-        candidate_goal_difference = np.where(
-            point_candidates,
-            chunk_goal_difference,
-            sentinel,
-        )
-        min_goal_difference = candidate_goal_difference.min(axis=1)
-        goal_difference_candidates = point_candidates & (
-            chunk_goal_difference == min_goal_difference[:, np.newaxis]
-        )
+    candidate_goals_for = np.where(
+        goal_difference_candidates,
+        goals_for,
+        sentinel,
+    )
+    min_goals_for = candidate_goals_for.min(axis=1)
+    worst_candidates = goal_difference_candidates & (
+        goals_for == min_goals_for[:, np.newaxis]
+    )
+    goals_for_tie_counts = worst_candidates.sum(axis=1)
+    unique_worst_on_goals_for = (
+        worst_candidates
+        & (goal_difference_tie_counts[:, np.newaxis] > 1)
+        & (goals_for_tie_counts[:, np.newaxis] == 1)
+    )
+    worst_counts += unique_worst_on_goals_for.sum(axis=0)
 
-        candidate_goals_for = np.where(
-            goal_difference_candidates,
-            chunk_goals_for,
-            sentinel,
-        )
-        min_goals_for = candidate_goals_for.min(axis=1)
-        worst_candidates = goal_difference_candidates & (
-            chunk_goals_for == min_goals_for[:, np.newaxis]
-        )
-
-        tie_counts = worst_candidates.sum(axis=1)
-        worst_counts += (worst_candidates / tie_counts[:, np.newaxis]).sum(axis=0)
+    unresolved_ties = (
+        worst_candidates
+        & (goal_difference_tie_counts[:, np.newaxis] > 1)
+        & (goals_for_tie_counts[:, np.newaxis] > 1)
+    )
+    simulation_indexes, team_indexes = np.nonzero(unresolved_ties)
+    np.add.at(
+        worst_counts,
+        team_indexes,
+        1 / goals_for_tie_counts[simulation_indexes],
+    )
 
     return worst_counts
 
