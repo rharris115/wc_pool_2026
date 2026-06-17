@@ -34,6 +34,7 @@ TEAM_ALIASES = {
 @dataclass(frozen=True)
 class PoolResources:
     entrants: dict[str, list[str]]
+    entrant_abbreviations: dict[str, str]
     team_emojis: dict[str, str]
 
 
@@ -47,9 +48,48 @@ def write_text_output(path: Path, text: str) -> None:
     path.write_text(f"{text.rstrip()}\n", encoding="utf-8")
 
 
+def parse_entrants(
+    entrants_config: dict[str, list[str] | dict[str, object]],
+) -> tuple[dict[str, list[str]], dict[str, str]]:
+    entrants = {}
+    entrant_abbreviations = {}
+
+    for person, entrant_config in entrants_config.items():
+        if isinstance(entrant_config, list):
+            teams = entrant_config
+            abbreviation = person
+        elif isinstance(entrant_config, dict):
+            teams = entrant_config.get("teams")
+            abbreviation = entrant_config.get("abbreviation", person)
+        else:
+            raise TypeError(
+                f"Invalid entrant config for {person}: expected list or object"
+            )
+
+        if not isinstance(teams, list) or not all(
+            isinstance(team, str) for team in teams
+        ):
+            raise TypeError(f"Invalid teams for {person}: expected a list of strings")
+
+        if not isinstance(abbreviation, str) or not abbreviation.strip():
+            raise TypeError(
+                f"Invalid abbreviation for {person}: expected a non-empty string"
+            )
+
+        entrants[person] = teams
+        entrant_abbreviations[person] = abbreviation
+
+    return entrants, entrant_abbreviations
+
+
 def load_pool_resources(config_dir: Path) -> PoolResources:
+    entrants, entrant_abbreviations = parse_entrants(
+        load_json(config_dir / "entrants.json")
+    )
+
     return PoolResources(
-        entrants=load_json(config_dir / "entrants.json"),
+        entrants=entrants,
+        entrant_abbreviations=entrant_abbreviations,
         team_emojis=load_json(config_dir / "team_emojis.json"),
     )
 

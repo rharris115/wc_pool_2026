@@ -45,21 +45,6 @@ CHART_COLORS = [
     "#3f6212",
 ]
 
-ENTRANT_MARKERS = [
-    "◆",
-    "●",
-    "▲",
-    "■",
-    "✦",
-    "✚",
-    "✕",
-    "✹",
-    "◇",
-    "○",
-    "△",
-    "□",
-]
-
 SVG_CHART_STYLE = """
   .chart-title {
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
@@ -162,17 +147,17 @@ def load_entrant_history(resources_path: Path) -> pd.DataFrame:
         third_prize = pd.read_csv(third_prize_file)
         require_columns(
             df=first_prize,
-            columns={"person", "probability_pct"},
+            columns={"rank", "person", "probability_pct", "teams"},
             source=first_prize_file,
         )
         require_columns(
             df=third_prize,
-            columns={"person", "probability_pct"},
+            columns={"rank", "person", "probability_pct", "teams"},
             source=third_prize_file,
         )
 
-        merged = first_prize[["person", "probability_pct"]].merge(
-            third_prize[["person", "probability_pct"]],
+        merged = first_prize[["rank", "person", "probability_pct", "teams"]].merge(
+            third_prize[["rank", "person", "probability_pct", "teams"]],
             on="person",
             suffixes=("_first_prize", "_third_prize"),
             validate="one_to_one",
@@ -184,18 +169,22 @@ def load_entrant_history(resources_path: Path) -> pd.DataFrame:
                     "match_day": snapshot["match_day"],
                     "snapshot_date": snapshot["snapshot_date"],
                     "person": entrant["person"],
+                    "first_prize_rank": entrant["rank_first_prize"],
                     "first_prize_probability": parse_probability_pct(
                         entrant["probability_pct_first_prize"]
                     ),
                     "first_prize_probability_pct": entrant[
                         "probability_pct_first_prize"
                     ],
+                    "first_prize_teams": entrant["teams_first_prize"],
+                    "third_prize_rank": entrant["rank_third_prize"],
                     "third_prize_probability": parse_probability_pct(
                         entrant["probability_pct_third_prize"]
                     ),
                     "third_prize_probability_pct": entrant[
                         "probability_pct_third_prize"
                     ],
+                    "third_prize_teams": entrant["teams_third_prize"],
                 }
             )
 
@@ -273,6 +262,54 @@ def nice_axis_max(max_value: float) -> float:
     return 1.0
 
 
+def build_team_color_map(team_history: pd.DataFrame) -> dict[str, str]:
+    color_map = {}
+
+    for index, team_display in enumerate(sorted(team_history["team_display"].unique())):
+        team = str(team_display).split(" ", maxsplit=1)[-1]
+        color_map[team] = CHART_COLORS[index % len(CHART_COLORS)]
+
+    return color_map
+
+
+def render_colored_team_detail(
+    detail: str,
+    team_color_map: dict[str, str] | None,
+) -> str:
+    if not team_color_map:
+        return escape(detail)
+
+    matches = list(
+        re.finditer(r"(?:^|\s*\|\s*|\s+)(.+?\([0-9.]+%\))", detail)
+    )
+
+    if not matches:
+        return escape(detail)
+
+    elements = []
+    position = 0
+    teams_by_length = sorted(team_color_map, key=len, reverse=True)
+
+    for match in matches:
+        chunk = match.group(1)
+        team = next((team for team in teams_by_length if team in chunk), None)
+
+        elements.append(escape(detail[position : match.start(1)]))
+
+        if team is None:
+            elements.append(escape(chunk))
+        else:
+            elements.append(
+                f'<tspan fill="{team_color_map[team]}">{escape(chunk)}</tspan>'
+            )
+
+        position = match.end(1)
+
+    elements.append(escape(detail[position:]))
+
+    return "".join(elements)
+
+
 def build_svg_line_chart(
     df: pd.DataFrame,
     entity_column: str,
@@ -280,12 +317,15 @@ def build_svg_line_chart(
     title: str,
     marker_column: str,
     label_column: str | None = None,
+    label_detail_column: str | None = None,
+    label_detail_color_map: dict[str, str] | None = None,
+    show_label_marker: bool = False,
     show_label_rank: bool = True,
 ) -> str:
-    width = 1160
+    width = 1800
     height = 940
     margin_left = 62
-    margin_right = 390
+    margin_right = 1030
     margin_top = 42
     margin_bottom = 56
     plot_width = width - margin_left - margin_right
@@ -372,6 +412,11 @@ def build_svg_line_chart(
         label = str(
             entity_rows[label_column].iloc[0] if label_column is not None else entity
         )
+        label_detail = (
+            str(entity_rows[label_detail_column].iloc[-1])
+            if label_detail_column is not None
+            else None
+        )
         points = [
             (
                 f"{x_for_day(int(row.match_day)):.1f},"
@@ -402,10 +447,12 @@ def build_svg_line_chart(
             {
                 "label": label,
                 "color": color,
+                "marker": marker,
                 "point_x": x_for_day(int(final_row["match_day"])),
                 "point_y": y_for_value(float(final_row[value_column])),
                 "latest_value": float(final_row[value_column]),
                 "arrowhead_id": arrowhead_ids[color],
+                "label_detail": label_detail,
             }
         )
 
@@ -431,6 +478,16 @@ def build_svg_line_chart(
         rank = index + 1
         prefix = medal_prefixes.get(rank, f"{rank}.")
         label_text = f"{prefix} {item['label']}" if show_label_rank else item["label"]
+        if show_label_marker:
+            label_text = f"{prefix} {item['marker']} {item['label']}"
+        label_content = escape(label_text)
+
+        if item["label_detail"]:
+            label_content += " -&gt; " + render_colored_team_detail(
+                detail=str(item["label_detail"]),
+                team_color_map=label_detail_color_map,
+            )
+
         elements.append(
             f'<path class="label-connector" '
             f'd="M {label_x - 10:.1f} {item["label_y"]:.1f} '
@@ -441,7 +498,7 @@ def build_svg_line_chart(
         elements.append(
             f'<text class="series-label" x="{label_x:.1f}" '
             f'y="{item["label_y"]:.1f}" fill="{item["color"]}" '
-            f'dominant-baseline="central">{escape(label_text)}</text>'
+            f'dominant-baseline="central">{label_content}</text>'
         )
 
     elements.append("</svg>")
@@ -457,18 +514,17 @@ def build_svg_line_chart(
 def build_html(
     entrant_history: pd.DataFrame,
     team_history: pd.DataFrame,
+    resources: PoolResources,
 ) -> str:
-    people = sorted(entrant_history["person"].unique())
-    entrant_marker_map = {
-        person: ENTRANT_MARKERS[index % len(ENTRANT_MARKERS)]
-        for index, person in enumerate(people)
-    }
     entrant_history = entrant_history.assign(
-        marker=entrant_history["person"].map(entrant_marker_map)
+        marker=entrant_history["person"].map(
+            lambda person: resources.entrant_abbreviations.get(person, person)
+        )
     )
     team_history = team_history.assign(
         marker=team_history["team_display"].str.split(" ", n=1).str[0]
     )
+    team_color_map = build_team_color_map(team_history)
     latest_day = int(entrant_history["match_day"].max())
     latest_snapshot = entrant_history[entrant_history["match_day"] == latest_day][
         "snapshot_date"
@@ -480,6 +536,9 @@ def build_html(
         value_column="first_prize_probability",
         title="Entrant 1st Prize Probability",
         marker_column="marker",
+        label_detail_column="first_prize_teams",
+        label_detail_color_map=team_color_map,
+        show_label_marker=True,
     )
     entrant_third = build_svg_line_chart(
         df=entrant_history,
@@ -487,6 +546,9 @@ def build_html(
         value_column="third_prize_probability",
         title="Entrant 3rd Prize Probability",
         marker_column="marker",
+        label_detail_column="third_prize_teams",
+        label_detail_color_map=team_color_map,
+        show_label_marker=True,
     )
     team_champion = build_svg_line_chart(
         df=team_history,
@@ -533,7 +595,7 @@ def build_html(
     }}
 
     main {{
-      max-width: 980px;
+      max-width: 1450px;
       margin: 0 auto;
       padding: 28px 20px 40px;
     }}
@@ -577,7 +639,7 @@ def build_html(
     svg {{
       display: block;
       width: 100%;
-      min-width: 760px;
+      min-width: 1600px;
       height: auto;
     }}
 
@@ -693,6 +755,7 @@ def build_leader_table_visualisations(resources_path: Path) -> tuple[Path, Path,
         build_html(
             entrant_history=entrant_history,
             team_history=team_history,
+            resources=resources,
         ),
         encoding="utf-8",
     )
