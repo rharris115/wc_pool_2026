@@ -1,37 +1,37 @@
 *🥉 WORLD CUP SWEEPSTAKE – 3RD PRIZE MONTE CARLO*
 
-🥇 *Neal* (60.06%)
-🇦🇷 Argentina (0.00%) | 🇸🇳 Senegal (0.12%) | 🇨🇿 Czechia (0.06%) | 🇨🇼 Curaçao (59.88%)
+🥇 *Neal* (59.34%)
+🇦🇷 Argentina (0.00%) | 🇸🇳 Senegal (0.11%) | 🇨🇿 Czechia (0.12%) | 🇨🇼 Curaçao (59.11%)
 
-🥈 *Ameenesh* (14.38%)
-🇭🇷 Croatia (0.03%) | 🇰🇷 South Korea (0.03%) | 🇧🇦 Bosnia & Herzegovina (0.07%) | 🇮🇶 Iraq (14.25%)
+🥈 *Ameenesh* (13.65%)
+🇭🇷 Croatia (0.03%) | 🇰🇷 South Korea (0.00%) | 🇧🇦 Bosnia & Herzegovina (0.00%) | 🇮🇶 Iraq (13.62%)
 
-🥉 *Robby* (9.78%)
-🇳🇱 Netherlands (0.00%) | 🇹🇷 Türkiye (0.04%) | 🇹🇳 Tunisia (9.74%) | 🇸🇦 Saudi Arabia (0.00%)
+🥉 *Robby* (9.52%)
+🇳🇱 Netherlands (0.00%) | 🇹🇷 Türkiye (0.23%) | 🇹🇳 Tunisia (9.28%) | 🇸🇦 Saudi Arabia (0.00%)
 
-4 *Aman M* (4.74%)
-🇩🇪 Germany (0.00%) | 🇺🇸 USA (0.02%) | 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (0.56%) | 🇯🇴 Jordan (4.15%)
+4 *Aman L* (6.17%)
+🇧🇪 Belgium (0.00%) | 🇪🇨 Ecuador (0.06%) | 🇦🇺 Australia (0.00%) | 🇭🇹 Haiti (6.10%)
 
-5 *Aman L* (3.97%)
-🇧🇪 Belgium (0.00%) | 🇪🇨 Ecuador (0.07%) | 🇦🇺 Australia (0.25%) | 🇭🇹 Haiti (3.65%)
+5 *Aman M* (3.87%)
+🇩🇪 Germany (0.00%) | 🇺🇸 USA (0.00%) | 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (0.00%) | 🇯🇴 Jordan (3.87%)
 
-6 *Julie* (2.13%)
-🇫🇷 France (0.00%) | 🇨🇮 Ivory Coast (0.00%) | 🇵🇾 Paraguay (0.07%) | 🇺🇿 Uzbekistan (2.06%)
+6 *Julie* (2.54%)
+🇫🇷 France (0.00%) | 🇨🇮 Ivory Coast (0.00%) | 🇵🇾 Paraguay (0.59%) | 🇺🇿 Uzbekistan (1.95%)
 
-7 *Swati* (1.41%)
-🇵🇹 Portugal (0.00%) | 🇦🇹 Austria (0.00%) | 🇸🇪 Sweden (0.00%) | 🇵🇦 Panama (1.41%)
+7 *Nikesh* (1.63%)
+🇨🇴 Colombia (0.01%) | 🇨🇭 Switzerland (0.00%) | 🇮🇷 Iran (0.00%) | 🇿🇦 South Africa (1.62%)
 
-8 *Seema V* (1.34%)
-🇲🇦 Morocco (0.01%) | 🇳🇴 Norway (0.00%) | 🇩🇿 Algeria (0.33%) | 🇨🇩 DR Congo (1.00%)
+8 *Swati* (1.33%)
+🇵🇹 Portugal (0.00%) | 🇦🇹 Austria (0.00%) | 🇸🇪 Sweden (0.00%) | 🇵🇦 Panama (1.33%)
 
-9 *Amar* (1.01%)
-🇧🇷 Brazil (0.00%) | 🇲🇽 Mexico (0.01%) | 🇨🇦 Canada (0.02%) | 🇶🇦 Qatar (0.98%)
+9 *Seema V* (1.24%)
+🇲🇦 Morocco (0.00%) | 🇳🇴 Norway (0.00%) | 🇩🇿 Algeria (0.30%) | 🇨🇩 DR Congo (0.94%)
 
-10 *Anila* (0.75%)
-🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (0.00%) | 🇺🇾 Uruguay (0.00%) | 🇬🇭 Ghana (0.75%) | 🇨🇻 Cape Verde (0.00%)
+10 *Anila* (0.71%)
+🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (0.00%) | 🇺🇾 Uruguay (0.00%) | 🇬🇭 Ghana (0.70%) | 🇨🇻 Cape Verde (0.00%)
 
-11 *Nikesh* (0.43%)
-🇨🇴 Colombia (0.01%) | 🇨🇭 Switzerland (0.01%) | 🇮🇷 Iran (0.00%) | 🇿🇦 South Africa (0.41%)
+11 *Amar* (0.00%)
+🇧🇷 Brazil (0.00%) | 🇲🇽 Mexico (0.00%) | 🇨🇦 Canada (0.00%) | 🇶🇦 Qatar (0.00%)
 
 12 *Chirag* (0.00%)
 🇪🇸 Spain (0.00%) | 🇯🇵 Japan (0.00%) | 🇪🇬 Egypt (0.00%) | 🇳🇿 New Zealand (0.00%)

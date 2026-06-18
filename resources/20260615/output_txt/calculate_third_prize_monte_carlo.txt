@@ -1,39 +1,39 @@
 *🥉 WORLD CUP SWEEPSTAKE – 3RD PRIZE MONTE CARLO*
 
-🥇 *Neal* (56.11%)
-🇦🇷 Argentina (0.00%) | 🇸🇳 Senegal (0.16%) | 🇨🇿 Czechia (0.08%) | 🇨🇼 Curaçao (55.88%)
+🥇 *Neal* (55.98%)
+🇦🇷 Argentina (0.00%) | 🇸🇳 Senegal (0.15%) | 🇨🇿 Czechia (0.13%) | 🇨🇼 Curaçao (55.70%)
 
-🥈 *Robby* (11.93%)
-🇳🇱 Netherlands (0.00%) | 🇹🇷 Türkiye (0.27%) | 🇹🇳 Tunisia (9.34%) | 🇸🇦 Saudi Arabia (2.33%)
+🥈 *Robby* (11.70%)
+🇳🇱 Netherlands (0.00%) | 🇹🇷 Türkiye (0.25%) | 🇹🇳 Tunisia (9.19%) | 🇸🇦 Saudi Arabia (2.27%)
 
-🥉 *Ameenesh* (9.05%)
-🇭🇷 Croatia (0.03%) | 🇰🇷 South Korea (0.04%) | 🇧🇦 Bosnia & Herzegovina (0.00%) | 🇮🇶 Iraq (8.97%)
+🥉 *Ameenesh* (8.85%)
+🇭🇷 Croatia (0.03%) | 🇰🇷 South Korea (0.00%) | 🇧🇦 Bosnia & Herzegovina (0.00%) | 🇮🇶 Iraq (8.82%)
 
-4 *Aman L* (6.79%)
-🇧🇪 Belgium (0.00%) | 🇪🇨 Ecuador (0.07%) | 🇦🇺 Australia (0.00%) | 🇭🇹 Haiti (6.72%)
+4 *Aman L* (6.59%)
+🇧🇪 Belgium (0.00%) | 🇪🇨 Ecuador (0.07%) | 🇦🇺 Australia (0.00%) | 🇭🇹 Haiti (6.52%)
 
-5 *Aman M* (4.97%)
-🇩🇪 Germany (0.00%) | 🇺🇸 USA (0.00%) | 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (0.00%) | 🇯🇴 Jordan (4.97%)
+5 *Aman M* (4.84%)
+🇩🇪 Germany (0.00%) | 🇺🇸 USA (0.00%) | 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (0.00%) | 🇯🇴 Jordan (4.84%)
 
-6 *Anila* (3.47%)
-🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (0.00%) | 🇺🇾 Uruguay (0.02%) | 🇬🇭 Ghana (0.68%) | 🇨🇻 Cape Verde (2.77%)
+6 *Anila* (3.40%)
+🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (0.00%) | 🇺🇾 Uruguay (0.02%) | 🇬🇭 Ghana (0.66%) | 🇨🇻 Cape Verde (2.72%)
 
-7 *Julie* (2.53%)
-🇫🇷 France (0.00%) | 🇨🇮 Ivory Coast (0.00%) | 🇵🇾 Paraguay (0.65%) | 🇺🇿 Uzbekistan (1.87%)
+7 *Julie* (2.45%)
+🇫🇷 France (0.00%) | 🇨🇮 Ivory Coast (0.00%) | 🇵🇾 Paraguay (0.61%) | 🇺🇿 Uzbekistan (1.84%)
 
-8 *Swati* (1.66%)
-🇵🇹 Portugal (0.00%) | 🇦🇹 Austria (0.05%) | 🇸🇪 Sweden (0.00%) | 🇵🇦 Panama (1.61%)
+8 *Nikesh* (1.92%)
+🇨🇴 Colombia (0.01%) | 🇨🇭 Switzerland (0.00%) | 🇮🇷 Iran (0.23%) | 🇿🇦 South Africa (1.69%)
 
-9 *Chirag* (1.53%)
-🇪🇸 Spain (0.00%) | 🇯🇵 Japan (0.00%) | 🇪🇬 Egypt (0.09%) | 🇳🇿 New Zealand (1.44%)
+9 *Swati* (1.60%)
+🇵🇹 Portugal (0.00%) | 🇦🇹 Austria (0.04%) | 🇸🇪 Sweden (0.00%) | 🇵🇦 Panama (1.55%)
 
-10 *Seema V* (1.25%)
-🇲🇦 Morocco (0.00%) | 🇳🇴 Norway (0.02%) | 🇩🇿 Algeria (0.19%) | 🇨🇩 DR Congo (1.04%)
+10 *Chirag* (1.46%)
+🇪🇸 Spain (0.00%) | 🇯🇵 Japan (0.00%) | 🇪🇬 Egypt (0.08%) | 🇳🇿 New Zealand (1.38%)
 
-11 *Nikesh* (0.69%)
-🇨🇴 Colombia (0.01%) | 🇨🇭 Switzerland (0.00%) | 🇮🇷 Iran (0.25%) | 🇿🇦 South Africa (0.43%)
+11 *Seema V* (1.22%)
+🇲🇦 Morocco (0.00%) | 🇳🇴 Norway (0.02%) | 🇩🇿 Algeria (0.18%) | 🇨🇩 DR Congo (1.02%)
 
-12 *Amar* (0.02%)
-🇧🇷 Brazil (0.00%) | 🇲🇽 Mexico (0.01%) | 🇨🇦 Canada (0.00%) | 🇶🇦 Qatar (0.00%)
+12 *Amar* (0.00%)
+🇧🇷 Brazil (0.00%) | 🇲🇽 Mexico (0.00%) | 🇨🇦 Canada (0.00%) | 🇶🇦 Qatar (0.00%)
 
 Criterion: Your teams include the worst group-stage team, ranked by lowest points, worst goal difference, then fewest goals for. Ties are split equally.
