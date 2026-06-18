@@ -335,9 +335,9 @@ def build_match_histogram_svg(
         '<div class="stats">'
         f"<span>xG {match.team_xg:.2f}-{match.opponent_xg:.2f}</span>"
         f"<span>Mean GD {expected:+.2f}</span>"
-        f"<span>{escape(match.team)} {team_win_probability * 100:.0f}%</span>"
+        f"<span>{escape(negative_label)} {opponent_win_probability * 100:.0f}%</span>"
         f"<span>Draw {draw_probability * 100:.0f}%</span>"
-        f"<span>{escape(match.opponent)} {opponent_win_probability * 100:.0f}%</span>"
+        f"<span>{escape(positive_label)} {team_win_probability * 100:.0f}%</span>"
         "</div>"
         "</article>"
     )

@@ -279,9 +279,7 @@ def render_colored_team_detail(
     if not team_color_map:
         return escape(detail)
 
-    matches = list(
-        re.finditer(r"(?:^|\s*\|\s*|\s+)(.+?\([0-9.]+%\))", detail)
-    )
+    matches = list(re.finditer(r"(?:^|\s*\|\s*|\s+)(.+?\([0-9.]+%\))", detail))
 
     if not matches:
         return escape(detail)
@@ -321,6 +319,7 @@ def build_svg_line_chart(
     label_detail_color_map: dict[str, str] | None = None,
     show_label_marker: bool = False,
     show_label_rank: bool = True,
+    show_label_value: bool = False,
 ) -> str:
     width = 1800
     height = 940
@@ -480,10 +479,12 @@ def build_svg_line_chart(
         label_text = f"{prefix} {item['label']}" if show_label_rank else item["label"]
         if show_label_marker:
             label_text = f"{prefix} {item['marker']} {item['label']}"
+        if show_label_value:
+            label_text = f"{label_text} ({item['latest_value'] * 100:.2f}%)"
         label_content = escape(label_text)
 
         if item["label_detail"]:
-            label_content += " -&gt; " + render_colored_team_detail(
+            label_content += " → " + render_colored_team_detail(
                 detail=str(item["label_detail"]),
                 team_color_map=label_detail_color_map,
             )
@@ -539,6 +540,7 @@ def build_html(
         label_detail_column="first_prize_teams",
         label_detail_color_map=team_color_map,
         show_label_marker=True,
+        show_label_value=True,
     )
     entrant_third = build_svg_line_chart(
         df=entrant_history,
@@ -549,6 +551,7 @@ def build_html(
         label_detail_column="third_prize_teams",
         label_detail_color_map=team_color_map,
         show_label_marker=True,
+        show_label_value=True,
     )
     team_champion = build_svg_line_chart(
         df=team_history,

@@ -1,13 +1,13 @@
 {
   "Amar": {"teams": ["Brazil", "Mexico", "Canada", "Qatar"], "abbreviation": "\uD83C\uDFA7"},
-  "Chirag": {"teams": ["Spain", "Japan", "Egypt", "New Zealand"], "abbreviation": "C"},
+  "Chirag": {"teams": ["Spain", "Japan", "Egypt", "New Zealand"], "abbreviation": "\uD83C\uDFCD\uFE0F"},
   "Nikesh": {"teams": ["Colombia", "Switzerland", "Iran", "South Africa"], "abbreviation": "\uD83E\uDEE1"},
   "Aman M": {"teams": ["Germany", "USA", "Scotland", "Jordan"], "abbreviation": "\uD83E\uDDEE"},
   "Anila": {"teams": ["England", "Uruguay", "Ghana", "Cape Verde"], "abbreviation": "☕"},
   "Swati": {"teams": ["Portugal", "Austria", "Sweden", "Panama"], "abbreviation": "✈\uFE0F"},
-  "Ameenesh": {"teams": ["Croatia", "South Korea", "Bosnia & Herzegovina", "Iraq"], "abbreviation": "AS"},
+  "Ameenesh": {"teams": ["Croatia", "South Korea", "Bosnia & Herzegovina", "Iraq"], "abbreviation": "\uD83E\uDDD8\uD83C\uDFFD\u200D♂\uFE0F"},
   "Aman L": {"teams": ["Belgium", "Ecuador", "Australia", "Haiti"], "abbreviation": "\uD83C\uDFCE\uFE0F"},
-  "Seema V": {"teams": ["Morocco", "Norway", "Algeria", "DR Congo"], "abbreviation": "SV"},
+  "Seema V": {"teams": ["Morocco", "Norway", "Algeria", "DR Congo"], "abbreviation": "\uD83D\uDC85"},
   "Neal": {"teams": ["Argentina", "Senegal", "Czechia", "Curaçao"], "abbreviation": "\uD83E\uDD8A"},
   "Robby": {"teams": ["Netherlands", "Türkiye", "Tunisia", "Saudi Arabia"], "abbreviation": "\uD83D\uDC0F"},
   "Julie": {"teams": ["France", "Ivory Coast", "Paraguay", "Uzbekistan"], "abbreviation": "\uD83E\uDD20"}
