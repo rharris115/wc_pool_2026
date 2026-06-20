@@ -1,4 +1,5 @@
 from html import escape
+import math
 import re
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from wc_pool_2026.viz_common import (
 ENTRANT_HISTORY_FILE = "leader_table_entrant_history.csv"
 TEAM_HISTORY_FILE = "leader_table_team_history.csv"
 HTML_FILE = "leader_table_visualisations.html"
+ENTROPY_HTML_FILE = "prize_probability_entropy.html"
 
 CHART_COLORS = [
     "#2563eb",
@@ -260,6 +262,49 @@ def nice_axis_max(max_value: float) -> float:
     if max_value <= 0.75:
         return 0.75
     return 1.0
+
+
+def probability_entropy(probabilities: pd.Series) -> float:
+    cleaned = pd.to_numeric(probabilities, errors="coerce").fillna(0)
+
+    if (cleaned < 0).any():
+        raise ValueError("Cannot calculate entropy for negative probabilities")
+
+    total = float(cleaned.sum())
+    if total <= 0:
+        return 0.0
+
+    normalised = cleaned / total
+
+    return -sum(
+        probability * math.log2(probability)
+        for probability in normalised
+        if probability > 0
+    )
+
+
+def build_entropy_history(entrant_history: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+
+    for (match_day, snapshot_date), group in entrant_history.groupby(
+        ["match_day", "snapshot_date"],
+        sort=True,
+    ):
+        first_prize_entropy = probability_entropy(group["first_prize_probability"])
+        third_prize_entropy = probability_entropy(group["third_prize_probability"])
+
+        rows.append(
+            {
+                "match_day": int(match_day),
+                "snapshot_date": str(snapshot_date),
+                "first_prize_entropy": first_prize_entropy,
+                "third_prize_entropy": third_prize_entropy,
+                "first_prize_effective_entrants": 2**first_prize_entropy,
+                "third_prize_effective_entrants": 2**third_prize_entropy,
+            }
+        )
+
+    return pd.DataFrame(rows).sort_values("match_day").reset_index(drop=True)
 
 
 def build_team_color_map(team_history: pd.DataFrame) -> dict[str, str]:
@@ -512,6 +557,405 @@ def build_svg_line_chart(
     )
 
 
+def build_two_series_svg(
+    history: pd.DataFrame,
+    title: str,
+    y_unit: str,
+    first_column: str,
+    third_column: str,
+    first_label: str,
+    third_label: str,
+    value_format: str,
+    axis_max: float | None = None,
+) -> str:
+    width = 1180
+    height = 620
+    margin_left = 72
+    margin_right = 170
+    margin_top = 48
+    margin_bottom = 62
+    plot_width = width - margin_left - margin_right
+    plot_height = height - margin_top - margin_bottom
+    days = sorted(history["match_day"].unique())
+    max_value = max(
+        float(history[first_column].max()),
+        float(history[third_column].max()),
+    )
+    y_axis_max = axis_max or max(1.0, math.ceil(max_value * 10) / 10)
+    series = [
+        {
+            "label": first_label,
+            "column": first_column,
+            "color": "#2563eb",
+        },
+        {
+            "label": third_label,
+            "column": third_column,
+            "color": "#dc2626",
+        },
+    ]
+
+    def x_for_day(match_day: int) -> float:
+        if len(days) == 1:
+            return margin_left + plot_width / 2
+
+        return margin_left + ((match_day - days[0]) / (days[-1] - days[0])) * plot_width
+
+    def y_for_value(value: float) -> float:
+        return margin_top + plot_height - (value / y_axis_max) * plot_height
+
+    elements = [
+        f'<svg viewBox="0 0 {width} {height}" role="img" '
+        f'aria-label="{escape(title)}">',
+        f"<style>{SVG_CHART_STYLE}</style>",
+        f'<text class="chart-title" x="{margin_left}" y="28">{escape(title)}</text>',
+    ]
+
+    for tick in range(6):
+        value = y_axis_max * tick / 5
+        y = y_for_value(value)
+        elements.append(
+            f'<line class="grid-line" x1="{margin_left}" y1="{y:.1f}" '
+            f'x2="{width - margin_right}" y2="{y:.1f}" />'
+        )
+        elements.append(
+            f'<text class="axis-label" x="{margin_left - 10}" y="{y + 4:.1f}" '
+            f'text-anchor="end">{value_format.format(value)} {escape(y_unit)}</text>'
+        )
+
+    for day in days:
+        x = x_for_day(day)
+        elements.append(
+            f'<line class="grid-line" x1="{x:.1f}" y1="{margin_top}" '
+            f'x2="{x:.1f}" y2="{height - margin_bottom}" />'
+        )
+        elements.append(
+            f'<text class="axis-label" x="{x:.1f}" y="{height - 22}" '
+            f'text-anchor="middle">MD{day}</text>'
+        )
+
+    elements.append(
+        f'<line class="axis-line" x1="{margin_left}" y1="{height - margin_bottom}" '
+        f'x2="{width - margin_right}" y2="{height - margin_bottom}" />'
+    )
+    elements.append(
+        f'<line class="axis-line" x1="{margin_left}" y1="{margin_top}" '
+        f'x2="{margin_left}" y2="{height - margin_bottom}" />'
+    )
+
+    legend_x = width - margin_right + 24
+    legend_y = margin_top + 24
+
+    for index, item in enumerate(series):
+        column = str(item["column"])
+        color = str(item["color"])
+        label = str(item["label"])
+        points = [
+            (
+                f"{x_for_day(int(row.match_day)):.1f},"
+                f"{y_for_value(float(getattr(row, column))):.1f}"
+            )
+            for row in history.itertuples()
+        ]
+        latest = history.iloc[-1]
+        latest_value = float(latest[column])
+
+        elements.append(
+            f'<polyline class="series-line" points="{" ".join(points)}" '
+            f'stroke="{color}" />'
+        )
+
+        for row in history.itertuples():
+            value = float(getattr(row, column))
+            elements.append(
+                f'<circle cx="{x_for_day(int(row.match_day)):.1f}" '
+                f'cy="{y_for_value(value):.1f}" r="4.2" fill="{color}">'
+                f"<title>{escape(label)}: {value_format.format(value)} "
+                f"{escape(y_unit)} on "
+                f"MD{int(row.match_day)}</title></circle>"
+            )
+
+        item_y = legend_y + index * 46
+        elements.extend(
+            [
+                f'<line x1="{legend_x}" y1="{item_y}" '
+                f'x2="{legend_x + 24}" y2="{item_y}" stroke="{color}" '
+                'stroke-width="3" stroke-linecap="round" />',
+                f'<text class="series-label" x="{legend_x + 34}" '
+                f'y="{item_y}" fill="{color}" dominant-baseline="central">'
+                f'{escape(label)}</text>',
+                f'<text class="axis-label" x="{legend_x + 34}" '
+                f'y="{item_y + 18}" dominant-baseline="central">'
+                f'Latest {value_format.format(latest_value)} '
+                f'{escape(y_unit)}</text>',
+            ]
+        )
+
+    elements.append("</svg>")
+
+    latest = history.iloc[-1]
+    stats = (
+        '<div class="stats">'
+        f'<span>Latest snapshot {escape(str(latest["snapshot_date"]))}</span>'
+        f'<span>{escape(first_label)} {value_format.format(float(latest[first_column]))} {escape(y_unit)}</span>'
+        f'<span>{escape(third_label)} {value_format.format(float(latest[third_column]))} {escape(y_unit)}</span>'
+        "</div>"
+    )
+
+    return (
+        '<div class="chart-block">'
+        + copy_chart_button(label=title)
+        + "".join(elements)
+        + stats
+        + "</div>"
+    )
+
+
+def build_entropy_svg(entropy_history: pd.DataFrame) -> str:
+    return build_two_series_svg(
+        history=entropy_history,
+        title="Prize Probability Entropy",
+        y_unit="bits",
+        first_column="first_prize_entropy",
+        third_column="third_prize_entropy",
+        first_label="1st Prize",
+        third_label="3rd Prize",
+        value_format="{:.2f}",
+    )
+
+
+def build_effective_entrants_svg(entropy_history: pd.DataFrame) -> str:
+    return build_two_series_svg(
+        history=entropy_history,
+        title="Effective Entrants",
+        y_unit="entrants",
+        first_column="first_prize_effective_entrants",
+        third_column="third_prize_effective_entrants",
+        first_label="1st Prize",
+        third_label="3rd Prize",
+        value_format="{:.1f}",
+    )
+
+
+def build_entropy_table(entropy_history: pd.DataFrame) -> str:
+    rows = []
+
+    for row in entropy_history.itertuples():
+        rows.append(
+            "<tr>"
+            f"<td>MD{int(row.match_day)}</td>"
+            f"<td>{escape(str(row.snapshot_date))}</td>"
+            f"<td>{float(row.first_prize_entropy):.3f}</td>"
+            f"<td>{float(row.third_prize_entropy):.3f}</td>"
+            f"<td>{float(row.first_prize_effective_entrants):.1f}</td>"
+            f"<td>{float(row.third_prize_effective_entrants):.1f}</td>"
+            "</tr>"
+        )
+
+    return (
+        '<div class="table-wrap">'
+        "<table>"
+        "<thead>"
+        "<tr>"
+        "<th>Match Day</th>"
+        "<th>Snapshot</th>"
+        "<th>1st Prize Entropy</th>"
+        "<th>3rd Prize Entropy</th>"
+        "<th>1st Effective Entrants</th>"
+        "<th>3rd Effective Entrants</th>"
+        "</tr>"
+        "</thead>"
+        f"<tbody>{''.join(rows)}</tbody>"
+        "</table>"
+        "</div>"
+    )
+
+
+def build_entropy_html(entropy_history: pd.DataFrame) -> str:
+    latest_day = int(entropy_history["match_day"].max())
+    latest_snapshot = entropy_history[entropy_history["match_day"] == latest_day][
+        "snapshot_date"
+    ].iloc[0]
+    entropy_chart = build_entropy_svg(entropy_history)
+    effective_entrants_chart = build_effective_entrants_svg(entropy_history)
+    entropy_table = build_entropy_table(entropy_history)
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prize Probability Entropy</title>
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d7dce5;
+      --grid: #edf0f5;
+    }}
+
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }}
+
+    main {{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }}
+
+    header {{
+      margin-bottom: 18px;
+    }}
+
+    h1 {{
+      margin: 0;
+      font-size: 24px;
+      font-weight: 720;
+    }}
+
+    .meta {{
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+      white-space: nowrap;
+    }}
+
+    .panel {{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: 0 1px 2px rgb(16 24 40 / 5%);
+    }}
+
+    .chart-block {{
+      overflow-x: auto;
+    }}
+
+    .stats {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      margin-top: 8px;
+    }}
+
+    .table-wrap {{
+      margin-top: 14px;
+      overflow-x: auto;
+    }}
+
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }}
+
+    th,
+    td {{
+      border-top: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: right;
+      white-space: nowrap;
+    }}
+
+    th {{
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }}
+
+    th:first-child,
+    td:first-child,
+    th:nth-child(2),
+    td:nth-child(2) {{
+      text-align: left;
+    }}
+
+{COPY_CHART_CONTROLS_CSS}
+
+    svg {{
+      display: block;
+      width: 100%;
+      min-width: 900px;
+      height: auto;
+    }}
+
+    .chart-title {{
+      font-size: 18px;
+      font-weight: 700;
+      fill: var(--text);
+    }}
+
+    .axis-label {{
+      font-size: 11px;
+      fill: var(--muted);
+    }}
+
+    .axis-line {{
+      stroke: var(--line);
+      stroke-width: 1.2;
+    }}
+
+    .grid-line {{
+      stroke: var(--grid);
+      stroke-width: 1;
+    }}
+
+    .series-line {{
+      fill: none;
+      stroke-width: 2.6;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }}
+
+    .series-label {{
+      font-size: 12px;
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }}
+
+    @media (max-width: 720px) {{
+      main {{
+        padding: 18px 12px 28px;
+      }}
+      .meta {{
+        white-space: normal;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Prize Probability Entropy</h1>
+      <div class="meta">Match days 1-{latest_day} · latest snapshot {escape(latest_snapshot)}</div>
+    </header>
+    <section class="panel">{entropy_chart}</section>
+    <section class="panel">{effective_entrants_chart}{entropy_table}</section>
+  </main>
+  <script>
+{COPY_CHART_PNG_SCRIPT}
+  </script>
+</body>
+</html>
+"""
+
+
 def build_html(
     entrant_history: pd.DataFrame,
     team_history: pd.DataFrame,
@@ -732,7 +1176,9 @@ def build_html(
 """
 
 
-def build_leader_table_visualisations(resources_path: Path) -> tuple[Path, Path, Path]:
+def build_leader_table_visualisations(
+    resources_path: Path,
+) -> tuple[Path, Path, Path, Path]:
     resources = load_pool_resources(resources_path)
     entrant_history = load_entrant_history(resources_path)
     team_history = load_team_history(resources_path, resources)
@@ -743,11 +1189,13 @@ def build_leader_table_visualisations(resources_path: Path) -> tuple[Path, Path,
     if team_history.empty:
         raise ValueError("No team history rows found")
 
+    entropy_history = build_entropy_history(entrant_history)
     output_csv_dir = resources_path / "output_csv"
     output_html_dir = resources_path / "output_html"
     entrant_history_path = output_csv_dir / ENTRANT_HISTORY_FILE
     team_history_path = output_csv_dir / TEAM_HISTORY_FILE
     html_path = output_html_dir / HTML_FILE
+    entropy_html_path = output_html_dir / ENTROPY_HTML_FILE
 
     output_csv_dir.mkdir(parents=True, exist_ok=True)
     output_html_dir.mkdir(parents=True, exist_ok=True)
@@ -762,8 +1210,12 @@ def build_leader_table_visualisations(resources_path: Path) -> tuple[Path, Path,
         ),
         encoding="utf-8",
     )
+    entropy_html_path.write_text(
+        build_entropy_html(entropy_history=entropy_history),
+        encoding="utf-8",
+    )
 
-    return entrant_history_path, team_history_path, html_path
+    return entrant_history_path, team_history_path, html_path, entropy_html_path
 
 
 @click.command()
@@ -779,13 +1231,14 @@ def build_leader_table_visualisations(resources_path: Path) -> tuple[Path, Path,
     required=False,
 )
 def main(resources_path: Path) -> None:
-    entrant_history_path, team_history_path, html_path = (
+    entrant_history_path, team_history_path, html_path, entropy_html_path = (
         build_leader_table_visualisations(resources_path)
     )
 
     click.echo(f"Wrote entrant history CSV to {entrant_history_path}")
     click.echo(f"Wrote team history CSV to {team_history_path}")
     click.echo(f"Wrote leader table visualisations HTML to {html_path}")
+    click.echo(f"Wrote prize probability entropy HTML to {entropy_html_path}")
 
 
 if __name__ == "__main__":

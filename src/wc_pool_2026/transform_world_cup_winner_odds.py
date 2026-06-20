@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import click
@@ -16,6 +17,9 @@ from wc_pool_2026.common import (
     normalise_team,
     snapshot_date_stamp as infer_snapshot_date_stamp,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 def find_latest_raw_file(resources_path: Path) -> Path:
@@ -73,14 +77,34 @@ def filter_to_entrant_teams(
     missing_teams = sorted(entrant_teams - set(filtered["team"]))
 
     if missing_teams:
-        raise ValueError(f"Missing odds for entrant teams: {missing_teams}")
+        logger.warning(
+            "Missing odds for entrant teams; assuming zero win probability: %s",
+            missing_teams,
+        )
+        filtered = pd.concat(
+            [
+                filtered,
+                pd.DataFrame(
+                    [
+                        {
+                            "team": team,
+                            "decimal_odds": pd.NA,
+                            "bookmaker": pd.NA,
+                        }
+                        for team in missing_teams
+                    ]
+                ),
+            ],
+            ignore_index=True,
+        )
 
     return filtered
 
 
 def build_probabilities(odds_df: pd.DataFrame) -> pd.DataFrame:
     odds_df = odds_df.copy()
-    odds_df["implied_prob"] = 1 / odds_df["decimal_odds"]
+    odds_df["decimal_odds"] = pd.to_numeric(odds_df["decimal_odds"], errors="coerce")
+    odds_df["implied_prob"] = odds_df["decimal_odds"].rdiv(1).fillna(0)
 
     team_probs = odds_df.groupby("team", as_index=False).agg(
         raw_implied_prob=("implied_prob", "mean"),
@@ -89,9 +113,11 @@ def build_probabilities(odds_df: pd.DataFrame) -> pd.DataFrame:
         bookmaker_count=("bookmaker", "nunique"),
     )
 
-    team_probs["win_prob"] = (
-        team_probs["raw_implied_prob"] / team_probs["raw_implied_prob"].sum()
-    )
+    raw_implied_prob_sum = team_probs["raw_implied_prob"].sum()
+    if raw_implied_prob_sum <= 0:
+        raise RuntimeError("No positive implied probabilities found in raw JSON.")
+
+    team_probs["win_prob"] = team_probs["raw_implied_prob"] / raw_implied_prob_sum
 
     return team_probs.sort_values("win_prob", ascending=False).reset_index(drop=True)
 

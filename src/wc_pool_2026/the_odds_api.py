@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("api_key")
+API_KEY = os.getenv("API_KEY")
 
 
 def main() -> None:
