@@ -20,10 +20,11 @@ from wc_pool_2026.paths import (
     default_resources_path,
 )
 from wc_pool_2026.group_stage_monte_carlo import (
+    SimulatedGroupMatch,
     find_match_results_file,
     load_completed_results,
     load_fixtures,
-    simulate_group_stats,
+    simulate_group_stage_state,
 )
 
 GROUP_LETTERS = tuple("ABCDEFGHIJKL")
@@ -33,9 +34,11 @@ THIRD_PLACE_CRITERIA_NOTE = (
     "Third-place ranking: points, goal difference, then goals scored. "
     "Any remaining ties are split randomly because team conduct scores and "
     "FIFA ranking tie-break data are not currently available in the input CSVs. "
-    "Group-position ties are also approximated using points, goal difference, "
-    "goals scored, then random split; head-to-head group tie-breaks are not "
-    "currently modeled."
+    "Group-position ties use points, then head-to-head points, head-to-head "
+    "goal difference, and head-to-head goals scored between the tied teams. "
+    "If teams remain tied, overall goal difference and overall goals scored are "
+    "used. Remaining ties are split randomly because conduct scores and FIFA "
+    "ranking data are not currently available in the input CSVs."
 )
 
 
@@ -156,20 +159,194 @@ def rank_group_indexes(
     goals_for: np.ndarray,
     goal_difference: np.ndarray,
     rng: np.random.Generator,
+    group_matches: list[SimulatedGroupMatch],
 ) -> np.ndarray:
     group_indexes_array = np.array(group_indexes)
     random_tiebreaker = rng.random((points.shape[0], len(group_indexes)))
-    order = np.lexsort(
-        (
-            -random_tiebreaker,
-            -goals_for[:, group_indexes_array],
-            -goal_difference[:, group_indexes_array],
-            -points[:, group_indexes_array],
+    rankings = np.empty((points.shape[0], len(group_indexes)), dtype=np.int16)
+
+    for simulation_index in range(points.shape[0]):
+        rankings[simulation_index] = rank_group_for_simulation(
+            group_indexes=list(group_indexes_array),
+            points=points,
+            goals_for=goals_for,
+            goal_difference=goal_difference,
+            group_matches=group_matches,
+            random_tiebreaker=random_tiebreaker[simulation_index],
+            simulation_index=simulation_index,
+        )
+
+    return rankings
+
+
+def goals_for_simulation(goals: int | np.ndarray, simulation_index: int) -> int:
+    if isinstance(goals, np.ndarray):
+        return int(goals[simulation_index])
+    return goals
+
+
+def rank_group_for_simulation(
+    group_indexes: list[int],
+    points: np.ndarray,
+    goals_for: np.ndarray,
+    goal_difference: np.ndarray,
+    group_matches: list[SimulatedGroupMatch],
+    random_tiebreaker: np.ndarray,
+    simulation_index: int,
+) -> list[int]:
+    point_groups: dict[int, list[int]] = {}
+
+    for team_index in group_indexes:
+        point_groups.setdefault(int(points[simulation_index, team_index]), []).append(
+            team_index
+        )
+
+    ranked = []
+    for point_total in sorted(point_groups, reverse=True):
+        tied_team_indexes = point_groups[point_total]
+        if len(tied_team_indexes) == 1:
+            ranked.extend(tied_team_indexes)
+        else:
+            ranked.extend(
+                rank_tied_teams(
+                    tied_team_indexes=tied_team_indexes,
+                    all_group_indexes=group_indexes,
+                    points=points,
+                    goals_for=goals_for,
+                    goal_difference=goal_difference,
+                    group_matches=group_matches,
+                    random_tiebreaker=random_tiebreaker,
+                    simulation_index=simulation_index,
+                )
+            )
+
+    return ranked
+
+
+def rank_tied_teams(
+    tied_team_indexes: list[int],
+    all_group_indexes: list[int],
+    points: np.ndarray,
+    goals_for: np.ndarray,
+    goal_difference: np.ndarray,
+    group_matches: list[SimulatedGroupMatch],
+    random_tiebreaker: np.ndarray,
+    simulation_index: int,
+) -> list[int]:
+    head_to_head_groups: dict[tuple[int, int, int], list[int]] = {}
+
+    for team_index in tied_team_indexes:
+        head_to_head_groups.setdefault(
+            head_to_head_key(
+                team_index=team_index,
+                tied_team_indexes=tied_team_indexes,
+                group_matches=group_matches,
+                simulation_index=simulation_index,
+            ),
+            [],
+        ).append(team_index)
+
+    if len(head_to_head_groups) > 1:
+        ranked = []
+        for key in sorted(head_to_head_groups, reverse=True):
+            still_tied = head_to_head_groups[key]
+            if len(still_tied) == 1:
+                ranked.extend(still_tied)
+            else:
+                ranked.extend(
+                    rank_tied_teams(
+                        tied_team_indexes=still_tied,
+                        all_group_indexes=all_group_indexes,
+                        points=points,
+                        goals_for=goals_for,
+                        goal_difference=goal_difference,
+                        group_matches=group_matches,
+                        random_tiebreaker=random_tiebreaker,
+                        simulation_index=simulation_index,
+                    )
+                )
+        return ranked
+
+    return sorted(
+        tied_team_indexes,
+        key=lambda team_index: overall_sort_key(
+            team_index=team_index,
+            all_group_indexes=all_group_indexes,
+            goals_for=goals_for,
+            goal_difference=goal_difference,
+            random_tiebreaker=random_tiebreaker,
+            simulation_index=simulation_index,
         ),
-        axis=1,
+        reverse=True,
     )
 
-    return group_indexes_array[order]
+
+def head_to_head_key(
+    team_index: int,
+    tied_team_indexes: list[int],
+    group_matches: list[SimulatedGroupMatch],
+    simulation_index: int,
+) -> tuple[int, int, int]:
+    tied_team_index_set = set(tied_team_indexes)
+    head_to_head_points = 0
+    head_to_head_goals_for = 0
+    head_to_head_goals_against = 0
+
+    for match in group_matches:
+        if (
+            match.team_1_index not in tied_team_index_set
+            or match.team_2_index not in tied_team_index_set
+        ):
+            continue
+
+        team_1_goals = goals_for_simulation(
+            goals=match.team_1_goals,
+            simulation_index=simulation_index,
+        )
+        team_2_goals = goals_for_simulation(
+            goals=match.team_2_goals,
+            simulation_index=simulation_index,
+        )
+
+        if team_index == match.team_1_index:
+            team_goals = team_1_goals
+            opponent_goals = team_2_goals
+        elif team_index == match.team_2_index:
+            team_goals = team_2_goals
+            opponent_goals = team_1_goals
+        else:
+            continue
+
+        head_to_head_goals_for += team_goals
+        head_to_head_goals_against += opponent_goals
+
+        if team_goals > opponent_goals:
+            head_to_head_points += 3
+        elif team_goals == opponent_goals:
+            head_to_head_points += 1
+
+    return (
+        head_to_head_points,
+        head_to_head_goals_for - head_to_head_goals_against,
+        head_to_head_goals_for,
+    )
+
+
+def overall_sort_key(
+    team_index: int,
+    all_group_indexes: list[int],
+    goals_for: np.ndarray,
+    goal_difference: np.ndarray,
+    random_tiebreaker: np.ndarray,
+    simulation_index: int,
+) -> tuple[int, int, float]:
+    local_index = all_group_indexes.index(team_index)
+
+    return (
+        int(goal_difference[simulation_index, team_index]),
+        int(goals_for[simulation_index, team_index]),
+        float(random_tiebreaker[local_index]),
+    )
 
 
 def build_group_standings(
@@ -178,10 +355,24 @@ def build_group_standings(
     points: np.ndarray,
     goals_for: np.ndarray,
     goals_against: np.ndarray,
+    matches: list[SimulatedGroupMatch],
     random_seed: int,
 ) -> dict[str, np.ndarray]:
     rng = np.random.default_rng(random_seed + 1)
     goal_difference = goals_for - goals_against
+    group_index_sets = {
+        group: {team_index[team] for team in group_teams}
+        for group, group_teams in groups.items()
+    }
+    group_matches = {
+        group: [
+            match
+            for match in matches
+            if match.team_1_index in group_index_sets[group]
+            and match.team_2_index in group_index_sets[group]
+        ]
+        for group in groups
+    }
 
     return {
         group: rank_group_indexes(
@@ -190,6 +381,7 @@ def build_group_standings(
             goals_for=goals_for,
             goal_difference=goal_difference,
             rng=rng,
+            group_matches=group_matches[group],
         )
         for group, group_teams in groups.items()
     }
@@ -443,26 +635,28 @@ def calculate_r32_slot_monte_carlo(
         fixtures=fixtures,
         completed_results=completed_results,
     )
-    teams, team_index, points, goals_for, goals_against = simulate_group_stats(
+    simulation = simulate_group_stage_state(
         fixtures=fixtures,
         completed_results=completed_results,
         n_simulations=n_simulations,
         random_seed=random_seed,
         progress_description="Simulating group fixtures",
+        record_matches=True,
     )
     standings = build_group_standings(
         groups=groups,
-        team_index=team_index,
-        points=points,
-        goals_for=goals_for,
-        goals_against=goals_against,
+        team_index=simulation.team_index,
+        points=simulation.points,
+        goals_for=simulation.goals_for,
+        goals_against=simulation.goals_against,
+        matches=simulation.matches,
         random_seed=random_seed,
     )
     qualifying_keys = third_place_keys(
         standings=standings,
-        points=points,
-        goals_for=goals_for,
-        goals_against=goals_against,
+        points=simulation.points,
+        goals_for=simulation.goals_for,
+        goals_against=simulation.goals_against,
         random_seed=random_seed,
     )
 
@@ -482,7 +676,7 @@ def calculate_r32_slot_monte_carlo(
         third_place_assignments=third_place_assignments,
         standings=standings,
         qualifying_keys=qualifying_keys,
-        teams=teams,
+        teams=simulation.teams,
         n_simulations=n_simulations,
     )
     third_place_key_results = build_third_place_key_results(

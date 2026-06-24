@@ -1,4 +1,5 @@
 from pathlib import Path
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -10,6 +11,25 @@ from wc_pool_2026.common import (
     snapshot_date_stamp as infer_snapshot_date_stamp,
 )
 from wc_pool_2026.paths import build_dated_resource_paths
+
+
+@dataclass(frozen=True)
+class SimulatedGroupMatch:
+    match_id: str
+    team_1_index: int
+    team_2_index: int
+    team_1_goals: int | np.ndarray
+    team_2_goals: int | np.ndarray
+
+
+@dataclass(frozen=True)
+class GroupStageSimulation:
+    teams: list[str]
+    team_index: dict[str, int]
+    points: np.ndarray
+    goals_for: np.ndarray
+    goals_against: np.ndarray
+    matches: list[SimulatedGroupMatch]
 
 
 def find_match_results_file(
@@ -201,6 +221,32 @@ def simulate_group_stats(
     random_seed: int,
     progress_description: str = "Simulating fixtures",
 ) -> tuple[list[str], dict[str, int], np.ndarray, np.ndarray, np.ndarray]:
+    simulation = simulate_group_stage_state(
+        fixtures=fixtures,
+        completed_results=completed_results,
+        n_simulations=n_simulations,
+        random_seed=random_seed,
+        progress_description=progress_description,
+        record_matches=False,
+    )
+
+    return (
+        simulation.teams,
+        simulation.team_index,
+        simulation.points,
+        simulation.goals_for,
+        simulation.goals_against,
+    )
+
+
+def simulate_group_stage_state(
+    fixtures: pd.DataFrame,
+    completed_results: pd.DataFrame,
+    n_simulations: int,
+    random_seed: int,
+    progress_description: str = "Simulating fixtures",
+    record_matches: bool = False,
+) -> GroupStageSimulation:
     teams = sorted(
         set(fixtures["team_1"])
         | set(fixtures["team_2"])
@@ -212,6 +258,7 @@ def simulate_group_stats(
     points = np.zeros((n_simulations, len(teams)), dtype=np.int16)
     goals_for = np.zeros((n_simulations, len(teams)), dtype=np.int16)
     goals_against = np.zeros((n_simulations, len(teams)), dtype=np.int16)
+    matches = []
 
     apply_completed_results(
         completed_results=completed_results,
@@ -220,6 +267,18 @@ def simulate_group_stats(
         goals_for=goals_for,
         goals_against=goals_against,
     )
+
+    if record_matches:
+        for result in completed_results.to_dict("records"):
+            matches.append(
+                SimulatedGroupMatch(
+                    match_id=str(result["match_id"]),
+                    team_1_index=team_index[result["team_1"]],
+                    team_2_index=team_index[result["team_2"]],
+                    team_1_goals=int(result["team_1_goals"]),
+                    team_2_goals=int(result["team_2_goals"]),
+                )
+            )
 
     rng = np.random.default_rng(random_seed)
     remaining_fixture_records = remaining_fixtures(
@@ -238,11 +297,11 @@ def simulate_group_stats(
         team_1_goals = rng.poisson(
             fixture["team_1_xg"],
             size=n_simulations,
-        )
+        ).astype(np.int16)
         team_2_goals = rng.poisson(
             fixture["team_2_xg"],
             size=n_simulations,
-        )
+        ).astype(np.int16)
 
         goals_for[:, team_1_index] += team_1_goals
         goals_against[:, team_1_index] += team_2_goals
@@ -258,4 +317,22 @@ def simulate_group_stats(
         points[draws, team_1_index] += 1
         points[draws, team_2_index] += 1
 
-    return teams, team_index, points, goals_for, goals_against
+        if record_matches:
+            matches.append(
+                SimulatedGroupMatch(
+                    match_id=str(fixture["match_id"]),
+                    team_1_index=team_1_index,
+                    team_2_index=team_2_index,
+                    team_1_goals=team_1_goals,
+                    team_2_goals=team_2_goals,
+                )
+            )
+
+    return GroupStageSimulation(
+        teams=teams,
+        team_index=team_index,
+        points=points,
+        goals_for=goals_for,
+        goals_against=goals_against,
+        matches=matches,
+    )
