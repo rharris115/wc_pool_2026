@@ -1,0 +1,67 @@
+*WORLD CUP ROUND OF 32 SLOT MONTE CARLO*
+
+Match 73
+home 2A: 🇰🇷 South Korea (67.7%), 🇿🇦 South Africa (13.9%), 🇲🇽 Mexico (9.4%), 🇨🇿 Czechia (9.0%)
+away 2B: 🇨🇭 Switzerland (55.3%), 🇨🇦 Canada (41.8%), 🇧🇦 Bosnia & Herzegovina (2.9%), 🇶🇦 Qatar (0.0%)
+
+Match 74
+home 1C: 🇺🇸 USA (99.7%), 🇦🇺 Australia (0.3%), 🇵🇾 Paraguay (0.0%)
+away 2F: 🇯🇵 Japan (54.7%), 🇳🇱 Netherlands (24.9%), 🇸🇪 Sweden (20.4%)
+
+Match 75
+home 1E: 🇩🇪 Germany (99.1%), 🇨🇮 Ivory Coast (0.9%)
+away 3A|3B|3C|3D|3F: 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (55.8%), 🇵🇾 Paraguay (15.2%), 🇦🇺 Australia (9.2%), 🇧🇷 Brazil (7.9%), 🇹🇷 Türkiye (3.5%)
+
+Match 76
+home 1F: 🇳🇱 Netherlands (74.8%), 🇯🇵 Japan (21.4%), 🇸🇪 Sweden (3.8%)
+away 2C: 🇦🇺 Australia (61.4%), 🇵🇾 Paraguay (38.3%), 🇺🇸 USA (0.3%)
+
+Match 77
+home 2E: 🇨🇮 Ivory Coast (92.3%), 🇨🇼 Curaçao (4.0%), 🇪🇨 Ecuador (2.8%), 🇩🇪 Germany (0.9%)
+away 2I: 🇳🇴 Norway (79.5%), 🇫🇷 France (20.5%)
+
+Match 78
+home 1I: 🇫🇷 France (79.5%), 🇳🇴 Norway (20.5%)
+away 3C|3D|3F|3G|3H: 🇸🇪 Sweden (60.8%), 🇯🇵 Japan (21.3%), 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (7.0%), 🇺🇾 Uruguay (2.6%), 🇮🇷 Iran (1.5%)
+
+Match 79
+home 1A: 🇲🇽 Mexico (90.6%), 🇰🇷 South Korea (9.4%)
+away 3C|3E|3F|3H|3I: 🇵🇾 Paraguay (28.3%), 🇦🇺 Australia (17.7%), 🇮🇷 Iran (12.5%), 🇪🇨 Ecuador (11.9%), 🇪🇬 Egypt (10.8%)
+
+Match 80
+home 1L: 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (83.8%), 🇭🇷 Croatia (10.7%), 🇬🇭 Ghana (5.5%)
+away 3E|3H|3I|3J|3K: 🇨🇩 DR Congo (54.6%), 🇸🇳 Senegal (30.3%), 🇺🇿 Uzbekistan (6.1%), 🇪🇨 Ecuador (2.4%), 🇩🇿 Algeria (1.6%)
+
+Match 81
+home 1G: 🇪🇸 Spain (84.9%), 🇺🇾 Uruguay (12.1%), 🇨🇻 Cape Verde (3.0%)
+away 3A|3E|3H|3I|3J: 🇸🇳 Senegal (19.1%), 🇨🇿 Czechia (17.2%), 🇰🇷 South Korea (14.6%), 🇮🇷 Iran (13.6%), 🇪🇬 Egypt (10.2%)
+
+Match 82
+home 1D: 🇧🇷 Brazil (64.6%), 🇲🇦 Morocco (33.5%), 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (1.9%)
+away 3B|3E|3F|3I|3J: 🇧🇦 Bosnia & Herzegovina (66.3%), 🇶🇦 Qatar (12.8%), 🇸🇳 Senegal (8.2%), 🇩🇿 Algeria (2.7%), 🇨🇭 Switzerland (2.6%)
+
+Match 83
+home 1H: 🇪🇬 Egypt (60.1%), 🇧🇪 Belgium (26.8%), 🇮🇷 Iran (13.1%)
+away 2J: 🇦🇹 Austria (69.4%), 🇩🇿 Algeria (30.4%), 🇦🇷 Argentina (0.2%)
+
+Match 84
+home 2K: 🇨🇴 Colombia (50.6%), 🇵🇹 Portugal (49.0%), 🇨🇩 DR Congo (0.4%)
+away 2L: 🇭🇷 Croatia (45.1%), 🇬🇭 Ghana (38.7%), 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (16.1%)
+
+Match 85
+home 1B: 🇨🇦 Canada (58.0%), 🇨🇭 Switzerland (42.0%)
+away 3E|3F|3G|3I|3J: 🇩🇿 Algeria (35.3%), 🇦🇹 Austria (17.6%), 🇺🇾 Uruguay (16.9%), 🇨🇻 Cape Verde (7.5%), 🇸🇳 Senegal (5.9%)
+
+Match 86
+home 2D: 🇲🇦 Morocco (65.4%), 🇧🇷 Brazil (26.0%), 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (8.5%)
+away 2G: 🇨🇻 Cape Verde (55.1%), 🇸🇦 Saudi Arabia (28.5%), 🇪🇸 Spain (9.2%), 🇺🇾 Uruguay (7.2%)
+
+Match 87
+home 1J: 🇦🇷 Argentina (99.8%), 🇦🇹 Austria (0.1%), 🇩🇿 Algeria (0.0%)
+away 2H: 🇧🇪 Belgium (60.0%), 🇮🇷 Iran (18.1%), 🇪🇬 Egypt (17.0%), 🇳🇿 New Zealand (4.9%)
+
+Match 88
+home 1K: 🇵🇹 Portugal (50.6%), 🇨🇴 Colombia (49.4%)
+away 3D|3E|3I|3J|3L: 🇬🇭 Ghana (55.7%), 🇭🇷 Croatia (38.5%), 🇸🇳 Senegal (2.9%), 🇵🇦 Panama (1.1%), 🇪🇨 Ecuador (0.7%)
+
+Third-place ranking: points, goal difference, then goals scored. Any remaining ties are split randomly because team conduct scores and FIFA ranking tie-break data are not currently available in the input CSVs. Group-position ties are also approximated using points, goal difference, goals scored, then random split; head-to-head group tie-breaks are not currently modeled.
