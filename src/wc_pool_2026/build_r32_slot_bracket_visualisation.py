@@ -88,14 +88,20 @@ def load_bracket(path: Path) -> pd.DataFrame:
     return bracket
 
 
-def load_snapshot_teams(path: Path) -> list[str]:
-    rows = pd.read_csv(path)
-    require_columns(
-        df=rows,
-        columns={"team", "opponent"},
-        source=path,
-    )
-    return sorted(set(rows["team"]) | set(rows["opponent"]))
+def load_snapshot_teams(paths: list[Path]) -> list[str]:
+    teams = set()
+
+    for path in paths:
+        rows = pd.read_csv(path)
+        require_columns(
+            df=rows,
+            columns={"team", "opponent"},
+            source=path,
+        )
+        teams.update(rows["team"])
+        teams.update(rows["opponent"])
+
+    return sorted(teams)
 
 
 def probability_label(probability: float) -> str:
@@ -877,7 +883,10 @@ def build_snapshot_html(
 
     slots = load_slot_probabilities(slot_path)
     snapshot_teams = load_snapshot_teams(
-        dated_paths.input_csv_dir / "group_match_outcome_xg.csv"
+        [
+            dated_paths.input_csv_dir / "group_match_outcome_xg.csv",
+            dated_paths.input_csv_dir / "group_match_results.csv",
+        ]
     )
     eliminated_teams = sorted(set(snapshot_teams) - set(slots["team"]))
     bracket = load_bracket(resources_path / BRACKET_CSV_FILE)

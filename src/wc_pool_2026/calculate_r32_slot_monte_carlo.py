@@ -21,7 +21,9 @@ from wc_pool_2026.paths import (
 )
 from wc_pool_2026.group_stage_monte_carlo import (
     SimulatedGroupMatch,
+    filter_group_stage_matches,
     find_match_results_file,
+    infer_groups,
     load_completed_results,
     load_fixtures,
     simulate_group_stage_state,
@@ -85,72 +87,6 @@ def load_third_place_assignments(path: Path) -> dict[str, dict[int, str]]:
         raise ValueError(f"Duplicate qualifying_groups_key values in {path}")
 
     return rows
-
-
-def infer_groups(
-    fixtures: pd.DataFrame,
-    completed_results: pd.DataFrame,
-) -> dict[str, list[str]]:
-    match_rows = pd.concat(
-        [
-            fixtures[["commence_time", "team_1", "team_2"]],
-            completed_results[["commence_time", "team_1", "team_2"]],
-        ],
-        ignore_index=True,
-    )
-    teams = sorted(set(match_rows["team_1"]) | set(match_rows["team_2"]))
-    neighbours = {team: set() for team in teams}
-    first_match_time = {team: None for team in teams}
-
-    for row in match_rows.to_dict("records"):
-        team_1 = row["team_1"]
-        team_2 = row["team_2"]
-        neighbours[team_1].add(team_2)
-        neighbours[team_2].add(team_1)
-
-        for team in (team_1, team_2):
-            current = first_match_time[team]
-            if current is None or row["commence_time"] < current:
-                first_match_time[team] = row["commence_time"]
-
-    components = []
-    unseen = set(teams)
-    while unseen:
-        seed = unseen.pop()
-        stack = [seed]
-        component = {seed}
-        while stack:
-            team = stack.pop()
-            for neighbour in neighbours[team]:
-                if neighbour in unseen:
-                    unseen.remove(neighbour)
-                    component.add(neighbour)
-                    stack.append(neighbour)
-
-        if len(component) != 4:
-            raise ValueError(
-                "Expected each inferred group to contain four teams, got "
-                f"{len(component)} for {sorted(component)}"
-            )
-
-        components.append(
-            (
-                min(first_match_time[team] for team in component),
-                sorted(component),
-            )
-        )
-
-    if len(components) != len(GROUP_LETTERS):
-        raise ValueError(f"Expected 12 inferred groups, got {len(components)}")
-
-    return {
-        group: teams
-        for group, (_, teams) in zip(
-            GROUP_LETTERS,
-            sorted(components),
-            strict=True,
-        )
-    }
 
 
 def rank_group_indexes(
@@ -634,6 +570,11 @@ def calculate_r32_slot_monte_carlo(
     groups = infer_groups(
         fixtures=fixtures,
         completed_results=completed_results,
+    )
+    fixtures, completed_results = filter_group_stage_matches(
+        fixtures=fixtures,
+        completed_results=completed_results,
+        groups=groups,
     )
     simulation = simulate_group_stage_state(
         fixtures=fixtures,

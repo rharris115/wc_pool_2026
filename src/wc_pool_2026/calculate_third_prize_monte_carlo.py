@@ -15,7 +15,9 @@ from wc_pool_2026.common import (
     write_text_output,
 )
 from wc_pool_2026.group_stage_monte_carlo import (
+    filter_group_stage_matches,
     find_match_results_file,
+    infer_groups,
     load_completed_results,
     load_fixtures,
     simulate_group_stats,
@@ -239,6 +241,15 @@ def calculate_third_prize_monte_carlo(
     )
     fixtures = load_fixtures(match_xg_file)
     completed_results = load_completed_results(match_results_file)
+    groups = infer_groups(
+        fixtures=fixtures,
+        completed_results=completed_results,
+    )
+    fixtures, completed_results = filter_group_stage_matches(
+        fixtures=fixtures,
+        completed_results=completed_results,
+        groups=groups,
+    )
     team_results = simulate_group_stage(
         fixtures=fixtures,
         completed_results=completed_results,

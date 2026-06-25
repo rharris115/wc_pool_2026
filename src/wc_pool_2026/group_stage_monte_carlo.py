@@ -1,4 +1,5 @@
 from pathlib import Path
+from itertools import combinations
 from dataclasses import dataclass
 
 import numpy as np
@@ -11,6 +12,8 @@ from wc_pool_2026.common import (
     snapshot_date_stamp as infer_snapshot_date_stamp,
 )
 from wc_pool_2026.paths import build_dated_resource_paths
+
+GROUP_LETTERS = tuple("ABCDEFGHIJKL")
 
 
 @dataclass(frozen=True)
@@ -170,6 +173,118 @@ def load_completed_results(match_results_file: Path) -> pd.DataFrame:
         )
 
     return pd.DataFrame(results, columns=result_columns).reset_index(drop=True)
+
+
+def infer_groups(
+    fixtures: pd.DataFrame,
+    completed_results: pd.DataFrame,
+) -> dict[str, list[str]]:
+    match_rows = pd.concat(
+        [
+            fixtures[["commence_time", "team_1", "team_2"]],
+            completed_results[["commence_time", "team_1", "team_2"]],
+        ],
+        ignore_index=True,
+    )
+    teams = sorted(set(match_rows["team_1"]) | set(match_rows["team_2"]))
+    edges = {
+        frozenset((row["team_1"], row["team_2"]))
+        for row in match_rows.to_dict("records")
+    }
+
+    group_candidates = [
+        frozenset(candidate)
+        for candidate in combinations(teams, 4)
+        if all(frozenset(pair) in edges for pair in combinations(candidate, 2))
+    ]
+    groups = find_group_cover(teams=teams, group_candidates=group_candidates)
+    first_match_time_by_group = {
+        group: min(
+            row["commence_time"]
+            for row in match_rows.to_dict("records")
+            if row["team_1"] in group and row["team_2"] in group
+        )
+        for group in groups
+    }
+
+    return {
+        group_letter: sorted(group)
+        for group_letter, group in zip(
+            GROUP_LETTERS,
+            sorted(groups, key=lambda group: first_match_time_by_group[group]),
+            strict=True,
+        )
+    }
+
+
+def find_group_cover(
+    teams: list[str],
+    group_candidates: list[frozenset[str]],
+) -> list[frozenset[str]]:
+    target_team_count = len(GROUP_LETTERS) * 4
+    if len(teams) != target_team_count:
+        raise ValueError(
+            f"Expected {target_team_count} teams for group-stage inference, "
+            f"got {len(teams)}"
+        )
+
+    candidates_by_team = {
+        team: [candidate for candidate in group_candidates if team in candidate]
+        for team in teams
+    }
+
+    def search(uncovered: frozenset[str]) -> list[frozenset[str]] | None:
+        if not uncovered:
+            return []
+
+        seed = min(
+            uncovered,
+            key=lambda team: sum(
+                candidate <= uncovered for candidate in candidates_by_team[team]
+            ),
+        )
+
+        for candidate in candidates_by_team[seed]:
+            if not candidate <= uncovered:
+                continue
+
+            remainder = search(uncovered - candidate)
+            if remainder is not None:
+                return [candidate, *remainder]
+
+        return None
+
+    groups = search(frozenset(teams))
+    if groups is None or len(groups) != len(GROUP_LETTERS):
+        raise ValueError(
+            "Could not infer 12 four-team groups from complete internal "
+            "group-stage match cliques"
+        )
+
+    return groups
+
+
+def filter_group_stage_matches(
+    fixtures: pd.DataFrame,
+    completed_results: pd.DataFrame,
+    groups: dict[str, list[str]],
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    group_by_team = {
+        team: group
+        for group, group_teams in groups.items()
+        for team in group_teams
+    }
+
+    def group_match_mask(rows: pd.DataFrame) -> pd.Series:
+        return rows.apply(
+            lambda row: group_by_team[row["team_1"]] == group_by_team[row["team_2"]],
+            axis=1,
+        )
+
+    return (
+        fixtures[group_match_mask(fixtures)].reset_index(drop=True),
+        completed_results[group_match_mask(completed_results)].reset_index(drop=True),
+    )
 
 
 def apply_completed_results(
