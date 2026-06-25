@@ -1,0 +1,2436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Match Goal Difference Histograms 20260625</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d7dce5;
+      --grid: #edf0f5;
+      --negative: #dc2626;
+      --zero: #667085;
+      --positive: #059669;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 720;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .match-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid #e3e7ee;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+      padding: 10px 10px 8px;
+    }
+
+
+    .chart-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .copy-chart {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1;
+      padding: 7px 9px;
+    }
+
+    .copy-chart:hover {
+      border-color: #aeb7c6;
+      background: #f9fafb;
+    }
+
+    .copy-chart:disabled {
+      cursor: progress;
+      opacity: 0.64;
+    }
+
+    .copy-status {
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 1em;
+    }
+
+
+    .histogram {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .match-title {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        sans-serif;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .side-label {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        sans-serif;
+      fill: var(--text);
+      font-size: 11px;
+      font-weight: 760;
+    }
+
+    .axis-label {
+      fill: #667085;
+      font-size: 9px;
+      font-weight: 650;
+    }
+
+    .grid-line {
+      stroke: var(--grid);
+      stroke-width: 1;
+    }
+
+    .axis-line {
+      stroke: var(--line);
+      stroke-width: 1.2;
+    }
+
+    .negative-bar {
+      fill: var(--negative);
+      opacity: 0.78;
+    }
+
+    .zero-bar {
+      fill: var(--zero);
+      opacity: 0.72;
+    }
+
+    .positive-bar {
+      fill: var(--positive);
+      opacity: 0.78;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .stats span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 20px 10px 28px;
+      }
+
+      header {
+        display: block;
+      }
+
+      .meta {
+        margin-top: 4px;
+        text-align: left;
+        white-space: normal;
+      }
+
+      .match-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Match Goal Difference Histograms</h1>
+      <div class="meta">Snapshot 20260625 · 19 matches · 38 plots · GD axis -10 to +10</div>
+    </header>
+    <div class="match-list">
+      <section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t20-00-00z-ecuador-vs-germany.png" aria-label="Copy Ecuador versus Germany as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Ecuador versus Germany goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 20:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇩🇪 Germany</text><text class="side-label" x="442" y="34" text-anchor="end">🇪🇨 Ecuador</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="220.6" y1="42" x2="220.6" y2="172"><title>Mean GD -1.06</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="171.9" width="18.0" height="0.1"><title>GD -9: 0.01%</title></rect><rect class="negative-bar" x="78.4" y="171.7" width="18.0" height="0.3"><title>GD -8: 0.05%</title></rect><rect class="negative-bar" x="97.6" y="171.0" width="18.0" height="1.0"><title>GD -7: 0.19%</title></rect><rect class="negative-bar" x="116.8" y="168.4" width="18.0" height="3.6"><title>GD -6: 0.66%</title></rect><rect class="negative-bar" x="136.0" y="161.0" width="18.0" height="11.0"><title>GD -5: 2.01%</title></rect><rect class="negative-bar" x="155.2" y="143.4" width="18.0" height="28.6"><title>GD -4: 5.23%</title></rect><rect class="negative-bar" x="174.4" y="111.0" width="18.0" height="61.0"><title>GD -3: 11.17%</title></rect><rect class="negative-bar" x="193.6" y="68.9" width="18.0" height="103.1"><title>GD -2: 18.87%</title></rect><rect class="negative-bar" x="212.8" y="42.0" width="18.0" height="130.0"><title>GD -1: 23.79%</title></rect><rect class="zero-bar" x="232.0" y="59.0" width="18.0" height="113.0"><title>GD +0: 20.68%</title></rect><rect class="positive-bar" x="251.2" y="109.6" width="18.0" height="62.4"><title>GD +1: 11.42%</title></rect><rect class="positive-bar" x="270.4" y="148.2" width="18.0" height="23.8"><title>GD +2: 4.35%</title></rect><rect class="positive-bar" x="289.6" y="165.2" width="18.0" height="6.8"><title>GD +3: 1.24%</title></rect><rect class="positive-bar" x="308.8" y="170.5" width="18.0" height="1.5"><title>GD +4: 0.28%</title></rect><rect class="positive-bar" x="328.0" y="171.7" width="18.0" height="0.3"><title>GD +5: 0.05%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.98-2.05</span><span>Mean GD -1.06</span><span>🇩🇪 Germany 62%</span><span>Draw 21%</span><span>🇪🇨 Ecuador 17%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t20-00-00z-germany-vs-ecuador.png" aria-label="Copy Germany versus Ecuador as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Germany versus Ecuador goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 20:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇪🇨 Ecuador</text><text class="side-label" x="442" y="34" text-anchor="end">🇩🇪 Germany</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="261.4" y1="42" x2="261.4" y2="172"><title>Mean GD +1.06</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.7" width="18.0" height="0.3"><title>GD -5: 0.05%</title></rect><rect class="negative-bar" x="155.2" y="170.5" width="18.0" height="1.5"><title>GD -4: 0.28%</title></rect><rect class="negative-bar" x="174.4" y="165.2" width="18.0" height="6.8"><title>GD -3: 1.24%</title></rect><rect class="negative-bar" x="193.6" y="148.2" width="18.0" height="23.8"><title>GD -2: 4.35%</title></rect><rect class="negative-bar" x="212.8" y="109.6" width="18.0" height="62.4"><title>GD -1: 11.42%</title></rect><rect class="zero-bar" x="232.0" y="59.0" width="18.0" height="113.0"><title>GD +0: 20.68%</title></rect><rect class="positive-bar" x="251.2" y="42.0" width="18.0" height="130.0"><title>GD +1: 23.79%</title></rect><rect class="positive-bar" x="270.4" y="68.9" width="18.0" height="103.1"><title>GD +2: 18.87%</title></rect><rect class="positive-bar" x="289.6" y="111.0" width="18.0" height="61.0"><title>GD +3: 11.17%</title></rect><rect class="positive-bar" x="308.8" y="143.4" width="18.0" height="28.6"><title>GD +4: 5.23%</title></rect><rect class="positive-bar" x="328.0" y="161.0" width="18.0" height="11.0"><title>GD +5: 2.01%</title></rect><rect class="positive-bar" x="347.2" y="168.4" width="18.0" height="3.6"><title>GD +6: 0.66%</title></rect><rect class="positive-bar" x="366.4" y="171.0" width="18.0" height="1.0"><title>GD +7: 0.19%</title></rect><rect class="positive-bar" x="385.6" y="171.7" width="18.0" height="0.3"><title>GD +8: 0.05%</title></rect><rect class="positive-bar" x="404.8" y="171.9" width="18.0" height="0.1"><title>GD +9: 0.01%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 2.05-0.98</span><span>Mean GD +1.06</span><span>🇪🇨 Ecuador 17%</span><span>Draw 21%</span><span>🇩🇪 Germany 62%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t20-00-00z-cura-ao-vs-ivory-coast.png" aria-label="Copy Curaçao versus Ivory Coast as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Curaçao versus Ivory Coast goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 20:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇨🇮 Ivory Coast</text><text class="side-label" x="442" y="34" text-anchor="end">🇨🇼 Curaçao</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="199.7" y1="42" x2="199.7" y2="172"><title>Mean GD -2.15</title></line><rect class="negative-bar" x="40.0" y="171.8" width="18.0" height="0.2"><title>GD -10: 0.03%</title></rect><rect class="negative-bar" x="59.2" y="171.4" width="18.0" height="0.6"><title>GD -9: 0.10%</title></rect><rect class="negative-bar" x="78.4" y="170.0" width="18.0" height="2.0"><title>GD -8: 0.34%</title></rect><rect class="negative-bar" x="97.6" y="166.0" width="18.0" height="6.0"><title>GD -7: 1.02%</title></rect><rect class="negative-bar" x="116.8" y="156.4" width="18.0" height="15.6"><title>GD -6: 2.67%</title></rect><rect class="negative-bar" x="136.0" y="136.7" width="18.0" height="35.3"><title>GD -5: 6.04%</title></rect><rect class="negative-bar" x="155.2" y="104.5" width="18.0" height="67.5"><title>GD -4: 11.55%</title></rect><rect class="negative-bar" x="174.4" y="66.2" width="18.0" height="105.8"><title>GD -3: 18.10%</title></rect><rect class="negative-bar" x="193.6" y="42.0" width="18.0" height="130.0"><title>GD -2: 22.24%</title></rect><rect class="negative-bar" x="212.8" y="54.5" width="18.0" height="117.5"><title>GD -1: 20.10%</title></rect><rect class="zero-bar" x="232.0" y="101.0" width="18.0" height="71.0"><title>GD +0: 12.15%</title></rect><rect class="positive-bar" x="251.2" y="146.4" width="18.0" height="25.6"><title>GD +1: 4.38%</title></rect><rect class="positive-bar" x="270.4" y="165.8" width="18.0" height="6.2"><title>GD +2: 1.06%</title></rect><rect class="positive-bar" x="289.6" y="170.9" width="18.0" height="1.1"><title>GD +3: 0.19%</title></rect><rect class="positive-bar" x="308.8" y="171.8" width="18.0" height="0.2"><title>GD +4: 0.03%</title></rect><rect class="positive-bar" x="328.0" y="172.0" width="18.0" height="0.0"><title>GD +5: 0.00%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.60-2.75</span><span>Mean GD -2.15</span><span>🇨🇮 Ivory Coast 82%</span><span>Draw 12%</span><span>🇨🇼 Curaçao 6%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t20-00-00z-ivory-coast-vs-cura-ao.png" aria-label="Copy Ivory Coast versus Curaçao as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Ivory Coast versus Curaçao goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 20:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇨🇼 Curaçao</text><text class="side-label" x="442" y="34" text-anchor="end">🇨🇮 Ivory Coast</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="282.3" y1="42" x2="282.3" y2="172"><title>Mean GD +2.15</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="172.0" width="18.0" height="0.0"><title>GD -5: 0.00%</title></rect><rect class="negative-bar" x="155.2" y="171.8" width="18.0" height="0.2"><title>GD -4: 0.03%</title></rect><rect class="negative-bar" x="174.4" y="170.9" width="18.0" height="1.1"><title>GD -3: 0.19%</title></rect><rect class="negative-bar" x="193.6" y="165.8" width="18.0" height="6.2"><title>GD -2: 1.06%</title></rect><rect class="negative-bar" x="212.8" y="146.4" width="18.0" height="25.6"><title>GD -1: 4.38%</title></rect><rect class="zero-bar" x="232.0" y="101.0" width="18.0" height="71.0"><title>GD +0: 12.15%</title></rect><rect class="positive-bar" x="251.2" y="54.5" width="18.0" height="117.5"><title>GD +1: 20.10%</title></rect><rect class="positive-bar" x="270.4" y="42.0" width="18.0" height="130.0"><title>GD +2: 22.24%</title></rect><rect class="positive-bar" x="289.6" y="66.2" width="18.0" height="105.8"><title>GD +3: 18.10%</title></rect><rect class="positive-bar" x="308.8" y="104.5" width="18.0" height="67.5"><title>GD +4: 11.55%</title></rect><rect class="positive-bar" x="328.0" y="136.7" width="18.0" height="35.3"><title>GD +5: 6.04%</title></rect><rect class="positive-bar" x="347.2" y="156.4" width="18.0" height="15.6"><title>GD +6: 2.67%</title></rect><rect class="positive-bar" x="366.4" y="166.0" width="18.0" height="6.0"><title>GD +7: 1.02%</title></rect><rect class="positive-bar" x="385.6" y="170.0" width="18.0" height="2.0"><title>GD +8: 0.34%</title></rect><rect class="positive-bar" x="404.8" y="171.4" width="18.0" height="0.6"><title>GD +9: 0.10%</title></rect><rect class="positive-bar" x="424.0" y="171.8" width="18.0" height="0.2"><title>GD +10: 0.03%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 2.75-0.60</span><span>Mean GD +2.15</span><span>🇨🇼 Curaçao 6%</span><span>Draw 12%</span><span>🇨🇮 Ivory Coast 82%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t23-00-00z-japan-vs-sweden.png" aria-label="Copy Japan versus Sweden as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Japan versus Sweden goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 23:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇸🇪 Sweden</text><text class="side-label" x="442" y="34" text-anchor="end">🇯🇵 Japan</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="253.2" y1="42" x2="253.2" y2="172"><title>Mean GD +0.64</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.9" width="18.0" height="0.1"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.5" width="18.0" height="0.5"><title>GD -5: 0.09%</title></rect><rect class="negative-bar" x="155.2" y="169.6" width="18.0" height="2.4"><title>GD -4: 0.45%</title></rect><rect class="negative-bar" x="174.4" y="162.0" width="18.0" height="10.0"><title>GD -3: 1.88%</title></rect><rect class="negative-bar" x="193.6" y="139.1" width="18.0" height="32.9"><title>GD -2: 6.15%</title></rect><rect class="negative-bar" x="212.8" y="92.3" width="18.0" height="79.7"><title>GD -1: 14.89%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 24.28%</title></rect><rect class="positive-bar" x="251.2" y="43.4" width="18.0" height="128.6"><title>GD +1: 24.02%</title></rect><rect class="positive-bar" x="270.4" y="86.3" width="18.0" height="85.7"><title>GD +2: 16.01%</title></rect><rect class="positive-bar" x="289.6" y="129.8" width="18.0" height="42.2"><title>GD +3: 7.87%</title></rect><rect class="positive-bar" x="308.8" y="155.7" width="18.0" height="16.3"><title>GD +4: 3.04%</title></rect><rect class="positive-bar" x="328.0" y="166.8" width="18.0" height="5.2"><title>GD +5: 0.96%</title></rect><rect class="positive-bar" x="347.2" y="170.6" width="18.0" height="1.4"><title>GD +6: 0.26%</title></rect><rect class="positive-bar" x="366.4" y="171.7" width="18.0" height="0.3"><title>GD +7: 0.06%</title></rect><rect class="positive-bar" x="385.6" y="171.9" width="18.0" height="0.1"><title>GD +8: 0.01%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.67-1.04</span><span>Mean GD +0.64</span><span>🇸🇪 Sweden 23%</span><span>Draw 24%</span><span>🇯🇵 Japan 52%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t23-00-00z-sweden-vs-japan.png" aria-label="Copy Sweden versus Japan as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Sweden versus Japan goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 23:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇯🇵 Japan</text><text class="side-label" x="442" y="34" text-anchor="end">🇸🇪 Sweden</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="228.8" y1="42" x2="228.8" y2="172"><title>Mean GD -0.64</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="171.9" width="18.0" height="0.1"><title>GD -8: 0.01%</title></rect><rect class="negative-bar" x="97.6" y="171.7" width="18.0" height="0.3"><title>GD -7: 0.06%</title></rect><rect class="negative-bar" x="116.8" y="170.6" width="18.0" height="1.4"><title>GD -6: 0.26%</title></rect><rect class="negative-bar" x="136.0" y="166.8" width="18.0" height="5.2"><title>GD -5: 0.96%</title></rect><rect class="negative-bar" x="155.2" y="155.7" width="18.0" height="16.3"><title>GD -4: 3.04%</title></rect><rect class="negative-bar" x="174.4" y="129.8" width="18.0" height="42.2"><title>GD -3: 7.87%</title></rect><rect class="negative-bar" x="193.6" y="86.3" width="18.0" height="85.7"><title>GD -2: 16.01%</title></rect><rect class="negative-bar" x="212.8" y="43.4" width="18.0" height="128.6"><title>GD -1: 24.02%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 24.28%</title></rect><rect class="positive-bar" x="251.2" y="92.3" width="18.0" height="79.7"><title>GD +1: 14.89%</title></rect><rect class="positive-bar" x="270.4" y="139.1" width="18.0" height="32.9"><title>GD +2: 6.15%</title></rect><rect class="positive-bar" x="289.6" y="162.0" width="18.0" height="10.0"><title>GD +3: 1.88%</title></rect><rect class="positive-bar" x="308.8" y="169.6" width="18.0" height="2.4"><title>GD +4: 0.45%</title></rect><rect class="positive-bar" x="328.0" y="171.5" width="18.0" height="0.5"><title>GD +5: 0.09%</title></rect><rect class="positive-bar" x="347.2" y="171.9" width="18.0" height="0.1"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.04-1.67</span><span>Mean GD -0.64</span><span>🇯🇵 Japan 52%</span><span>Draw 24%</span><span>🇸🇪 Sweden 23%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t23-00-00z-netherlands-vs-tunisia.png" aria-label="Copy Netherlands versus Tunisia as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Netherlands versus Tunisia goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 23:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇹🇳 Tunisia</text><text class="side-label" x="442" y="34" text-anchor="end">🇳🇱 Netherlands</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="290.8" y1="42" x2="290.8" y2="172"><title>Mean GD +2.59</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="172.0" width="18.0" height="0.0"><title>GD -5: 0.00%</title></rect><rect class="negative-bar" x="155.2" y="171.9" width="18.0" height="0.1"><title>GD -4: 0.01%</title></rect><rect class="negative-bar" x="174.4" y="171.5" width="18.0" height="0.5"><title>GD -3: 0.08%</title></rect><rect class="negative-bar" x="193.6" y="168.8" width="18.0" height="3.2"><title>GD -2: 0.53%</title></rect><rect class="negative-bar" x="212.8" y="155.8" width="18.0" height="16.2"><title>GD -1: 2.68%</title></rect><rect class="zero-bar" x="232.0" y="118.0" width="18.0" height="54.0"><title>GD +0: 8.94%</title></rect><rect class="positive-bar" x="251.2" y="68.7" width="18.0" height="103.3"><title>GD +1: 17.11%</title></rect><rect class="positive-bar" x="270.4" y="42.0" width="18.0" height="130.0"><title>GD +2: 21.53%</title></rect><rect class="positive-bar" x="289.6" y="52.6" width="18.0" height="119.4"><title>GD +3: 19.77%</title></rect><rect class="positive-bar" x="308.8" y="86.3" width="18.0" height="85.7"><title>GD +4: 14.19%</title></rect><rect class="positive-bar" x="328.0" y="121.8" width="18.0" height="50.2"><title>GD +5: 8.32%</title></rect><rect class="positive-bar" x="347.2" y="147.1" width="18.0" height="24.9"><title>GD +6: 4.12%</title></rect><rect class="positive-bar" x="366.4" y="161.4" width="18.0" height="10.6"><title>GD +7: 1.76%</title></rect><rect class="positive-bar" x="385.6" y="168.0" width="18.0" height="4.0"><title>GD +8: 0.66%</title></rect><rect class="positive-bar" x="404.8" y="170.7" width="18.0" height="1.3"><title>GD +9: 0.22%</title></rect><rect class="positive-bar" x="424.0" y="171.6" width="18.0" height="0.4"><title>GD +10: 0.07%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 3.07-0.48</span><span>Mean GD +2.59</span><span>🇹🇳 Tunisia 3%</span><span>Draw 9%</span><span>🇳🇱 Netherlands 88%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-25t23-00-00z-tunisia-vs-netherlands.png" aria-label="Copy Tunisia versus Netherlands as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Tunisia versus Netherlands goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">25 Jun 2026 23:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇳🇱 Netherlands</text><text class="side-label" x="442" y="34" text-anchor="end">🇹🇳 Tunisia</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="191.2" y1="42" x2="191.2" y2="172"><title>Mean GD -2.59</title></line><rect class="negative-bar" x="40.0" y="171.6" width="18.0" height="0.4"><title>GD -10: 0.07%</title></rect><rect class="negative-bar" x="59.2" y="170.7" width="18.0" height="1.3"><title>GD -9: 0.22%</title></rect><rect class="negative-bar" x="78.4" y="168.0" width="18.0" height="4.0"><title>GD -8: 0.66%</title></rect><rect class="negative-bar" x="97.6" y="161.4" width="18.0" height="10.6"><title>GD -7: 1.76%</title></rect><rect class="negative-bar" x="116.8" y="147.1" width="18.0" height="24.9"><title>GD -6: 4.12%</title></rect><rect class="negative-bar" x="136.0" y="121.8" width="18.0" height="50.2"><title>GD -5: 8.32%</title></rect><rect class="negative-bar" x="155.2" y="86.3" width="18.0" height="85.7"><title>GD -4: 14.19%</title></rect><rect class="negative-bar" x="174.4" y="52.6" width="18.0" height="119.4"><title>GD -3: 19.77%</title></rect><rect class="negative-bar" x="193.6" y="42.0" width="18.0" height="130.0"><title>GD -2: 21.53%</title></rect><rect class="negative-bar" x="212.8" y="68.7" width="18.0" height="103.3"><title>GD -1: 17.11%</title></rect><rect class="zero-bar" x="232.0" y="118.0" width="18.0" height="54.0"><title>GD +0: 8.94%</title></rect><rect class="positive-bar" x="251.2" y="155.8" width="18.0" height="16.2"><title>GD +1: 2.68%</title></rect><rect class="positive-bar" x="270.4" y="168.8" width="18.0" height="3.2"><title>GD +2: 0.53%</title></rect><rect class="positive-bar" x="289.6" y="171.5" width="18.0" height="0.5"><title>GD +3: 0.08%</title></rect><rect class="positive-bar" x="308.8" y="171.9" width="18.0" height="0.1"><title>GD +4: 0.01%</title></rect><rect class="positive-bar" x="328.0" y="172.0" width="18.0" height="0.0"><title>GD +5: 0.00%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.48-3.07</span><span>Mean GD -2.59</span><span>🇳🇱 Netherlands 88%</span><span>Draw 9%</span><span>🇹🇳 Tunisia 3%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t02-00-00z-australia-vs-paraguay.png" aria-label="Copy Australia versus Paraguay as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Australia versus Paraguay goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇵🇾 Paraguay</text><text class="side-label" x="442" y="34" text-anchor="end">🇦🇺 Australia</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">16%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">32%</text><line class="expected-line" x1="237.4" y1="42" x2="237.4" y2="172"><title>Mean GD -0.19</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.9" width="18.0" height="0.1"><title>GD -6: 0.03%</title></rect><rect class="negative-bar" x="136.0" y="171.3" width="18.0" height="0.7"><title>GD -5: 0.17%</title></rect><rect class="negative-bar" x="155.2" y="168.5" width="18.0" height="3.5"><title>GD -4: 0.86%</title></rect><rect class="negative-bar" x="174.4" y="157.8" width="18.0" height="14.2"><title>GD -3: 3.48%</title></rect><rect class="negative-bar" x="193.6" y="127.9" width="18.0" height="44.1"><title>GD -2: 10.80%</title></rect><rect class="negative-bar" x="212.8" y="75.0" width="18.0" height="97.0"><title>GD -1: 23.75%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 31.82%</title></rect><rect class="positive-bar" x="251.2" y="92.5" width="18.0" height="79.5"><title>GD +1: 19.46%</title></rect><rect class="positive-bar" x="270.4" y="142.4" width="18.0" height="29.6"><title>GD +2: 7.25%</title></rect><rect class="positive-bar" x="289.6" y="164.2" width="18.0" height="7.8"><title>GD +3: 1.91%</title></rect><rect class="positive-bar" x="308.8" y="170.4" width="18.0" height="1.6"><title>GD +4: 0.39%</title></rect><rect class="positive-bar" x="328.0" y="171.7" width="18.0" height="0.3"><title>GD +5: 0.06%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.85-1.03</span><span>Mean GD -0.19</span><span>🇵🇾 Paraguay 39%</span><span>Draw 32%</span><span>🇦🇺 Australia 29%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t02-00-00z-paraguay-vs-australia.png" aria-label="Copy Paraguay versus Australia as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Paraguay versus Australia goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇦🇺 Australia</text><text class="side-label" x="442" y="34" text-anchor="end">🇵🇾 Paraguay</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">16%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">32%</text><line class="expected-line" x1="244.6" y1="42" x2="244.6" y2="172"><title>Mean GD +0.19</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.7" width="18.0" height="0.3"><title>GD -5: 0.06%</title></rect><rect class="negative-bar" x="155.2" y="170.4" width="18.0" height="1.6"><title>GD -4: 0.39%</title></rect><rect class="negative-bar" x="174.4" y="164.2" width="18.0" height="7.8"><title>GD -3: 1.91%</title></rect><rect class="negative-bar" x="193.6" y="142.4" width="18.0" height="29.6"><title>GD -2: 7.25%</title></rect><rect class="negative-bar" x="212.8" y="92.5" width="18.0" height="79.5"><title>GD -1: 19.46%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 31.82%</title></rect><rect class="positive-bar" x="251.2" y="75.0" width="18.0" height="97.0"><title>GD +1: 23.75%</title></rect><rect class="positive-bar" x="270.4" y="127.9" width="18.0" height="44.1"><title>GD +2: 10.80%</title></rect><rect class="positive-bar" x="289.6" y="157.8" width="18.0" height="14.2"><title>GD +3: 3.48%</title></rect><rect class="positive-bar" x="308.8" y="168.5" width="18.0" height="3.5"><title>GD +4: 0.86%</title></rect><rect class="positive-bar" x="328.0" y="171.3" width="18.0" height="0.7"><title>GD +5: 0.17%</title></rect><rect class="positive-bar" x="347.2" y="171.9" width="18.0" height="0.1"><title>GD +6: 0.03%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.03-0.85</span><span>Mean GD +0.19</span><span>🇦🇺 Australia 29%</span><span>Draw 32%</span><span>🇵🇾 Paraguay 39%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t02-00-00z-t-rkiye-vs-usa.png" aria-label="Copy Türkiye versus USA as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Türkiye versus USA goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇺🇸 USA</text><text class="side-label" x="442" y="34" text-anchor="end">🇹🇷 Türkiye</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">23%</text><line class="expected-line" x1="229.8" y1="42" x2="229.8" y2="172"><title>Mean GD -0.58</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="171.9" width="18.0" height="0.1"><title>GD -8: 0.02%</title></rect><rect class="negative-bar" x="97.6" y="171.6" width="18.0" height="0.4"><title>GD -7: 0.07%</title></rect><rect class="negative-bar" x="116.8" y="170.3" width="18.0" height="1.7"><title>GD -6: 0.30%</title></rect><rect class="negative-bar" x="136.0" y="166.1" width="18.0" height="5.9"><title>GD -5: 1.06%</title></rect><rect class="negative-bar" x="155.2" y="154.3" width="18.0" height="17.7"><title>GD -4: 3.19%</title></rect><rect class="negative-bar" x="174.4" y="127.9" width="18.0" height="44.1"><title>GD -3: 7.93%</title></rect><rect class="negative-bar" x="193.6" y="85.4" width="18.0" height="86.6"><title>GD -2: 15.58%</title></rect><rect class="negative-bar" x="212.8" y="44.6" width="18.0" height="127.4"><title>GD -1: 22.91%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 23.39%</title></rect><rect class="positive-bar" x="251.2" y="86.6" width="18.0" height="85.4"><title>GD +1: 15.36%</title></rect><rect class="positive-bar" x="270.4" y="133.1" width="18.0" height="38.9"><title>GD +2: 7.00%</title></rect><rect class="positive-bar" x="289.6" y="158.7" width="18.0" height="13.3"><title>GD +3: 2.39%</title></rect><rect class="positive-bar" x="308.8" y="168.4" width="18.0" height="3.6"><title>GD +4: 0.64%</title></rect><rect class="positive-bar" x="328.0" y="171.2" width="18.0" height="0.8"><title>GD +5: 0.14%</title></rect><rect class="positive-bar" x="347.2" y="171.8" width="18.0" height="0.2"><title>GD +6: 0.03%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.19-1.77</span><span>Mean GD -0.58</span><span>🇺🇸 USA 51%</span><span>Draw 23%</span><span>🇹🇷 Türkiye 26%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t02-00-00z-usa-vs-t-rkiye.png" aria-label="Copy USA versus Türkiye as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="USA versus Türkiye goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇹🇷 Türkiye</text><text class="side-label" x="442" y="34" text-anchor="end">🇺🇸 USA</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">23%</text><line class="expected-line" x1="252.2" y1="42" x2="252.2" y2="172"><title>Mean GD +0.58</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.8" width="18.0" height="0.2"><title>GD -6: 0.03%</title></rect><rect class="negative-bar" x="136.0" y="171.2" width="18.0" height="0.8"><title>GD -5: 0.14%</title></rect><rect class="negative-bar" x="155.2" y="168.4" width="18.0" height="3.6"><title>GD -4: 0.64%</title></rect><rect class="negative-bar" x="174.4" y="158.7" width="18.0" height="13.3"><title>GD -3: 2.39%</title></rect><rect class="negative-bar" x="193.6" y="133.1" width="18.0" height="38.9"><title>GD -2: 7.00%</title></rect><rect class="negative-bar" x="212.8" y="86.6" width="18.0" height="85.4"><title>GD -1: 15.36%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 23.39%</title></rect><rect class="positive-bar" x="251.2" y="44.6" width="18.0" height="127.4"><title>GD +1: 22.91%</title></rect><rect class="positive-bar" x="270.4" y="85.4" width="18.0" height="86.6"><title>GD +2: 15.58%</title></rect><rect class="positive-bar" x="289.6" y="127.9" width="18.0" height="44.1"><title>GD +3: 7.93%</title></rect><rect class="positive-bar" x="308.8" y="154.3" width="18.0" height="17.7"><title>GD +4: 3.19%</title></rect><rect class="positive-bar" x="328.0" y="166.1" width="18.0" height="5.9"><title>GD +5: 1.06%</title></rect><rect class="positive-bar" x="347.2" y="170.3" width="18.0" height="1.7"><title>GD +6: 0.30%</title></rect><rect class="positive-bar" x="366.4" y="171.6" width="18.0" height="0.4"><title>GD +7: 0.07%</title></rect><rect class="positive-bar" x="385.6" y="171.9" width="18.0" height="0.1"><title>GD +8: 0.02%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.77-1.19</span><span>Mean GD +0.58</span><span>🇹🇷 Türkiye 26%</span><span>Draw 23%</span><span>🇺🇸 USA 51%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t19-00-00z-iraq-vs-senegal.png" aria-label="Copy Iraq versus Senegal as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Iraq versus Senegal goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 19:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇸🇳 Senegal</text><text class="side-label" x="442" y="34" text-anchor="end">🇮🇶 Iraq</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="205.3" y1="42" x2="205.3" y2="172"><title>Mean GD -1.86</title></line><rect class="negative-bar" x="40.0" y="171.9" width="18.0" height="0.1"><title>GD -10: 0.01%</title></rect><rect class="negative-bar" x="59.2" y="171.7" width="18.0" height="0.3"><title>GD -9: 0.06%</title></rect><rect class="negative-bar" x="78.4" y="170.8" width="18.0" height="1.2"><title>GD -8: 0.21%</title></rect><rect class="negative-bar" x="97.6" y="168.0" width="18.0" height="4.0"><title>GD -7: 0.68%</title></rect><rect class="negative-bar" x="116.8" y="160.7" width="18.0" height="11.3"><title>GD -6: 1.92%</title></rect><rect class="negative-bar" x="136.0" y="144.3" width="18.0" height="27.7"><title>GD -5: 4.69%</title></rect><rect class="negative-bar" x="155.2" y="114.7" width="18.0" height="57.3"><title>GD -4: 9.71%</title></rect><rect class="negative-bar" x="174.4" y="74.7" width="18.0" height="97.3"><title>GD -3: 16.50%</title></rect><rect class="negative-bar" x="193.6" y="42.0" width="18.0" height="130.0"><title>GD -2: 22.03%</title></rect><rect class="negative-bar" x="212.8" y="43.7" width="18.0" height="128.3"><title>GD -1: 21.75%</title></rect><rect class="zero-bar" x="232.0" y="86.4" width="18.0" height="85.6"><title>GD +0: 14.51%</title></rect><rect class="positive-bar" x="251.2" y="137.1" width="18.0" height="34.9"><title>GD +1: 5.91%</title></rect><rect class="positive-bar" x="270.4" y="162.4" width="18.0" height="9.6"><title>GD +2: 1.63%</title></rect><rect class="positive-bar" x="289.6" y="170.0" width="18.0" height="2.0"><title>GD +3: 0.33%</title></rect><rect class="positive-bar" x="308.8" y="171.7" width="18.0" height="0.3"><title>GD +4: 0.05%</title></rect><rect class="positive-bar" x="328.0" y="172.0" width="18.0" height="0.0"><title>GD +5: 0.01%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.69-2.55</span><span>Mean GD -1.86</span><span>🇸🇳 Senegal 78%</span><span>Draw 15%</span><span>🇮🇶 Iraq 8%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t19-00-00z-senegal-vs-iraq.png" aria-label="Copy Senegal versus Iraq as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Senegal versus Iraq goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 19:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇮🇶 Iraq</text><text class="side-label" x="442" y="34" text-anchor="end">🇸🇳 Senegal</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="276.7" y1="42" x2="276.7" y2="172"><title>Mean GD +1.86</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="172.0" width="18.0" height="0.0"><title>GD -5: 0.01%</title></rect><rect class="negative-bar" x="155.2" y="171.7" width="18.0" height="0.3"><title>GD -4: 0.05%</title></rect><rect class="negative-bar" x="174.4" y="170.0" width="18.0" height="2.0"><title>GD -3: 0.33%</title></rect><rect class="negative-bar" x="193.6" y="162.4" width="18.0" height="9.6"><title>GD -2: 1.63%</title></rect><rect class="negative-bar" x="212.8" y="137.1" width="18.0" height="34.9"><title>GD -1: 5.91%</title></rect><rect class="zero-bar" x="232.0" y="86.4" width="18.0" height="85.6"><title>GD +0: 14.51%</title></rect><rect class="positive-bar" x="251.2" y="43.7" width="18.0" height="128.3"><title>GD +1: 21.75%</title></rect><rect class="positive-bar" x="270.4" y="42.0" width="18.0" height="130.0"><title>GD +2: 22.03%</title></rect><rect class="positive-bar" x="289.6" y="74.7" width="18.0" height="97.3"><title>GD +3: 16.50%</title></rect><rect class="positive-bar" x="308.8" y="114.7" width="18.0" height="57.3"><title>GD +4: 9.71%</title></rect><rect class="positive-bar" x="328.0" y="144.3" width="18.0" height="27.7"><title>GD +5: 4.69%</title></rect><rect class="positive-bar" x="347.2" y="160.7" width="18.0" height="11.3"><title>GD +6: 1.92%</title></rect><rect class="positive-bar" x="366.4" y="168.0" width="18.0" height="4.0"><title>GD +7: 0.68%</title></rect><rect class="positive-bar" x="385.6" y="170.8" width="18.0" height="1.2"><title>GD +8: 0.21%</title></rect><rect class="positive-bar" x="404.8" y="171.7" width="18.0" height="0.3"><title>GD +9: 0.06%</title></rect><rect class="positive-bar" x="424.0" y="171.9" width="18.0" height="0.1"><title>GD +10: 0.01%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 2.55-0.69</span><span>Mean GD +1.86</span><span>🇮🇶 Iraq 8%</span><span>Draw 15%</span><span>🇸🇳 Senegal 78%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t19-00-00z-france-vs-norway.png" aria-label="Copy France versus Norway as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="France versus Norway goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 19:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇳🇴 Norway</text><text class="side-label" x="442" y="34" text-anchor="end">🇫🇷 France</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="258.8" y1="42" x2="258.8" y2="172"><title>Mean GD +0.93</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.9" width="18.0" height="0.1"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.6" width="18.0" height="0.4"><title>GD -5: 0.07%</title></rect><rect class="negative-bar" x="155.2" y="170.0" width="18.0" height="2.0"><title>GD -4: 0.37%</title></rect><rect class="negative-bar" x="174.4" y="163.6" width="18.0" height="8.4"><title>GD -3: 1.53%</title></rect><rect class="negative-bar" x="193.6" y="144.1" width="18.0" height="27.9"><title>GD -2: 5.07%</title></rect><rect class="negative-bar" x="212.8" y="103.0" width="18.0" height="69.0"><title>GD -1: 12.54%</title></rect><rect class="zero-bar" x="232.0" y="53.8" width="18.0" height="118.2"><title>GD +0: 21.48%</title></rect><rect class="positive-bar" x="251.2" y="42.0" width="18.0" height="130.0"><title>GD +1: 23.62%</title></rect><rect class="positive-bar" x="270.4" y="73.0" width="18.0" height="99.0"><title>GD +2: 17.99%</title></rect><rect class="positive-bar" x="289.6" y="115.6" width="18.0" height="56.4"><title>GD +3: 10.25%</title></rect><rect class="positive-bar" x="308.8" y="146.6" width="18.0" height="25.4"><title>GD +4: 4.62%</title></rect><rect class="positive-bar" x="328.0" y="162.6" width="18.0" height="9.4"><title>GD +5: 1.71%</title></rect><rect class="positive-bar" x="347.2" y="169.0" width="18.0" height="3.0"><title>GD +6: 0.54%</title></rect><rect class="positive-bar" x="366.4" y="171.2" width="18.0" height="0.8"><title>GD +7: 0.15%</title></rect><rect class="positive-bar" x="385.6" y="171.8" width="18.0" height="0.2"><title>GD +8: 0.04%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.01%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.98-1.05</span><span>Mean GD +0.93</span><span>🇳🇴 Norway 20%</span><span>Draw 21%</span><span>🇫🇷 France 59%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-26t19-00-00z-norway-vs-france.png" aria-label="Copy Norway versus France as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Norway versus France goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">26 Jun 2026 19:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇫🇷 France</text><text class="side-label" x="442" y="34" text-anchor="end">🇳🇴 Norway</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="223.2" y1="42" x2="223.2" y2="172"><title>Mean GD -0.93</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.01%</title></rect><rect class="negative-bar" x="78.4" y="171.8" width="18.0" height="0.2"><title>GD -8: 0.04%</title></rect><rect class="negative-bar" x="97.6" y="171.2" width="18.0" height="0.8"><title>GD -7: 0.15%</title></rect><rect class="negative-bar" x="116.8" y="169.0" width="18.0" height="3.0"><title>GD -6: 0.54%</title></rect><rect class="negative-bar" x="136.0" y="162.6" width="18.0" height="9.4"><title>GD -5: 1.71%</title></rect><rect class="negative-bar" x="155.2" y="146.6" width="18.0" height="25.4"><title>GD -4: 4.62%</title></rect><rect class="negative-bar" x="174.4" y="115.6" width="18.0" height="56.4"><title>GD -3: 10.25%</title></rect><rect class="negative-bar" x="193.6" y="73.0" width="18.0" height="99.0"><title>GD -2: 17.99%</title></rect><rect class="negative-bar" x="212.8" y="42.0" width="18.0" height="130.0"><title>GD -1: 23.62%</title></rect><rect class="zero-bar" x="232.0" y="53.8" width="18.0" height="118.2"><title>GD +0: 21.48%</title></rect><rect class="positive-bar" x="251.2" y="103.0" width="18.0" height="69.0"><title>GD +1: 12.54%</title></rect><rect class="positive-bar" x="270.4" y="144.1" width="18.0" height="27.9"><title>GD +2: 5.07%</title></rect><rect class="positive-bar" x="289.6" y="163.6" width="18.0" height="8.4"><title>GD +3: 1.53%</title></rect><rect class="positive-bar" x="308.8" y="170.0" width="18.0" height="2.0"><title>GD +4: 0.37%</title></rect><rect class="positive-bar" x="328.0" y="171.6" width="18.0" height="0.4"><title>GD +5: 0.07%</title></rect><rect class="positive-bar" x="347.2" y="171.9" width="18.0" height="0.1"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.05-1.98</span><span>Mean GD -0.93</span><span>🇫🇷 France 59%</span><span>Draw 21%</span><span>🇳🇴 Norway 20%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t00-00-00z-spain-vs-uruguay.png" aria-label="Copy Spain versus Uruguay as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Spain versus Uruguay goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 00:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇺🇾 Uruguay</text><text class="side-label" x="442" y="34" text-anchor="end">🇪🇸 Spain</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">25%</text><line class="expected-line" x1="263.4" y1="42" x2="263.4" y2="172"><title>Mean GD +1.16</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="171.9" width="18.0" height="0.1"><title>GD -5: 0.02%</title></rect><rect class="negative-bar" x="155.2" y="171.3" width="18.0" height="0.7"><title>GD -4: 0.14%</title></rect><rect class="negative-bar" x="174.4" y="168.1" width="18.0" height="3.9"><title>GD -3: 0.76%</title></rect><rect class="negative-bar" x="193.6" y="155.2" width="18.0" height="16.8"><title>GD -2: 3.25%</title></rect><rect class="negative-bar" x="212.8" y="119.5" width="18.0" height="52.5"><title>GD -1: 10.14%</title></rect><rect class="zero-bar" x="232.0" y="63.7" width="18.0" height="108.3"><title>GD +0: 20.92%</title></rect><rect class="positive-bar" x="251.2" y="42.0" width="18.0" height="130.0"><title>GD +1: 25.13%</title></rect><rect class="positive-bar" x="270.4" y="68.8" width="18.0" height="103.2"><title>GD +2: 19.96%</title></rect><rect class="positive-bar" x="289.6" y="112.0" width="18.0" height="60.0"><title>GD +3: 11.60%</title></rect><rect class="positive-bar" x="308.8" y="144.7" width="18.0" height="27.3"><title>GD +4: 5.28%</title></rect><rect class="positive-bar" x="328.0" y="161.8" width="18.0" height="10.2"><title>GD +5: 1.96%</title></rect><rect class="positive-bar" x="347.2" y="168.8" width="18.0" height="3.2"><title>GD +6: 0.62%</title></rect><rect class="positive-bar" x="366.4" y="171.1" width="18.0" height="0.9"><title>GD +7: 0.17%</title></rect><rect class="positive-bar" x="385.6" y="171.8" width="18.0" height="0.2"><title>GD +8: 0.04%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.01%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.95-0.79</span><span>Mean GD +1.16</span><span>🇺🇾 Uruguay 14%</span><span>Draw 21%</span><span>🇪🇸 Spain 65%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t00-00-00z-uruguay-vs-spain.png" aria-label="Copy Uruguay versus Spain as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Uruguay versus Spain goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 00:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇪🇸 Spain</text><text class="side-label" x="442" y="34" text-anchor="end">🇺🇾 Uruguay</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">25%</text><line class="expected-line" x1="218.6" y1="42" x2="218.6" y2="172"><title>Mean GD -1.16</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.01%</title></rect><rect class="negative-bar" x="78.4" y="171.8" width="18.0" height="0.2"><title>GD -8: 0.04%</title></rect><rect class="negative-bar" x="97.6" y="171.1" width="18.0" height="0.9"><title>GD -7: 0.17%</title></rect><rect class="negative-bar" x="116.8" y="168.8" width="18.0" height="3.2"><title>GD -6: 0.62%</title></rect><rect class="negative-bar" x="136.0" y="161.8" width="18.0" height="10.2"><title>GD -5: 1.96%</title></rect><rect class="negative-bar" x="155.2" y="144.7" width="18.0" height="27.3"><title>GD -4: 5.28%</title></rect><rect class="negative-bar" x="174.4" y="112.0" width="18.0" height="60.0"><title>GD -3: 11.60%</title></rect><rect class="negative-bar" x="193.6" y="68.8" width="18.0" height="103.2"><title>GD -2: 19.96%</title></rect><rect class="negative-bar" x="212.8" y="42.0" width="18.0" height="130.0"><title>GD -1: 25.13%</title></rect><rect class="zero-bar" x="232.0" y="63.7" width="18.0" height="108.3"><title>GD +0: 20.92%</title></rect><rect class="positive-bar" x="251.2" y="119.5" width="18.0" height="52.5"><title>GD +1: 10.14%</title></rect><rect class="positive-bar" x="270.4" y="155.2" width="18.0" height="16.8"><title>GD +2: 3.25%</title></rect><rect class="positive-bar" x="289.6" y="168.1" width="18.0" height="3.9"><title>GD +3: 0.76%</title></rect><rect class="positive-bar" x="308.8" y="171.3" width="18.0" height="0.7"><title>GD +4: 0.14%</title></rect><rect class="positive-bar" x="328.0" y="171.9" width="18.0" height="0.1"><title>GD +5: 0.02%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.79-1.95</span><span>Mean GD -1.16</span><span>🇪🇸 Spain 65%</span><span>Draw 21%</span><span>🇺🇾 Uruguay 14%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t00-00-00z-cape-verde-vs-saudi-arabia.png" aria-label="Copy Cape Verde versus Saudi Arabia as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Cape Verde versus Saudi Arabia goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 00:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇸🇦 Saudi Arabia</text><text class="side-label" x="442" y="34" text-anchor="end">🇨🇻 Cape Verde</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">14%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">27%</text><line class="expected-line" x1="242.5" y1="42" x2="242.5" y2="172"><title>Mean GD +0.08</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.01%</title></rect><rect class="negative-bar" x="116.8" y="171.8" width="18.0" height="0.2"><title>GD -6: 0.04%</title></rect><rect class="negative-bar" x="136.0" y="170.9" width="18.0" height="1.1"><title>GD -5: 0.23%</title></rect><rect class="negative-bar" x="155.2" y="167.3" width="18.0" height="4.7"><title>GD -4: 0.98%</title></rect><rect class="negative-bar" x="174.4" y="155.1" width="18.0" height="16.9"><title>GD -3: 3.51%</title></rect><rect class="negative-bar" x="193.6" y="124.9" width="18.0" height="47.1"><title>GD -2: 9.79%</title></rect><rect class="negative-bar" x="212.8" y="75.9" width="18.0" height="96.1"><title>GD -1: 20.00%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 27.04%</title></rect><rect class="positive-bar" x="251.2" y="69.4" width="18.0" height="102.6"><title>GD +1: 21.33%</title></rect><rect class="positive-bar" x="270.4" y="118.4" width="18.0" height="53.6"><title>GD +2: 11.14%</title></rect><rect class="positive-bar" x="289.6" y="151.5" width="18.0" height="20.5"><title>GD +3: 4.26%</title></rect><rect class="positive-bar" x="308.8" y="165.9" width="18.0" height="6.1"><title>GD +4: 1.28%</title></rect><rect class="positive-bar" x="328.0" y="170.5" width="18.0" height="1.5"><title>GD +5: 0.31%</title></rect><rect class="positive-bar" x="347.2" y="171.7" width="18.0" height="0.3"><title>GD +6: 0.06%</title></rect><rect class="positive-bar" x="366.4" y="171.9" width="18.0" height="0.1"><title>GD +7: 0.01%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.29-1.20</span><span>Mean GD +0.08</span><span>🇸🇦 Saudi Arabia 35%</span><span>Draw 27%</span><span>🇨🇻 Cape Verde 38%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t00-00-00z-saudi-arabia-vs-cape-verde.png" aria-label="Copy Saudi Arabia versus Cape Verde as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Saudi Arabia versus Cape Verde goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 00:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇨🇻 Cape Verde</text><text class="side-label" x="442" y="34" text-anchor="end">🇸🇦 Saudi Arabia</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">14%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">27%</text><line class="expected-line" x1="239.5" y1="42" x2="239.5" y2="172"><title>Mean GD -0.08</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="171.9" width="18.0" height="0.1"><title>GD -7: 0.01%</title></rect><rect class="negative-bar" x="116.8" y="171.7" width="18.0" height="0.3"><title>GD -6: 0.06%</title></rect><rect class="negative-bar" x="136.0" y="170.5" width="18.0" height="1.5"><title>GD -5: 0.31%</title></rect><rect class="negative-bar" x="155.2" y="165.9" width="18.0" height="6.1"><title>GD -4: 1.28%</title></rect><rect class="negative-bar" x="174.4" y="151.5" width="18.0" height="20.5"><title>GD -3: 4.26%</title></rect><rect class="negative-bar" x="193.6" y="118.4" width="18.0" height="53.6"><title>GD -2: 11.14%</title></rect><rect class="negative-bar" x="212.8" y="69.4" width="18.0" height="102.6"><title>GD -1: 21.33%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 27.04%</title></rect><rect class="positive-bar" x="251.2" y="75.9" width="18.0" height="96.1"><title>GD +1: 20.00%</title></rect><rect class="positive-bar" x="270.4" y="124.9" width="18.0" height="47.1"><title>GD +2: 9.79%</title></rect><rect class="positive-bar" x="289.6" y="155.1" width="18.0" height="16.9"><title>GD +3: 3.51%</title></rect><rect class="positive-bar" x="308.8" y="167.3" width="18.0" height="4.7"><title>GD +4: 0.98%</title></rect><rect class="positive-bar" x="328.0" y="170.9" width="18.0" height="1.1"><title>GD +5: 0.23%</title></rect><rect class="positive-bar" x="347.2" y="171.8" width="18.0" height="0.2"><title>GD +6: 0.04%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.01%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.20-1.29</span><span>Mean GD -0.08</span><span>🇨🇻 Cape Verde 38%</span><span>Draw 27%</span><span>🇸🇦 Saudi Arabia 35%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t03-00-00z-egypt-vs-iran.png" aria-label="Copy Egypt versus Iran as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Egypt versus Iran goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 03:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇮🇷 Iran</text><text class="side-label" x="442" y="34" text-anchor="end">🇪🇬 Egypt</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">15%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">30%</text><line class="expected-line" x1="245.8" y1="42" x2="245.8" y2="172"><title>Mean GD +0.25</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.7" width="18.0" height="0.3"><title>GD -5: 0.07%</title></rect><rect class="negative-bar" x="155.2" y="170.1" width="18.0" height="1.9"><title>GD -4: 0.43%</title></rect><rect class="negative-bar" x="174.4" y="163.3" width="18.0" height="8.7"><title>GD -3: 2.01%</title></rect><rect class="negative-bar" x="193.6" y="140.7" width="18.0" height="31.3"><title>GD -2: 7.26%</title></rect><rect class="negative-bar" x="212.8" y="91.2" width="18.0" height="80.8"><title>GD -1: 18.72%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 30.11%</title></rect><rect class="positive-bar" x="251.2" y="68.7" width="18.0" height="103.3"><title>GD +1: 23.91%</title></rect><rect class="positive-bar" x="270.4" y="120.9" width="18.0" height="51.1"><title>GD +2: 11.84%</title></rect><rect class="positive-bar" x="289.6" y="153.9" width="18.0" height="18.1"><title>GD +3: 4.19%</title></rect><rect class="positive-bar" x="308.8" y="167.1" width="18.0" height="4.9"><title>GD +4: 1.14%</title></rect><rect class="positive-bar" x="328.0" y="170.9" width="18.0" height="1.1"><title>GD +5: 0.25%</title></rect><rect class="positive-bar" x="347.2" y="171.8" width="18.0" height="0.2"><title>GD +6: 0.05%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.01%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.15-0.90</span><span>Mean GD +0.25</span><span>🇮🇷 Iran 28%</span><span>Draw 30%</span><span>🇪🇬 Egypt 41%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t03-00-00z-iran-vs-egypt.png" aria-label="Copy Iran versus Egypt as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Iran versus Egypt goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 03:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇪🇬 Egypt</text><text class="side-label" x="442" y="34" text-anchor="end">🇮🇷 Iran</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">15%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">30%</text><line class="expected-line" x1="236.2" y1="42" x2="236.2" y2="172"><title>Mean GD -0.25</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.01%</title></rect><rect class="negative-bar" x="116.8" y="171.8" width="18.0" height="0.2"><title>GD -6: 0.05%</title></rect><rect class="negative-bar" x="136.0" y="170.9" width="18.0" height="1.1"><title>GD -5: 0.25%</title></rect><rect class="negative-bar" x="155.2" y="167.1" width="18.0" height="4.9"><title>GD -4: 1.14%</title></rect><rect class="negative-bar" x="174.4" y="153.9" width="18.0" height="18.1"><title>GD -3: 4.19%</title></rect><rect class="negative-bar" x="193.6" y="120.9" width="18.0" height="51.1"><title>GD -2: 11.84%</title></rect><rect class="negative-bar" x="212.8" y="68.7" width="18.0" height="103.3"><title>GD -1: 23.91%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 30.11%</title></rect><rect class="positive-bar" x="251.2" y="91.2" width="18.0" height="80.8"><title>GD +1: 18.72%</title></rect><rect class="positive-bar" x="270.4" y="140.7" width="18.0" height="31.3"><title>GD +2: 7.26%</title></rect><rect class="positive-bar" x="289.6" y="163.3" width="18.0" height="8.7"><title>GD +3: 2.01%</title></rect><rect class="positive-bar" x="308.8" y="170.1" width="18.0" height="1.9"><title>GD +4: 0.43%</title></rect><rect class="positive-bar" x="328.0" y="171.7" width="18.0" height="0.3"><title>GD +5: 0.07%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.90-1.15</span><span>Mean GD -0.25</span><span>🇪🇬 Egypt 41%</span><span>Draw 30%</span><span>🇮🇷 Iran 28%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t03-00-00z-belgium-vs-new-zealand.png" aria-label="Copy Belgium versus New Zealand as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Belgium versus New Zealand goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 03:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇳🇿 New Zealand</text><text class="side-label" x="442" y="34" text-anchor="end">🇧🇪 Belgium</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="282.5" y1="42" x2="282.5" y2="172"><title>Mean GD +2.16</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="172.0" width="18.0" height="0.0"><title>GD -5: 0.00%</title></rect><rect class="negative-bar" x="155.2" y="171.8" width="18.0" height="0.2"><title>GD -4: 0.03%</title></rect><rect class="negative-bar" x="174.4" y="170.8" width="18.0" height="1.2"><title>GD -3: 0.20%</title></rect><rect class="negative-bar" x="193.6" y="165.5" width="18.0" height="6.5"><title>GD -2: 1.11%</title></rect><rect class="negative-bar" x="212.8" y="145.7" width="18.0" height="26.3"><title>GD -1: 4.46%</title></rect><rect class="zero-bar" x="232.0" y="100.8" width="18.0" height="71.2"><title>GD +0: 12.09%</title></rect><rect class="positive-bar" x="251.2" y="54.8" width="18.0" height="117.2"><title>GD +1: 19.90%</title></rect><rect class="positive-bar" x="270.4" y="42.0" width="18.0" height="130.0"><title>GD +2: 22.07%</title></rect><rect class="positive-bar" x="289.6" y="65.6" width="18.0" height="106.4"><title>GD +3: 18.07%</title></rect><rect class="positive-bar" x="308.8" y="103.5" width="18.0" height="68.5"><title>GD +4: 11.62%</title></rect><rect class="positive-bar" x="328.0" y="135.9" width="18.0" height="36.1"><title>GD +5: 6.13%</title></rect><rect class="positive-bar" x="347.2" y="155.9" width="18.0" height="16.1"><title>GD +6: 2.74%</title></rect><rect class="positive-bar" x="366.4" y="165.8" width="18.0" height="6.2"><title>GD +7: 1.06%</title></rect><rect class="positive-bar" x="385.6" y="169.9" width="18.0" height="2.1"><title>GD +8: 0.36%</title></rect><rect class="positive-bar" x="404.8" y="171.4" width="18.0" height="0.6"><title>GD +9: 0.11%</title></rect><rect class="positive-bar" x="424.0" y="171.8" width="18.0" height="0.2"><title>GD +10: 0.03%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 2.78-0.62</span><span>Mean GD +2.16</span><span>🇳🇿 New Zealand 6%</span><span>Draw 12%</span><span>🇧🇪 Belgium 82%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t03-00-00z-new-zealand-vs-belgium.png" aria-label="Copy New Zealand versus Belgium as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="New Zealand versus Belgium goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 03:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇧🇪 Belgium</text><text class="side-label" x="442" y="34" text-anchor="end">🇳🇿 New Zealand</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="199.5" y1="42" x2="199.5" y2="172"><title>Mean GD -2.16</title></line><rect class="negative-bar" x="40.0" y="171.8" width="18.0" height="0.2"><title>GD -10: 0.03%</title></rect><rect class="negative-bar" x="59.2" y="171.4" width="18.0" height="0.6"><title>GD -9: 0.11%</title></rect><rect class="negative-bar" x="78.4" y="169.9" width="18.0" height="2.1"><title>GD -8: 0.36%</title></rect><rect class="negative-bar" x="97.6" y="165.8" width="18.0" height="6.2"><title>GD -7: 1.06%</title></rect><rect class="negative-bar" x="116.8" y="155.9" width="18.0" height="16.1"><title>GD -6: 2.74%</title></rect><rect class="negative-bar" x="136.0" y="135.9" width="18.0" height="36.1"><title>GD -5: 6.13%</title></rect><rect class="negative-bar" x="155.2" y="103.5" width="18.0" height="68.5"><title>GD -4: 11.62%</title></rect><rect class="negative-bar" x="174.4" y="65.6" width="18.0" height="106.4"><title>GD -3: 18.07%</title></rect><rect class="negative-bar" x="193.6" y="42.0" width="18.0" height="130.0"><title>GD -2: 22.07%</title></rect><rect class="negative-bar" x="212.8" y="54.8" width="18.0" height="117.2"><title>GD -1: 19.90%</title></rect><rect class="zero-bar" x="232.0" y="100.8" width="18.0" height="71.2"><title>GD +0: 12.09%</title></rect><rect class="positive-bar" x="251.2" y="145.7" width="18.0" height="26.3"><title>GD +1: 4.46%</title></rect><rect class="positive-bar" x="270.4" y="165.5" width="18.0" height="6.5"><title>GD +2: 1.11%</title></rect><rect class="positive-bar" x="289.6" y="170.8" width="18.0" height="1.2"><title>GD +3: 0.20%</title></rect><rect class="positive-bar" x="308.8" y="171.8" width="18.0" height="0.2"><title>GD +4: 0.03%</title></rect><rect class="positive-bar" x="328.0" y="172.0" width="18.0" height="0.0"><title>GD +5: 0.00%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.62-2.78</span><span>Mean GD -2.16</span><span>🇧🇪 Belgium 82%</span><span>Draw 12%</span><span>🇳🇿 New Zealand 6%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t21-00-00z-england-vs-panama.png" aria-label="Copy England versus Panama as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="England versus Panama goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 21:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇵🇦 Panama</text><text class="side-label" x="442" y="34" text-anchor="end">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="281.5" y1="42" x2="281.5" y2="172"><title>Mean GD +2.11</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="172.0" width="18.0" height="0.0"><title>GD -5: 0.00%</title></rect><rect class="negative-bar" x="155.2" y="171.8" width="18.0" height="0.2"><title>GD -4: 0.03%</title></rect><rect class="negative-bar" x="174.4" y="170.7" width="18.0" height="1.3"><title>GD -3: 0.22%</title></rect><rect class="negative-bar" x="193.6" y="165.0" width="18.0" height="7.0"><title>GD -2: 1.19%</title></rect><rect class="negative-bar" x="212.8" y="144.4" width="18.0" height="27.6"><title>GD -1: 4.70%</title></rect><rect class="zero-bar" x="232.0" y="98.5" width="18.0" height="73.5"><title>GD +0: 12.50%</title></rect><rect class="positive-bar" x="251.2" y="53.0" width="18.0" height="119.0"><title>GD +1: 20.23%</title></rect><rect class="positive-bar" x="270.4" y="42.0" width="18.0" height="130.0"><title>GD +2: 22.10%</title></rect><rect class="positive-bar" x="289.6" y="67.1" width="18.0" height="104.9"><title>GD +3: 17.82%</title></rect><rect class="positive-bar" x="308.8" y="105.5" width="18.0" height="66.5"><title>GD +4: 11.30%</title></rect><rect class="positive-bar" x="328.0" y="137.4" width="18.0" height="34.6"><title>GD +5: 5.87%</title></rect><rect class="positive-bar" x="347.2" y="156.8" width="18.0" height="15.2"><title>GD +6: 2.58%</title></rect><rect class="positive-bar" x="366.4" y="166.2" width="18.0" height="5.8"><title>GD +7: 0.98%</title></rect><rect class="positive-bar" x="385.6" y="170.1" width="18.0" height="1.9"><title>GD +8: 0.33%</title></rect><rect class="positive-bar" x="404.8" y="171.4" width="18.0" height="0.6"><title>GD +9: 0.10%</title></rect><rect class="positive-bar" x="424.0" y="171.8" width="18.0" height="0.2"><title>GD +10: 0.03%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 2.75-0.64</span><span>Mean GD +2.11</span><span>🇵🇦 Panama 6%</span><span>Draw 13%</span><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 81%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t21-00-00z-panama-vs-england.png" aria-label="Copy Panama versus England as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Panama versus England goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 21:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</text><text class="side-label" x="442" y="34" text-anchor="end">🇵🇦 Panama</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">22%</text><line class="expected-line" x1="200.5" y1="42" x2="200.5" y2="172"><title>Mean GD -2.11</title></line><rect class="negative-bar" x="40.0" y="171.8" width="18.0" height="0.2"><title>GD -10: 0.03%</title></rect><rect class="negative-bar" x="59.2" y="171.4" width="18.0" height="0.6"><title>GD -9: 0.10%</title></rect><rect class="negative-bar" x="78.4" y="170.1" width="18.0" height="1.9"><title>GD -8: 0.33%</title></rect><rect class="negative-bar" x="97.6" y="166.2" width="18.0" height="5.8"><title>GD -7: 0.98%</title></rect><rect class="negative-bar" x="116.8" y="156.8" width="18.0" height="15.2"><title>GD -6: 2.58%</title></rect><rect class="negative-bar" x="136.0" y="137.4" width="18.0" height="34.6"><title>GD -5: 5.87%</title></rect><rect class="negative-bar" x="155.2" y="105.5" width="18.0" height="66.5"><title>GD -4: 11.30%</title></rect><rect class="negative-bar" x="174.4" y="67.1" width="18.0" height="104.9"><title>GD -3: 17.82%</title></rect><rect class="negative-bar" x="193.6" y="42.0" width="18.0" height="130.0"><title>GD -2: 22.10%</title></rect><rect class="negative-bar" x="212.8" y="53.0" width="18.0" height="119.0"><title>GD -1: 20.23%</title></rect><rect class="zero-bar" x="232.0" y="98.5" width="18.0" height="73.5"><title>GD +0: 12.50%</title></rect><rect class="positive-bar" x="251.2" y="144.4" width="18.0" height="27.6"><title>GD +1: 4.70%</title></rect><rect class="positive-bar" x="270.4" y="165.0" width="18.0" height="7.0"><title>GD +2: 1.19%</title></rect><rect class="positive-bar" x="289.6" y="170.7" width="18.0" height="1.3"><title>GD +3: 0.22%</title></rect><rect class="positive-bar" x="308.8" y="171.8" width="18.0" height="0.2"><title>GD +4: 0.03%</title></rect><rect class="positive-bar" x="328.0" y="172.0" width="18.0" height="0.0"><title>GD +5: 0.00%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.64-2.75</span><span>Mean GD -2.11</span><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 81%</span><span>Draw 13%</span><span>🇵🇦 Panama 6%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t21-00-00z-croatia-vs-ghana.png" aria-label="Copy Croatia versus Ghana as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Croatia versus Ghana goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 21:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇬🇭 Ghana</text><text class="side-label" x="442" y="34" text-anchor="end">🇭🇷 Croatia</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">26%</text><line class="expected-line" x1="255.3" y1="42" x2="255.3" y2="172"><title>Mean GD +0.74</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="171.9" width="18.0" height="0.1"><title>GD -5: 0.03%</title></rect><rect class="negative-bar" x="155.2" y="171.0" width="18.0" height="1.0"><title>GD -4: 0.19%</title></rect><rect class="negative-bar" x="174.4" y="166.8" width="18.0" height="5.2"><title>GD -3: 1.06%</title></rect><rect class="negative-bar" x="193.6" y="150.0" width="18.0" height="22.0"><title>GD -2: 4.44%</title></rect><rect class="negative-bar" x="212.8" y="105.4" width="18.0" height="66.6"><title>GD -1: 13.45%</title></rect><rect class="zero-bar" x="232.0" y="43.7" width="18.0" height="128.3"><title>GD +0: 25.91%</title></rect><rect class="positive-bar" x="251.2" y="42.0" width="18.0" height="130.0"><title>GD +1: 26.25%</title></rect><rect class="positive-bar" x="270.4" y="88.2" width="18.0" height="83.8"><title>GD +2: 16.92%</title></rect><rect class="positive-bar" x="289.6" y="133.1" width="18.0" height="38.9"><title>GD +3: 7.85%</title></rect><rect class="positive-bar" x="308.8" y="158.0" width="18.0" height="14.0"><title>GD +4: 2.83%</title></rect><rect class="positive-bar" x="328.0" y="167.9" width="18.0" height="4.1"><title>GD +5: 0.83%</title></rect><rect class="positive-bar" x="347.2" y="171.0" width="18.0" height="1.0"><title>GD +6: 0.20%</title></rect><rect class="positive-bar" x="366.4" y="171.8" width="18.0" height="0.2"><title>GD +7: 0.04%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.01%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.52-0.78</span><span>Mean GD +0.74</span><span>🇬🇭 Ghana 19%</span><span>Draw 26%</span><span>🇭🇷 Croatia 55%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t21-00-00z-ghana-vs-croatia.png" aria-label="Copy Ghana versus Croatia as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Ghana versus Croatia goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 21:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇭🇷 Croatia</text><text class="side-label" x="442" y="34" text-anchor="end">🇬🇭 Ghana</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">26%</text><line class="expected-line" x1="226.7" y1="42" x2="226.7" y2="172"><title>Mean GD -0.74</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.01%</title></rect><rect class="negative-bar" x="97.6" y="171.8" width="18.0" height="0.2"><title>GD -7: 0.04%</title></rect><rect class="negative-bar" x="116.8" y="171.0" width="18.0" height="1.0"><title>GD -6: 0.20%</title></rect><rect class="negative-bar" x="136.0" y="167.9" width="18.0" height="4.1"><title>GD -5: 0.83%</title></rect><rect class="negative-bar" x="155.2" y="158.0" width="18.0" height="14.0"><title>GD -4: 2.83%</title></rect><rect class="negative-bar" x="174.4" y="133.1" width="18.0" height="38.9"><title>GD -3: 7.85%</title></rect><rect class="negative-bar" x="193.6" y="88.2" width="18.0" height="83.8"><title>GD -2: 16.92%</title></rect><rect class="negative-bar" x="212.8" y="42.0" width="18.0" height="130.0"><title>GD -1: 26.25%</title></rect><rect class="zero-bar" x="232.0" y="43.7" width="18.0" height="128.3"><title>GD +0: 25.91%</title></rect><rect class="positive-bar" x="251.2" y="105.4" width="18.0" height="66.6"><title>GD +1: 13.45%</title></rect><rect class="positive-bar" x="270.4" y="150.0" width="18.0" height="22.0"><title>GD +2: 4.44%</title></rect><rect class="positive-bar" x="289.6" y="166.8" width="18.0" height="5.2"><title>GD +3: 1.06%</title></rect><rect class="positive-bar" x="308.8" y="171.0" width="18.0" height="1.0"><title>GD +4: 0.19%</title></rect><rect class="positive-bar" x="328.0" y="171.9" width="18.0" height="0.1"><title>GD +5: 0.03%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.78-1.52</span><span>Mean GD -0.74</span><span>🇭🇷 Croatia 55%</span><span>Draw 26%</span><span>🇬🇭 Ghana 19%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t23-30-00z-dr-congo-vs-uzbekistan.png" aria-label="Copy DR Congo versus Uzbekistan as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="DR Congo versus Uzbekistan goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 23:30 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇺🇿 Uzbekistan</text><text class="side-label" x="442" y="34" text-anchor="end">🇨🇩 DR Congo</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="254.8" y1="42" x2="254.8" y2="172"><title>Mean GD +0.72</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.9" width="18.0" height="0.1"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.6" width="18.0" height="0.4"><title>GD -5: 0.07%</title></rect><rect class="negative-bar" x="155.2" y="170.1" width="18.0" height="1.9"><title>GD -4: 0.36%</title></rect><rect class="negative-bar" x="174.4" y="163.5" width="18.0" height="8.5"><title>GD -3: 1.61%</title></rect><rect class="negative-bar" x="193.6" y="142.5" width="18.0" height="29.5"><title>GD -2: 5.55%</title></rect><rect class="negative-bar" x="212.8" y="97.0" width="18.0" height="75.0"><title>GD -1: 14.12%</title></rect><rect class="zero-bar" x="232.0" y="44.3" width="18.0" height="127.7"><title>GD +0: 24.05%</title></rect><rect class="positive-bar" x="251.2" y="42.0" width="18.0" height="130.0"><title>GD +1: 24.48%</title></rect><rect class="positive-bar" x="270.4" y="83.4" width="18.0" height="88.6"><title>GD +2: 16.67%</title></rect><rect class="positive-bar" x="289.6" y="127.6" width="18.0" height="44.4"><title>GD +3: 8.36%</title></rect><rect class="positive-bar" x="308.8" y="154.5" width="18.0" height="17.5"><title>GD +4: 3.29%</title></rect><rect class="positive-bar" x="328.0" y="166.4" width="18.0" height="5.6"><title>GD +5: 1.06%</title></rect><rect class="positive-bar" x="347.2" y="170.5" width="18.0" height="1.5"><title>GD +6: 0.29%</title></rect><rect class="positive-bar" x="366.4" y="171.6" width="18.0" height="0.4"><title>GD +7: 0.07%</title></rect><rect class="positive-bar" x="385.6" y="171.9" width="18.0" height="0.1"><title>GD +8: 0.01%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.70-0.98</span><span>Mean GD +0.72</span><span>🇺🇿 Uzbekistan 22%</span><span>Draw 24%</span><span>🇨🇩 DR Congo 54%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t23-30-00z-uzbekistan-vs-dr-congo.png" aria-label="Copy Uzbekistan versus DR Congo as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Uzbekistan versus DR Congo goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 23:30 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇨🇩 DR Congo</text><text class="side-label" x="442" y="34" text-anchor="end">🇺🇿 Uzbekistan</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">12%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">24%</text><line class="expected-line" x1="227.2" y1="42" x2="227.2" y2="172"><title>Mean GD -0.72</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="171.9" width="18.0" height="0.1"><title>GD -8: 0.01%</title></rect><rect class="negative-bar" x="97.6" y="171.6" width="18.0" height="0.4"><title>GD -7: 0.07%</title></rect><rect class="negative-bar" x="116.8" y="170.5" width="18.0" height="1.5"><title>GD -6: 0.29%</title></rect><rect class="negative-bar" x="136.0" y="166.4" width="18.0" height="5.6"><title>GD -5: 1.06%</title></rect><rect class="negative-bar" x="155.2" y="154.5" width="18.0" height="17.5"><title>GD -4: 3.29%</title></rect><rect class="negative-bar" x="174.4" y="127.6" width="18.0" height="44.4"><title>GD -3: 8.36%</title></rect><rect class="negative-bar" x="193.6" y="83.4" width="18.0" height="88.6"><title>GD -2: 16.67%</title></rect><rect class="negative-bar" x="212.8" y="42.0" width="18.0" height="130.0"><title>GD -1: 24.48%</title></rect><rect class="zero-bar" x="232.0" y="44.3" width="18.0" height="127.7"><title>GD +0: 24.05%</title></rect><rect class="positive-bar" x="251.2" y="97.0" width="18.0" height="75.0"><title>GD +1: 14.12%</title></rect><rect class="positive-bar" x="270.4" y="142.5" width="18.0" height="29.5"><title>GD +2: 5.55%</title></rect><rect class="positive-bar" x="289.6" y="163.5" width="18.0" height="8.5"><title>GD +3: 1.61%</title></rect><rect class="positive-bar" x="308.8" y="170.1" width="18.0" height="1.9"><title>GD +4: 0.36%</title></rect><rect class="positive-bar" x="328.0" y="171.6" width="18.0" height="0.4"><title>GD +5: 0.07%</title></rect><rect class="positive-bar" x="347.2" y="171.9" width="18.0" height="0.1"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.98-1.70</span><span>Mean GD -0.72</span><span>🇨🇩 DR Congo 54%</span><span>Draw 24%</span><span>🇺🇿 Uzbekistan 22%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t23-30-00z-colombia-vs-portugal.png" aria-label="Copy Colombia versus Portugal as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Colombia versus Portugal goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 23:30 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇵🇹 Portugal</text><text class="side-label" x="442" y="34" text-anchor="end">🇨🇴 Colombia</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">25%</text><line class="expected-line" x1="229.0" y1="42" x2="229.0" y2="172"><title>Mean GD -0.63</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.01%</title></rect><rect class="negative-bar" x="97.6" y="171.7" width="18.0" height="0.3"><title>GD -7: 0.05%</title></rect><rect class="negative-bar" x="116.8" y="170.9" width="18.0" height="1.1"><title>GD -6: 0.22%</title></rect><rect class="negative-bar" x="136.0" y="167.6" width="18.0" height="4.4"><title>GD -5: 0.85%</title></rect><rect class="negative-bar" x="155.2" y="157.5" width="18.0" height="14.5"><title>GD -4: 2.80%</title></rect><rect class="negative-bar" x="174.4" y="132.8" width="18.0" height="39.2"><title>GD -3: 7.56%</title></rect><rect class="negative-bar" x="193.6" y="89.4" width="18.0" height="82.6"><title>GD -2: 15.93%</title></rect><rect class="negative-bar" x="212.8" y="44.6" width="18.0" height="127.4"><title>GD -1: 24.59%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 25.09%</title></rect><rect class="positive-bar" x="251.2" y="94.8" width="18.0" height="77.2"><title>GD +1: 14.90%</title></rect><rect class="positive-bar" x="270.4" y="141.7" width="18.0" height="30.3"><title>GD +2: 5.85%</title></rect><rect class="positive-bar" x="289.6" y="163.3" width="18.0" height="8.7"><title>GD +3: 1.68%</title></rect><rect class="positive-bar" x="308.8" y="170.0" width="18.0" height="2.0"><title>GD +4: 0.38%</title></rect><rect class="positive-bar" x="328.0" y="171.6" width="18.0" height="0.4"><title>GD +5: 0.07%</title></rect><rect class="positive-bar" x="347.2" y="171.9" width="18.0" height="0.1"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.97-1.59</span><span>Mean GD -0.63</span><span>🇵🇹 Portugal 52%</span><span>Draw 25%</span><span>🇨🇴 Colombia 23%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-27t23-30-00z-portugal-vs-colombia.png" aria-label="Copy Portugal versus Colombia as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Portugal versus Colombia goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">27 Jun 2026 23:30 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇨🇴 Colombia</text><text class="side-label" x="442" y="34" text-anchor="end">🇵🇹 Portugal</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">25%</text><line class="expected-line" x1="253.0" y1="42" x2="253.0" y2="172"><title>Mean GD +0.63</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.9" width="18.0" height="0.1"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.6" width="18.0" height="0.4"><title>GD -5: 0.07%</title></rect><rect class="negative-bar" x="155.2" y="170.0" width="18.0" height="2.0"><title>GD -4: 0.38%</title></rect><rect class="negative-bar" x="174.4" y="163.3" width="18.0" height="8.7"><title>GD -3: 1.68%</title></rect><rect class="negative-bar" x="193.6" y="141.7" width="18.0" height="30.3"><title>GD -2: 5.85%</title></rect><rect class="negative-bar" x="212.8" y="94.8" width="18.0" height="77.2"><title>GD -1: 14.90%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 25.09%</title></rect><rect class="positive-bar" x="251.2" y="44.6" width="18.0" height="127.4"><title>GD +1: 24.59%</title></rect><rect class="positive-bar" x="270.4" y="89.4" width="18.0" height="82.6"><title>GD +2: 15.93%</title></rect><rect class="positive-bar" x="289.6" y="132.8" width="18.0" height="39.2"><title>GD +3: 7.56%</title></rect><rect class="positive-bar" x="308.8" y="157.5" width="18.0" height="14.5"><title>GD +4: 2.80%</title></rect><rect class="positive-bar" x="328.0" y="167.6" width="18.0" height="4.4"><title>GD +5: 0.85%</title></rect><rect class="positive-bar" x="347.2" y="170.9" width="18.0" height="1.1"><title>GD +6: 0.22%</title></rect><rect class="positive-bar" x="366.4" y="171.7" width="18.0" height="0.3"><title>GD +7: 0.05%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.01%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.59-0.97</span><span>Mean GD +0.63</span><span>🇨🇴 Colombia 23%</span><span>Draw 25%</span><span>🇵🇹 Portugal 52%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-28t02-00-00z-argentina-vs-jordan.png" aria-label="Copy Argentina versus Jordan as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Argentina versus Jordan goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">28 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇯🇴 Jordan</text><text class="side-label" x="442" y="34" text-anchor="end">🇦🇷 Argentina</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">23%</text><line class="expected-line" x1="278.9" y1="42" x2="278.9" y2="172"><title>Mean GD +1.97</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="172.0" width="18.0" height="0.0"><title>GD -5: 0.00%</title></rect><rect class="negative-bar" x="155.2" y="171.9" width="18.0" height="0.1"><title>GD -4: 0.03%</title></rect><rect class="negative-bar" x="174.4" y="170.9" width="18.0" height="1.1"><title>GD -3: 0.19%</title></rect><rect class="negative-bar" x="193.6" y="165.6" width="18.0" height="6.4"><title>GD -2: 1.12%</title></rect><rect class="negative-bar" x="212.8" y="144.3" width="18.0" height="27.7"><title>GD -1: 4.84%</title></rect><rect class="zero-bar" x="232.0" y="94.1" width="18.0" height="77.9"><title>GD +0: 13.64%</title></rect><rect class="positive-bar" x="251.2" y="47.6" width="18.0" height="124.4"><title>GD +1: 21.78%</title></rect><rect class="positive-bar" x="270.4" y="42.0" width="18.0" height="130.0"><title>GD +2: 22.75%</title></rect><rect class="positive-bar" x="289.6" y="73.1" width="18.0" height="98.9"><title>GD +3: 17.31%</title></rect><rect class="positive-bar" x="308.8" y="113.3" width="18.0" height="58.7"><title>GD +4: 10.28%</title></rect><rect class="positive-bar" x="328.0" y="143.5" width="18.0" height="28.5"><title>GD +5: 4.99%</title></rect><rect class="positive-bar" x="347.2" y="160.3" width="18.0" height="11.7"><title>GD +6: 2.04%</title></rect><rect class="positive-bar" x="366.4" y="167.9" width="18.0" height="4.1"><title>GD +7: 0.72%</title></rect><rect class="positive-bar" x="385.6" y="170.7" width="18.0" height="1.3"><title>GD +8: 0.22%</title></rect><rect class="positive-bar" x="404.8" y="171.6" width="18.0" height="0.4"><title>GD +9: 0.06%</title></rect><rect class="positive-bar" x="424.0" y="171.9" width="18.0" height="0.1"><title>GD +10: 0.02%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 2.54-0.56</span><span>Mean GD +1.97</span><span>🇯🇴 Jordan 6%</span><span>Draw 14%</span><span>🇦🇷 Argentina 80%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-28t02-00-00z-jordan-vs-argentina.png" aria-label="Copy Jordan versus Argentina as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Jordan versus Argentina goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">28 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇦🇷 Argentina</text><text class="side-label" x="442" y="34" text-anchor="end">🇯🇴 Jordan</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">11%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">23%</text><line class="expected-line" x1="203.1" y1="42" x2="203.1" y2="172"><title>Mean GD -1.97</title></line><rect class="negative-bar" x="40.0" y="171.9" width="18.0" height="0.1"><title>GD -10: 0.02%</title></rect><rect class="negative-bar" x="59.2" y="171.6" width="18.0" height="0.4"><title>GD -9: 0.06%</title></rect><rect class="negative-bar" x="78.4" y="170.7" width="18.0" height="1.3"><title>GD -8: 0.22%</title></rect><rect class="negative-bar" x="97.6" y="167.9" width="18.0" height="4.1"><title>GD -7: 0.72%</title></rect><rect class="negative-bar" x="116.8" y="160.3" width="18.0" height="11.7"><title>GD -6: 2.04%</title></rect><rect class="negative-bar" x="136.0" y="143.5" width="18.0" height="28.5"><title>GD -5: 4.99%</title></rect><rect class="negative-bar" x="155.2" y="113.3" width="18.0" height="58.7"><title>GD -4: 10.28%</title></rect><rect class="negative-bar" x="174.4" y="73.1" width="18.0" height="98.9"><title>GD -3: 17.31%</title></rect><rect class="negative-bar" x="193.6" y="42.0" width="18.0" height="130.0"><title>GD -2: 22.75%</title></rect><rect class="negative-bar" x="212.8" y="47.6" width="18.0" height="124.4"><title>GD -1: 21.78%</title></rect><rect class="zero-bar" x="232.0" y="94.1" width="18.0" height="77.9"><title>GD +0: 13.64%</title></rect><rect class="positive-bar" x="251.2" y="144.3" width="18.0" height="27.7"><title>GD +1: 4.84%</title></rect><rect class="positive-bar" x="270.4" y="165.6" width="18.0" height="6.4"><title>GD +2: 1.12%</title></rect><rect class="positive-bar" x="289.6" y="170.9" width="18.0" height="1.1"><title>GD +3: 0.19%</title></rect><rect class="positive-bar" x="308.8" y="171.9" width="18.0" height="0.1"><title>GD +4: 0.03%</title></rect><rect class="positive-bar" x="328.0" y="172.0" width="18.0" height="0.0"><title>GD +5: 0.00%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.56-2.54</span><span>Mean GD -1.97</span><span>🇦🇷 Argentina 80%</span><span>Draw 14%</span><span>🇯🇴 Jordan 6%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-28t02-00-00z-algeria-vs-austria.png" aria-label="Copy Algeria versus Austria as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Algeria versus Austria goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">28 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇦🇹 Austria</text><text class="side-label" x="442" y="34" text-anchor="end">🇩🇿 Algeria</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">15%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">31%</text><line class="expected-line" x1="237.6" y1="42" x2="237.6" y2="172"><title>Mean GD -0.17</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.01%</title></rect><rect class="negative-bar" x="116.8" y="171.8" width="18.0" height="0.2"><title>GD -6: 0.04%</title></rect><rect class="negative-bar" x="136.0" y="171.1" width="18.0" height="0.9"><title>GD -5: 0.21%</title></rect><rect class="negative-bar" x="155.2" y="167.9" width="18.0" height="4.1"><title>GD -4: 0.97%</title></rect><rect class="negative-bar" x="174.4" y="156.1" width="18.0" height="15.9"><title>GD -3: 3.73%</title></rect><rect class="negative-bar" x="193.6" y="125.0" width="18.0" height="47.0"><title>GD -2: 11.04%</title></rect><rect class="negative-bar" x="212.8" y="72.9" width="18.0" height="99.1"><title>GD -1: 23.29%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 30.55%</title></rect><rect class="positive-bar" x="251.2" y="88.7" width="18.0" height="83.3"><title>GD +1: 19.58%</title></rect><rect class="positive-bar" x="270.4" y="138.8" width="18.0" height="33.2"><title>GD +2: 7.80%</title></rect><rect class="positive-bar" x="289.6" y="162.6" width="18.0" height="9.4"><title>GD +3: 2.21%</title></rect><rect class="positive-bar" x="308.8" y="169.9" width="18.0" height="2.1"><title>GD +4: 0.49%</title></rect><rect class="positive-bar" x="328.0" y="171.6" width="18.0" height="0.4"><title>GD +5: 0.09%</title></rect><rect class="positive-bar" x="347.2" y="171.9" width="18.0" height="0.1"><title>GD +6: 0.01%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.92-1.09</span><span>Mean GD -0.17</span><span>🇦🇹 Austria 39%</span><span>Draw 31%</span><span>🇩🇿 Algeria 30%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-28t02-00-00z-austria-vs-algeria.png" aria-label="Copy Austria versus Algeria as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Austria versus Algeria goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">28 Jun 2026 02:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇩🇿 Algeria</text><text class="side-label" x="442" y="34" text-anchor="end">🇦🇹 Austria</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">15%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">31%</text><line class="expected-line" x1="244.4" y1="42" x2="244.4" y2="172"><title>Mean GD +0.17</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="171.9" width="18.0" height="0.1"><title>GD -6: 0.01%</title></rect><rect class="negative-bar" x="136.0" y="171.6" width="18.0" height="0.4"><title>GD -5: 0.09%</title></rect><rect class="negative-bar" x="155.2" y="169.9" width="18.0" height="2.1"><title>GD -4: 0.49%</title></rect><rect class="negative-bar" x="174.4" y="162.6" width="18.0" height="9.4"><title>GD -3: 2.21%</title></rect><rect class="negative-bar" x="193.6" y="138.8" width="18.0" height="33.2"><title>GD -2: 7.80%</title></rect><rect class="negative-bar" x="212.8" y="88.7" width="18.0" height="83.3"><title>GD -1: 19.58%</title></rect><rect class="zero-bar" x="232.0" y="42.0" width="18.0" height="130.0"><title>GD +0: 30.55%</title></rect><rect class="positive-bar" x="251.2" y="72.9" width="18.0" height="99.1"><title>GD +1: 23.29%</title></rect><rect class="positive-bar" x="270.4" y="125.0" width="18.0" height="47.0"><title>GD +2: 11.04%</title></rect><rect class="positive-bar" x="289.6" y="156.1" width="18.0" height="15.9"><title>GD +3: 3.73%</title></rect><rect class="positive-bar" x="308.8" y="167.9" width="18.0" height="4.1"><title>GD +4: 0.97%</title></rect><rect class="positive-bar" x="328.0" y="171.1" width="18.0" height="0.9"><title>GD +5: 0.21%</title></rect><rect class="positive-bar" x="347.2" y="171.8" width="18.0" height="0.2"><title>GD +6: 0.04%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.01%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.09-0.92</span><span>Mean GD +0.17</span><span>🇩🇿 Algeria 30%</span><span>Draw 31%</span><span>🇦🇹 Austria 39%</span></div></article></section>
+<section class="match-row"><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-28t19-00-00z-canada-vs-south-africa.png" aria-label="Copy Canada versus South Africa as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="Canada versus South Africa goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">28 Jun 2026 19:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇿🇦 South Africa</text><text class="side-label" x="442" y="34" text-anchor="end">🇨🇦 Canada</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">26%</text><line class="expected-line" x1="255.1" y1="42" x2="255.1" y2="172"><title>Mean GD +0.74</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.00%</title></rect><rect class="negative-bar" x="97.6" y="172.0" width="18.0" height="0.0"><title>GD -7: 0.00%</title></rect><rect class="negative-bar" x="116.8" y="172.0" width="18.0" height="0.0"><title>GD -6: 0.00%</title></rect><rect class="negative-bar" x="136.0" y="171.8" width="18.0" height="0.2"><title>GD -5: 0.04%</title></rect><rect class="negative-bar" x="155.2" y="170.8" width="18.0" height="1.2"><title>GD -4: 0.23%</title></rect><rect class="negative-bar" x="174.4" y="166.0" width="18.0" height="6.0"><title>GD -3: 1.19%</title></rect><rect class="negative-bar" x="193.6" y="148.2" width="18.0" height="23.8"><title>GD -2: 4.73%</title></rect><rect class="negative-bar" x="212.8" y="103.2" width="18.0" height="68.8"><title>GD -1: 13.66%</title></rect><rect class="zero-bar" x="232.0" y="43.9" width="18.0" height="128.1"><title>GD +0: 25.42%</title></rect><rect class="positive-bar" x="251.2" y="42.0" width="18.0" height="130.0"><title>GD +1: 25.79%</title></rect><rect class="positive-bar" x="270.4" y="87.0" width="18.0" height="85.0"><title>GD +2: 16.86%</title></rect><rect class="positive-bar" x="289.6" y="131.8" width="18.0" height="40.2"><title>GD +3: 7.98%</title></rect><rect class="positive-bar" x="308.8" y="157.2" width="18.0" height="14.8"><title>GD +4: 2.94%</title></rect><rect class="positive-bar" x="328.0" y="167.6" width="18.0" height="4.4"><title>GD +5: 0.88%</title></rect><rect class="positive-bar" x="347.2" y="170.9" width="18.0" height="1.1"><title>GD +6: 0.22%</title></rect><rect class="positive-bar" x="366.4" y="171.8" width="18.0" height="0.2"><title>GD +7: 0.05%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.01%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 1.56-0.83</span><span>Mean GD +0.74</span><span>🇿🇦 South Africa 20%</span><span>Draw 25%</span><span>🇨🇦 Canada 55%</span></div></article><article class="card chart-block"><div class="chart-actions"><button class="copy-chart" type="button" data-filename="2026-06-28t19-00-00z-south-africa-vs-canada.png" aria-label="Copy South Africa versus Canada as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div><svg class="histogram" viewBox="0 0 460 198" role="img" aria-label="South Africa versus Canada goal difference histogram"><style>
+  .match-title {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 760;
+    fill: #172033;
+  }
+
+  .side-label {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    fill: #172033;
+    font-size: 11px;
+    font-weight: 760;
+  }
+
+  .axis-label {
+    fill: #667085;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .grid-line {
+    stroke: #edf0f5;
+    stroke-width: 1;
+  }
+
+  .axis-line {
+    stroke: #d7dce5;
+    stroke-width: 1.2;
+  }
+
+  .expected-line {
+    stroke: #172033;
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+
+  .negative-bar {
+    fill: #dc2626;
+    opacity: 0.78;
+  }
+
+  .zero-bar {
+    fill: #667085;
+    opacity: 0.72;
+  }
+
+  .positive-bar {
+    fill: #059669;
+    opacity: 0.78;
+  }
+</style><text class="match-title" x="230.0" y="17" text-anchor="middle">28 Jun 2026 19:00 UTC</text><text class="side-label" x="40" y="34" text-anchor="start">🇨🇦 Canada</text><text class="side-label" x="442" y="34" text-anchor="end">🇿🇦 South Africa</text><line class="grid-line" x1="40" y1="172.0" x2="442" y2="172.0" /><text class="axis-label" x="34" y="175.0" text-anchor="end">0%</text><line class="grid-line" x1="40" y1="107.0" x2="442" y2="107.0" /><text class="axis-label" x="34" y="110.0" text-anchor="end">13%</text><line class="grid-line" x1="40" y1="42.0" x2="442" y2="42.0" /><text class="axis-label" x="34" y="45.0" text-anchor="end">26%</text><line class="expected-line" x1="226.9" y1="42" x2="226.9" y2="172"><title>Mean GD -0.74</title></line><rect class="negative-bar" x="40.0" y="172.0" width="18.0" height="0.0"><title>GD -10: 0.00%</title></rect><rect class="negative-bar" x="59.2" y="172.0" width="18.0" height="0.0"><title>GD -9: 0.00%</title></rect><rect class="negative-bar" x="78.4" y="172.0" width="18.0" height="0.0"><title>GD -8: 0.01%</title></rect><rect class="negative-bar" x="97.6" y="171.8" width="18.0" height="0.2"><title>GD -7: 0.05%</title></rect><rect class="negative-bar" x="116.8" y="170.9" width="18.0" height="1.1"><title>GD -6: 0.22%</title></rect><rect class="negative-bar" x="136.0" y="167.6" width="18.0" height="4.4"><title>GD -5: 0.88%</title></rect><rect class="negative-bar" x="155.2" y="157.2" width="18.0" height="14.8"><title>GD -4: 2.94%</title></rect><rect class="negative-bar" x="174.4" y="131.8" width="18.0" height="40.2"><title>GD -3: 7.98%</title></rect><rect class="negative-bar" x="193.6" y="87.0" width="18.0" height="85.0"><title>GD -2: 16.86%</title></rect><rect class="negative-bar" x="212.8" y="42.0" width="18.0" height="130.0"><title>GD -1: 25.79%</title></rect><rect class="zero-bar" x="232.0" y="43.9" width="18.0" height="128.1"><title>GD +0: 25.42%</title></rect><rect class="positive-bar" x="251.2" y="103.2" width="18.0" height="68.8"><title>GD +1: 13.66%</title></rect><rect class="positive-bar" x="270.4" y="148.2" width="18.0" height="23.8"><title>GD +2: 4.73%</title></rect><rect class="positive-bar" x="289.6" y="166.0" width="18.0" height="6.0"><title>GD +3: 1.19%</title></rect><rect class="positive-bar" x="308.8" y="170.8" width="18.0" height="1.2"><title>GD +4: 0.23%</title></rect><rect class="positive-bar" x="328.0" y="171.8" width="18.0" height="0.2"><title>GD +5: 0.04%</title></rect><rect class="positive-bar" x="347.2" y="172.0" width="18.0" height="0.0"><title>GD +6: 0.00%</title></rect><rect class="positive-bar" x="366.4" y="172.0" width="18.0" height="0.0"><title>GD +7: 0.00%</title></rect><rect class="positive-bar" x="385.6" y="172.0" width="18.0" height="0.0"><title>GD +8: 0.00%</title></rect><rect class="positive-bar" x="404.8" y="172.0" width="18.0" height="0.0"><title>GD +9: 0.00%</title></rect><rect class="positive-bar" x="424.0" y="172.0" width="18.0" height="0.0"><title>GD +10: 0.00%</title></rect><line class="axis-line" x1="40" y1="172" x2="442" y2="172" /><text class="axis-label" x="49.0" y="188" text-anchor="middle">-10</text><text class="axis-label" x="241.0" y="188" text-anchor="middle">+0</text><text class="axis-label" x="433.0" y="188" text-anchor="middle">+10</text></svg><div class="stats"><span>xG 0.83-1.56</span><span>Mean GD -0.74</span><span>🇨🇦 Canada 55%</span><span>Draw 25%</span><span>🇿🇦 South Africa 20%</span></div></article></section>
+    </div>
+  </main>
+  <script>
+
+    async function svgToPngBlob(svg, stats) {
+      const clone = svg.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+      const viewBox = clone.viewBox.baseVal;
+      const width = viewBox && viewBox.width ? viewBox.width : clone.clientWidth;
+      const height = viewBox && viewBox.height ? viewBox.height : clone.clientHeight;
+      const statTexts = stats
+        ? Array.from(stats.querySelectorAll("span")).map((span) =>
+            span.textContent.trim()
+          )
+        : [];
+      const statsHeight = statTexts.length ? 32 : 0;
+      const exportHeight = height + statsHeight;
+      const scale = Math.max(2, window.devicePixelRatio || 1);
+      clone.setAttribute("width", width);
+      clone.setAttribute("height", exportHeight);
+      clone.setAttribute("viewBox", `0 0 ${width} ${exportHeight}`);
+
+      const background = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "rect"
+      );
+      background.setAttribute("x", "0");
+      background.setAttribute("y", "0");
+      background.setAttribute("width", width);
+      background.setAttribute("height", exportHeight);
+      background.setAttribute("fill", "#ffffff");
+      clone.insertBefore(background, clone.firstChild);
+
+      if (statTexts.length) {
+        const statsGroup = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+        const columnWidth = width / statTexts.length;
+
+        statTexts.forEach((statText, index) => {
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("x", columnWidth * index + columnWidth / 2);
+          text.setAttribute("y", height + 21);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("fill", "#667085");
+          text.setAttribute("font-size", "10.5");
+          text.setAttribute("font-weight", "650");
+          text.setAttribute(
+            "font-family",
+            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          );
+          text.textContent = statText;
+          statsGroup.appendChild(text);
+        });
+
+        clone.appendChild(statsGroup);
+      }
+
+      const serializer = new XMLSerializer();
+      const svgText = serializer.serializeToString(clone);
+      const svgBlob = new Blob([svgText], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+
+      try {
+        const image = new Image();
+        image.decoding = "async";
+        image.src = url;
+        await image.decode();
+
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(width * scale);
+        canvas.height = Math.ceil(exportHeight * scale);
+
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        return await new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error("Could not create PNG"));
+            }
+          }, "image/png");
+        });
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function downloadPngBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename || "chart.png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function copyChartAsPng(button) {
+      const block = button.closest(".chart-block");
+      const svg = block.querySelector("svg");
+      const stats = block.querySelector(".stats");
+      const status = block.querySelector(".copy-status");
+
+      button.disabled = true;
+      status.textContent = "Copying...";
+
+      try {
+        const blob = await svgToPngBlob(svg, stats);
+        if (!navigator.clipboard || !window.ClipboardItem) {
+          downloadPngBlob(blob, button.dataset.filename);
+          status.textContent = "Downloaded";
+          return;
+        }
+
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob }),
+        ]);
+        status.textContent = "Copied";
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Copy failed";
+      } finally {
+        button.disabled = false;
+        window.setTimeout(() => {
+          if (
+            status.textContent === "Copied" ||
+            status.textContent === "Downloaded"
+          ) {
+            status.textContent = "";
+          }
+        }, 2200);
+      }
+    }
+
+    document.querySelectorAll(".copy-chart").forEach((button) => {
+      button.addEventListener("click", () => copyChartAsPng(button));
+    });
+
+  </script>
+</body>
+</html>
