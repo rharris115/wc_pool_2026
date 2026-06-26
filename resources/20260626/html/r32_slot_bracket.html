@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Round of 32 Slot Bracket</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #9aa4b2;
+      --line-strong: #65758b;
+      --accent: #0f766e;
+      --r32: #eef6f4;
+      --placeholder: #f3f5f8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        sans-serif;
+    }
+
+    main {
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: right;
+    }
+
+
+    .chart-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .copy-chart {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1;
+      padding: 7px 9px;
+    }
+
+    .copy-chart:hover {
+      border-color: #aeb7c6;
+      background: #f9fafb;
+    }
+
+    .copy-chart:disabled {
+      cursor: progress;
+      opacity: 0.64;
+    }
+
+    .copy-status {
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 1em;
+    }
+
+
+    .bracket-scroll {
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    .bracket-svg {
+      display: block;
+      max-width: none;
+      background: #ffffff;
+      border: 1px solid #e0e5ee;
+      border-radius: 8px;
+    }
+
+    .svg-bg {
+      fill: #ffffff;
+    }
+
+    .connector {
+      fill: none;
+      stroke: var(--line-strong);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .match-card {
+      width: 320px;
+      min-height: 226px;
+      height: 100%;
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid #d4dae4;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(23, 32, 51, 0.06);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        sans-serif;
+    }
+
+    .match-card.r32 {
+      background: linear-gradient(180deg, var(--panel), var(--r32));
+      padding: 8px 9px;
+    }
+
+    .match-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 7px;
+      font-size: 12px;
+      font-weight: 760;
+      line-height: 1.1;
+    }
+
+    .match-head small {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .slot {
+      border-top: 1px solid #e2e7ef;
+      padding-top: 5px;
+    }
+
+    .slot + .slot {
+      margin-top: 6px;
+    }
+
+    .slot-head {
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .team-prob {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 8px;
+      min-height: 15px;
+      font-size: 10.5px;
+      line-height: 1.16;
+    }
+
+    .team-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .prob {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--placeholder);
+      border-style: solid;
+      padding: 10px;
+    }
+
+    .placeholder-inner {
+      text-align: center;
+    }
+
+    .round-label {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 820;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    .match-id {
+      font-size: 17px;
+      font-weight: 780;
+      margin-bottom: 7px;
+    }
+
+    .sources {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .f {
+      background: #ffffff;
+      border-color: var(--line-strong);
+      border-width: 1.5px;
+    }
+
+    .note {
+      max-width: 980px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Round of 32 Slot Probability Bracket</h1>
+      <div class="meta">Snapshot 20260626 · all teams shown per slot</div>
+    </header>
+    <div class="chart-block">
+      <div class="chart-actions"><button class="copy-chart" type="button" data-filename="r32-slot-bracket.png" aria-label="Copy Round of 32 slot bracket as PNG">Copy PNG</button><span class="copy-status" aria-live="polite"></span></div>
+      <div class="bracket-scroll">
+        <svg class="bracket-svg" viewBox="0 0 3424 2206" width="3424" height="2206" role="img" aria-label="Round of 32 slot probability bracket">
+<style>
+  .svg-bg {
+    fill: #ffffff;
+  }
+
+  .connector {
+    fill: none;
+    stroke: #65758b;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .card {
+    fill: #ffffff;
+    stroke: #d4dae4;
+    stroke-width: 1;
+    filter: drop-shadow(0 1px 1px rgba(23, 32, 51, 0.08));
+  }
+
+  .r32-card {
+    fill: #eef6f4;
+  }
+
+  .placeholder-card {
+    fill: #f3f5f8;
+  }
+
+  .f {
+    fill: #ffffff;
+    stroke: #65758b;
+    stroke-width: 1.5;
+  }
+
+  text {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      sans-serif;
+    letter-spacing: 0;
+  }
+
+  .match-title {
+    fill: #172033;
+    font-size: 12px;
+    font-weight: 760;
+  }
+
+  .match-meta {
+    fill: #667085;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .slot-rule {
+    stroke: #d5dce7;
+    stroke-width: 1;
+  }
+
+  .slot-source {
+    fill: #0f766e;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .team-name {
+    fill: #172033;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+
+  .prob {
+    fill: #172033;
+    font-size: 10.5px;
+    font-weight: 760;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .round-label {
+    fill: #0f766e;
+    font-size: 13px;
+    font-weight: 820;
+    text-transform: uppercase;
+  }
+
+  .match-id {
+    fill: #172033;
+    font-size: 17px;
+    font-weight: 780;
+  }
+
+  .sources {
+    fill: #667085;
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .eliminated-panel {
+    fill: #f8fafc;
+    stroke: #d4dae4;
+    stroke-width: 1;
+  }
+
+  .eliminated-title {
+    fill: #991b1b;
+    font-size: 13px;
+    font-weight: 820;
+    text-transform: uppercase;
+  }
+
+  .eliminated-note {
+    fill: #667085;
+    font-size: 11px;
+    font-weight: 650;
+  }
+
+  .eliminated-chip {
+    fill: #ffffff;
+    stroke: #e2e7ef;
+    stroke-width: 1;
+  }
+
+  .eliminated-team {
+    fill: #172033;
+    font-size: 12px;
+    font-weight: 700;
+  }
+</style><rect class="svg-bg" x="0" y="0" width="100%" height="100%" /><g class="connectors"><path class="connector" d="M 344.0 137.0 L 375.0 137.0 L 375.0 279.0 L 406.0 279.0" />
+<path class="connector" d="M 344.0 421.0 L 375.0 421.0 L 375.0 279.0 L 406.0 279.0" />
+<path class="connector" d="M 344.0 669.0 L 375.0 669.0 L 375.0 793.0 L 406.0 793.0" />
+<path class="connector" d="M 344.0 917.0 L 375.0 917.0 L 375.0 793.0 L 406.0 793.0" />
+<path class="connector" d="M 344.0 1165.0 L 375.0 1165.0 L 375.0 1299.0 L 406.0 1299.0" />
+<path class="connector" d="M 344.0 1434.0 L 375.0 1434.0 L 375.0 1299.0 L 406.0 1299.0" />
+<path class="connector" d="M 344.0 1682.0 L 375.0 1682.0 L 375.0 1817.0 L 406.0 1817.0" />
+<path class="connector" d="M 344.0 1940.5 L 375.0 1940.5 L 375.0 1817.0 L 406.0 1817.0" />
+<path class="connector" d="M 3080.0 155.0 L 3049.0 155.0 L 3049.0 279.0 L 3018.0 279.0" />
+<path class="connector" d="M 3080.0 421.0 L 3049.0 421.0 L 3049.0 279.0 L 3018.0 279.0" />
+<path class="connector" d="M 3080.0 669.0 L 3049.0 669.0 L 3049.0 793.0 L 3018.0 793.0" />
+<path class="connector" d="M 3080.0 917.0 L 3049.0 917.0 L 3049.0 793.0 L 3018.0 793.0" />
+<path class="connector" d="M 3080.0 1175.5 L 3049.0 1175.5 L 3049.0 1299.0 L 3018.0 1299.0" />
+<path class="connector" d="M 3080.0 1434.0 L 3049.0 1434.0 L 3049.0 1299.0 L 3018.0 1299.0" />
+<path class="connector" d="M 3080.0 1682.0 L 3049.0 1682.0 L 3049.0 1817.0 L 3018.0 1817.0" />
+<path class="connector" d="M 3080.0 1940.5 L 3049.0 1940.5 L 3049.0 1817.0 L 3018.0 1817.0" />
+<path class="connector" d="M 726.0 279.0 L 757.0 279.0 L 757.0 527.0 L 788.0 527.0" />
+<path class="connector" d="M 726.0 793.0 L 757.0 793.0 L 757.0 527.0 L 788.0 527.0" />
+<path class="connector" d="M 726.0 1299.0 L 757.0 1299.0 L 757.0 1558.0 L 788.0 1558.0" />
+<path class="connector" d="M 726.0 1817.0 L 757.0 1817.0 L 757.0 1558.0 L 788.0 1558.0" />
+<path class="connector" d="M 2698.0 279.0 L 2667.0 279.0 L 2667.0 527.0 L 2636.0 527.0" />
+<path class="connector" d="M 2698.0 793.0 L 2667.0 793.0 L 2667.0 527.0 L 2636.0 527.0" />
+<path class="connector" d="M 2698.0 1299.0 L 2667.0 1299.0 L 2667.0 1558.0 L 2636.0 1558.0" />
+<path class="connector" d="M 2698.0 1817.0 L 2667.0 1817.0 L 2667.0 1558.0 L 2636.0 1558.0" />
+<path class="connector" d="M 1108.0 527.0 L 1139.0 527.0 L 1139.0 1044.0 L 1170.0 1044.0" />
+<path class="connector" d="M 1108.0 1558.0 L 1139.0 1558.0 L 1139.0 1044.0 L 1170.0 1044.0" />
+<path class="connector" d="M 2316.0 527.0 L 2285.0 527.0 L 2285.0 1044.0 L 2254.0 1044.0" />
+<path class="connector" d="M 2316.0 1558.0 L 2285.0 1558.0 L 2285.0 1044.0 L 2254.0 1044.0" />
+<path class="connector" d="M 1490.0 1044.0 L 1521.0 1044.0 L 1521.0 1044.0 L 1552.0 1044.0" />
+<path class="connector" d="M 1934.0 1044.0 L 1903.0 1044.0 L 1903.0 1044.0 L 1872.0 1044.0" /></g><rect class="card r32-card" x="24" y="24" width="320" height="226" rx="8" />
+<text x="34.0" y="42.0" class="match-title" text-anchor="start">Match 73</text>
+<text x="334.0" y="42.0" class="match-meta" text-anchor="end">to W89</text>
+<line class="slot-rule" x1="34" y1="56.0" x2="334" y2="56.0" />
+<text x="34.0" y="69.0" class="slot-source" text-anchor="start">2A</text>
+<text x="34.0" y="78.0" class="team-name" text-anchor="start">🇿🇦 South Africa</text>
+<text x="334.0" y="78.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="34" y1="93.0" x2="334" y2="93.0" />
+<text x="34.0" y="106.0" class="slot-source" text-anchor="start">2B</text>
+<text x="34.0" y="115.0" class="team-name" text-anchor="start">🇨🇦 Canada</text>
+<text x="334.0" y="115.0" class="prob" text-anchor="end">100.0%</text><rect class="card r32-card" x="24" y="308" width="320" height="226" rx="8" />
+<text x="34.0" y="326.0" class="match-title" text-anchor="start">Match 74</text>
+<text x="334.0" y="326.0" class="match-meta" text-anchor="end">to W89</text>
+<line class="slot-rule" x1="34" y1="340.0" x2="334" y2="340.0" />
+<text x="34.0" y="353.0" class="slot-source" text-anchor="start">1C</text>
+<text x="34.0" y="362.0" class="team-name" text-anchor="start">🇺🇸 USA</text>
+<text x="334.0" y="362.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="34" y1="377.0" x2="334" y2="377.0" />
+<text x="34.0" y="390.0" class="slot-source" text-anchor="start">2F</text>
+<text x="34.0" y="399.0" class="team-name" text-anchor="start">🇯🇵 Japan</text>
+<text x="334.0" y="399.0" class="prob" text-anchor="end">100.0%</text><rect class="card r32-card" x="24" y="556" width="320" height="226" rx="8" />
+<text x="34.0" y="574.0" class="match-title" text-anchor="start">Match 75</text>
+<text x="334.0" y="574.0" class="match-meta" text-anchor="end">to W90</text>
+<line class="slot-rule" x1="34" y1="588.0" x2="334" y2="588.0" />
+<text x="34.0" y="601.0" class="slot-source" text-anchor="start">1E</text>
+<text x="34.0" y="610.0" class="team-name" text-anchor="start">🇩🇪 Germany</text>
+<text x="334.0" y="610.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="34" y1="625.0" x2="334" y2="625.0" />
+<text x="34.0" y="638.0" class="slot-source" text-anchor="start">3A|3B|3C|3D|3F</text>
+<text x="34.0" y="647.0" class="team-name" text-anchor="start">🇵🇾 Paraguay</text>
+<text x="334.0" y="647.0" class="prob" text-anchor="end">94.9%</text>
+<text x="34.0" y="662.0" class="team-name" text-anchor="start">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland</text>
+<text x="334.0" y="662.0" class="prob" text-anchor="end">4.9%</text>
+<text x="34.0" y="677.0" class="team-name" text-anchor="start">🇸🇪 Sweden</text>
+<text x="334.0" y="677.0" class="prob" text-anchor="end">0.19%</text><rect class="card r32-card" x="24" y="804" width="320" height="226" rx="8" />
+<text x="34.0" y="822.0" class="match-title" text-anchor="start">Match 76</text>
+<text x="334.0" y="822.0" class="match-meta" text-anchor="end">to W90</text>
+<line class="slot-rule" x1="34" y1="836.0" x2="334" y2="836.0" />
+<text x="34.0" y="849.0" class="slot-source" text-anchor="start">1F</text>
+<text x="34.0" y="858.0" class="team-name" text-anchor="start">🇳🇱 Netherlands</text>
+<text x="334.0" y="858.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="34" y1="873.0" x2="334" y2="873.0" />
+<text x="34.0" y="886.0" class="slot-source" text-anchor="start">2C</text>
+<text x="34.0" y="895.0" class="team-name" text-anchor="start">🇦🇺 Australia</text>
+<text x="334.0" y="895.0" class="prob" text-anchor="end">100.0%</text><rect class="card r32-card" x="24" y="1052" width="320" height="226" rx="8" />
+<text x="34.0" y="1070.0" class="match-title" text-anchor="start">Match 77</text>
+<text x="334.0" y="1070.0" class="match-meta" text-anchor="end">to W91</text>
+<line class="slot-rule" x1="34" y1="1084.0" x2="334" y2="1084.0" />
+<text x="34.0" y="1097.0" class="slot-source" text-anchor="start">2E</text>
+<text x="34.0" y="1106.0" class="team-name" text-anchor="start">🇨🇮 Ivory Coast</text>
+<text x="334.0" y="1106.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="34" y1="1121.0" x2="334" y2="1121.0" />
+<text x="34.0" y="1134.0" class="slot-source" text-anchor="start">2I</text>
+<text x="34.0" y="1143.0" class="team-name" text-anchor="start">🇳🇴 Norway</text>
+<text x="334.0" y="1143.0" class="prob" text-anchor="end">79.2%</text>
+<text x="34.0" y="1158.0" class="team-name" text-anchor="start">🇫🇷 France</text>
+<text x="334.0" y="1158.0" class="prob" text-anchor="end">20.8%</text><rect class="card r32-card" x="24" y="1321" width="320" height="226" rx="8" />
+<text x="34.0" y="1339.0" class="match-title" text-anchor="start">Match 78</text>
+<text x="334.0" y="1339.0" class="match-meta" text-anchor="end">to W91</text>
+<line class="slot-rule" x1="34" y1="1353.0" x2="334" y2="1353.0" />
+<text x="34.0" y="1366.0" class="slot-source" text-anchor="start">1I</text>
+<text x="34.0" y="1375.0" class="team-name" text-anchor="start">🇫🇷 France</text>
+<text x="334.0" y="1375.0" class="prob" text-anchor="end">79.2%</text>
+<text x="34.0" y="1390.0" class="team-name" text-anchor="start">🇳🇴 Norway</text>
+<text x="334.0" y="1390.0" class="prob" text-anchor="end">20.8%</text>
+<line class="slot-rule" x1="34" y1="1405.0" x2="334" y2="1405.0" />
+<text x="34.0" y="1418.0" class="slot-source" text-anchor="start">3C|3D|3F|3G|3H</text>
+<text x="34.0" y="1427.0" class="team-name" text-anchor="start">🇸🇪 Sweden</text>
+<text x="334.0" y="1427.0" class="prob" text-anchor="end">99.2%</text>
+<text x="34.0" y="1442.0" class="team-name" text-anchor="start">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland</text>
+<text x="334.0" y="1442.0" class="prob" text-anchor="end">0.58%</text>
+<text x="34.0" y="1457.0" class="team-name" text-anchor="start">🇪🇸 Spain</text>
+<text x="334.0" y="1457.0" class="prob" text-anchor="end">0.14%</text>
+<text x="34.0" y="1472.0" class="team-name" text-anchor="start">🇸🇦 Saudi Arabia</text>
+<text x="334.0" y="1472.0" class="prob" text-anchor="end">0.06%</text><rect class="card r32-card" x="24" y="1569" width="320" height="226" rx="8" />
+<text x="34.0" y="1587.0" class="match-title" text-anchor="start">Match 79</text>
+<text x="334.0" y="1587.0" class="match-meta" text-anchor="end">to W92</text>
+<line class="slot-rule" x1="34" y1="1601.0" x2="334" y2="1601.0" />
+<text x="34.0" y="1614.0" class="slot-source" text-anchor="start">1A</text>
+<text x="34.0" y="1623.0" class="team-name" text-anchor="start">🇲🇽 Mexico</text>
+<text x="334.0" y="1623.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="34" y1="1638.0" x2="334" y2="1638.0" />
+<text x="34.0" y="1651.0" class="slot-source" text-anchor="start">3C|3E|3F|3H|3I</text>
+<text x="34.0" y="1660.0" class="team-name" text-anchor="start">🇪🇨 Ecuador</text>
+<text x="334.0" y="1660.0" class="prob" text-anchor="end">68.7%</text>
+<text x="34.0" y="1675.0" class="team-name" text-anchor="start">🇮🇷 Iran</text>
+<text x="334.0" y="1675.0" class="prob" text-anchor="end">12.2%</text>
+<text x="34.0" y="1690.0" class="team-name" text-anchor="start">🇪🇬 Egypt</text>
+<text x="334.0" y="1690.0" class="prob" text-anchor="end">10.6%</text>
+<text x="34.0" y="1705.0" class="team-name" text-anchor="start">🇵🇾 Paraguay</text>
+<text x="334.0" y="1705.0" class="prob" text-anchor="end">4.9%</text>
+<text x="34.0" y="1720.0" class="team-name" text-anchor="start">🇧🇪 Belgium</text>
+<text x="334.0" y="1720.0" class="prob" text-anchor="end">2.7%</text>
+<text x="34.0" y="1735.0" class="team-name" text-anchor="start">🇳🇿 New Zealand</text>
+<text x="334.0" y="1735.0" class="prob" text-anchor="end">0.90%</text><rect class="card r32-card" x="24" y="1817" width="320" height="247" rx="8" />
+<text x="34.0" y="1835.0" class="match-title" text-anchor="start">Match 80</text>
+<text x="334.0" y="1835.0" class="match-meta" text-anchor="end">to W92</text>
+<line class="slot-rule" x1="34" y1="1849.0" x2="334" y2="1849.0" />
+<text x="34.0" y="1862.0" class="slot-source" text-anchor="start">1L</text>
+<text x="34.0" y="1871.0" class="team-name" text-anchor="start">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</text>
+<text x="334.0" y="1871.0" class="prob" text-anchor="end">84.8%</text>
+<text x="34.0" y="1886.0" class="team-name" text-anchor="start">🇭🇷 Croatia</text>
+<text x="334.0" y="1886.0" class="prob" text-anchor="end">10.0%</text>
+<text x="34.0" y="1901.0" class="team-name" text-anchor="start">🇬🇭 Ghana</text>
+<text x="334.0" y="1901.0" class="prob" text-anchor="end">5.3%</text>
+<line class="slot-rule" x1="34" y1="1916.0" x2="334" y2="1916.0" />
+<text x="34.0" y="1929.0" class="slot-source" text-anchor="start">3E|3H|3I|3J|3K</text>
+<text x="34.0" y="1938.0" class="team-name" text-anchor="start">🇨🇩 DR Congo</text>
+<text x="334.0" y="1938.0" class="prob" text-anchor="end">53.8%</text>
+<text x="34.0" y="1953.0" class="team-name" text-anchor="start">🇸🇳 Senegal</text>
+<text x="334.0" y="1953.0" class="prob" text-anchor="end">29.8%</text>
+<text x="34.0" y="1968.0" class="team-name" text-anchor="start">🇪🇨 Ecuador</text>
+<text x="334.0" y="1968.0" class="prob" text-anchor="end">12.6%</text>
+<text x="34.0" y="1983.0" class="team-name" text-anchor="start">🇩🇿 Algeria</text>
+<text x="334.0" y="1983.0" class="prob" text-anchor="end">2.0%</text>
+<text x="34.0" y="1998.0" class="team-name" text-anchor="start">🇦🇹 Austria</text>
+<text x="334.0" y="1998.0" class="prob" text-anchor="end">1.2%</text>
+<text x="34.0" y="2013.0" class="team-name" text-anchor="start">🇵🇹 Portugal</text>
+<text x="334.0" y="2013.0" class="prob" text-anchor="end">0.41%</text>
+<text x="34.0" y="2028.0" class="team-name" text-anchor="start">🇺🇿 Uzbekistan</text>
+<text x="334.0" y="2028.0" class="prob" text-anchor="end">0.15%</text>
+<text x="34.0" y="2043.0" class="team-name" text-anchor="start">🇮🇶 Iraq</text>
+<text x="334.0" y="2043.0" class="prob" text-anchor="end">0.14%</text><rect class="card r32-card" x="3080" y="24" width="320" height="262" rx="8" />
+<text x="3090.0" y="42.0" class="match-title" text-anchor="start">Match 81</text>
+<text x="3390.0" y="42.0" class="match-meta" text-anchor="end">to W93</text>
+<line class="slot-rule" x1="3090" y1="56.0" x2="3390" y2="56.0" />
+<text x="3090.0" y="69.0" class="slot-source" text-anchor="start">1G</text>
+<text x="3090.0" y="78.0" class="team-name" text-anchor="start">🇪🇸 Spain</text>
+<text x="3390.0" y="78.0" class="prob" text-anchor="end">83.5%</text>
+<text x="3090.0" y="93.0" class="team-name" text-anchor="start">🇺🇾 Uruguay</text>
+<text x="3390.0" y="93.0" class="prob" text-anchor="end">13.7%</text>
+<text x="3090.0" y="108.0" class="team-name" text-anchor="start">🇨🇻 Cape Verde</text>
+<text x="3390.0" y="108.0" class="prob" text-anchor="end">2.8%</text>
+<line class="slot-rule" x1="3090" y1="123.0" x2="3390" y2="123.0" />
+<text x="3090.0" y="136.0" class="slot-source" text-anchor="start">3A|3E|3H|3I|3J</text>
+<text x="3090.0" y="145.0" class="team-name" text-anchor="start">🇰🇷 South Korea</text>
+<text x="3390.0" y="145.0" class="prob" text-anchor="end">52.8%</text>
+<text x="3090.0" y="160.0" class="team-name" text-anchor="start">🇪🇬 Egypt</text>
+<text x="3390.0" y="160.0" class="prob" text-anchor="end">12.7%</text>
+<text x="3090.0" y="175.0" class="team-name" text-anchor="start">🇮🇷 Iran</text>
+<text x="3390.0" y="175.0" class="prob" text-anchor="end">11.8%</text>
+<text x="3090.0" y="190.0" class="team-name" text-anchor="start">🇸🇳 Senegal</text>
+<text x="3390.0" y="190.0" class="prob" text-anchor="end">8.8%</text>
+<text x="3090.0" y="205.0" class="team-name" text-anchor="start">🇩🇿 Algeria</text>
+<text x="3390.0" y="205.0" class="prob" text-anchor="end">7.6%</text>
+<text x="3090.0" y="220.0" class="team-name" text-anchor="start">🇦🇹 Austria</text>
+<text x="3390.0" y="220.0" class="prob" text-anchor="end">2.7%</text>
+<text x="3090.0" y="235.0" class="team-name" text-anchor="start">🇧🇪 Belgium</text>
+<text x="3390.0" y="235.0" class="prob" text-anchor="end">2.5%</text>
+<text x="3090.0" y="250.0" class="team-name" text-anchor="start">🇳🇿 New Zealand</text>
+<text x="3390.0" y="250.0" class="prob" text-anchor="end">1.1%</text>
+<text x="3090.0" y="265.0" class="team-name" text-anchor="start">🇮🇶 Iraq</text>
+<text x="3390.0" y="265.0" class="prob" text-anchor="end">0.00%</text><rect class="card r32-card" x="3080" y="308" width="320" height="226" rx="8" />
+<text x="3090.0" y="326.0" class="match-title" text-anchor="start">Match 82</text>
+<text x="3390.0" y="326.0" class="match-meta" text-anchor="end">to W93</text>
+<line class="slot-rule" x1="3090" y1="340.0" x2="3390" y2="340.0" />
+<text x="3090.0" y="353.0" class="slot-source" text-anchor="start">1D</text>
+<text x="3090.0" y="362.0" class="team-name" text-anchor="start">🇧🇷 Brazil</text>
+<text x="3390.0" y="362.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="3090" y1="377.0" x2="3390" y2="377.0" />
+<text x="3090.0" y="390.0" class="slot-source" text-anchor="start">3B|3E|3F|3I|3J</text>
+<text x="3090.0" y="399.0" class="team-name" text-anchor="start">🇧🇦 Bosnia &amp; Herzegovina</text>
+<text x="3390.0" y="399.0" class="prob" text-anchor="end">100.0%</text><rect class="card r32-card" x="3080" y="556" width="320" height="226" rx="8" />
+<text x="3090.0" y="574.0" class="match-title" text-anchor="start">Match 83</text>
+<text x="3390.0" y="574.0" class="match-meta" text-anchor="end">to W94</text>
+<line class="slot-rule" x1="3090" y1="588.0" x2="3390" y2="588.0" />
+<text x="3090.0" y="601.0" class="slot-source" text-anchor="start">1H</text>
+<text x="3090.0" y="610.0" class="team-name" text-anchor="start">🇪🇬 Egypt</text>
+<text x="3390.0" y="610.0" class="prob" text-anchor="end">58.2%</text>
+<text x="3090.0" y="625.0" class="team-name" text-anchor="start">🇧🇪 Belgium</text>
+<text x="3390.0" y="625.0" class="prob" text-anchor="end">29.4%</text>
+<text x="3090.0" y="640.0" class="team-name" text-anchor="start">🇮🇷 Iran</text>
+<text x="3390.0" y="640.0" class="prob" text-anchor="end">12.3%</text>
+<line class="slot-rule" x1="3090" y1="655.0" x2="3390" y2="655.0" />
+<text x="3090.0" y="668.0" class="slot-source" text-anchor="start">2J</text>
+<text x="3090.0" y="677.0" class="team-name" text-anchor="start">🇦🇹 Austria</text>
+<text x="3390.0" y="677.0" class="prob" text-anchor="end">70.1%</text>
+<text x="3090.0" y="692.0" class="team-name" text-anchor="start">🇩🇿 Algeria</text>
+<text x="3390.0" y="692.0" class="prob" text-anchor="end">29.9%</text><rect class="card r32-card" x="3080" y="804" width="320" height="226" rx="8" />
+<text x="3090.0" y="822.0" class="match-title" text-anchor="start">Match 84</text>
+<text x="3390.0" y="822.0" class="match-meta" text-anchor="end">to W94</text>
+<line class="slot-rule" x1="3090" y1="836.0" x2="3390" y2="836.0" />
+<text x="3090.0" y="849.0" class="slot-source" text-anchor="start">2K</text>
+<text x="3090.0" y="858.0" class="team-name" text-anchor="start">🇨🇴 Colombia</text>
+<text x="3390.0" y="858.0" class="prob" text-anchor="end">51.0%</text>
+<text x="3090.0" y="873.0" class="team-name" text-anchor="start">🇵🇹 Portugal</text>
+<text x="3390.0" y="873.0" class="prob" text-anchor="end">48.6%</text>
+<text x="3090.0" y="888.0" class="team-name" text-anchor="start">🇨🇩 DR Congo</text>
+<text x="3390.0" y="888.0" class="prob" text-anchor="end">0.41%</text>
+<line class="slot-rule" x1="3090" y1="903.0" x2="3390" y2="903.0" />
+<text x="3090.0" y="916.0" class="slot-source" text-anchor="start">2L</text>
+<text x="3090.0" y="925.0" class="team-name" text-anchor="start">🇭🇷 Croatia</text>
+<text x="3390.0" y="925.0" class="prob" text-anchor="end">45.1%</text>
+<text x="3090.0" y="940.0" class="team-name" text-anchor="start">🇬🇭 Ghana</text>
+<text x="3390.0" y="940.0" class="prob" text-anchor="end">39.7%</text>
+<text x="3090.0" y="955.0" class="team-name" text-anchor="start">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</text>
+<text x="3390.0" y="955.0" class="prob" text-anchor="end">15.2%</text><rect class="card r32-card" x="3080" y="1052" width="320" height="247" rx="8" />
+<text x="3090.0" y="1070.0" class="match-title" text-anchor="start">Match 85</text>
+<text x="3390.0" y="1070.0" class="match-meta" text-anchor="end">to W95</text>
+<line class="slot-rule" x1="3090" y1="1084.0" x2="3390" y2="1084.0" />
+<text x="3090.0" y="1097.0" class="slot-source" text-anchor="start">1B</text>
+<text x="3090.0" y="1106.0" class="team-name" text-anchor="start">🇨🇭 Switzerland</text>
+<text x="3390.0" y="1106.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="3090" y1="1121.0" x2="3390" y2="1121.0" />
+<text x="3090.0" y="1134.0" class="slot-source" text-anchor="start">3E|3F|3G|3I|3J</text>
+<text x="3090.0" y="1143.0" class="team-name" text-anchor="start">🇩🇿 Algeria</text>
+<text x="3390.0" y="1143.0" class="prob" text-anchor="end">26.1%</text>
+<text x="3090.0" y="1158.0" class="team-name" text-anchor="start">🇺🇾 Uruguay</text>
+<text x="3390.0" y="1158.0" class="prob" text-anchor="end">16.4%</text>
+<text x="3090.0" y="1173.0" class="team-name" text-anchor="start">🇪🇨 Ecuador</text>
+<text x="3390.0" y="1173.0" class="prob" text-anchor="end">13.2%</text>
+<text x="3090.0" y="1188.0" class="team-name" text-anchor="start">🇦🇹 Austria</text>
+<text x="3390.0" y="1188.0" class="prob" text-anchor="end">12.1%</text>
+<text x="3090.0" y="1203.0" class="team-name" text-anchor="start">🇸🇳 Senegal</text>
+<text x="3390.0" y="1203.0" class="prob" text-anchor="end">11.9%</text>
+<text x="3090.0" y="1218.0" class="team-name" text-anchor="start">🇨🇻 Cape Verde</text>
+<text x="3390.0" y="1218.0" class="prob" text-anchor="end">8.3%</text>
+<text x="3090.0" y="1233.0" class="team-name" text-anchor="start">🇪🇸 Spain</text>
+<text x="3390.0" y="1233.0" class="prob" text-anchor="end">5.8%</text>
+<text x="3090.0" y="1248.0" class="team-name" text-anchor="start">🇸🇦 Saudi Arabia</text>
+<text x="3390.0" y="1248.0" class="prob" text-anchor="end">5.6%</text>
+<text x="3090.0" y="1263.0" class="team-name" text-anchor="start">🇸🇪 Sweden</text>
+<text x="3390.0" y="1263.0" class="prob" text-anchor="end">0.58%</text>
+<text x="3090.0" y="1278.0" class="team-name" text-anchor="start">🇮🇶 Iraq</text>
+<text x="3390.0" y="1278.0" class="prob" text-anchor="end">0.02%</text><rect class="card r32-card" x="3080" y="1321" width="320" height="226" rx="8" />
+<text x="3090.0" y="1339.0" class="match-title" text-anchor="start">Match 86</text>
+<text x="3390.0" y="1339.0" class="match-meta" text-anchor="end">to W95</text>
+<line class="slot-rule" x1="3090" y1="1353.0" x2="3390" y2="1353.0" />
+<text x="3090.0" y="1366.0" class="slot-source" text-anchor="start">2D</text>
+<text x="3090.0" y="1375.0" class="team-name" text-anchor="start">🇲🇦 Morocco</text>
+<text x="3390.0" y="1375.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="3090" y1="1390.0" x2="3390" y2="1390.0" />
+<text x="3090.0" y="1403.0" class="slot-source" text-anchor="start">2G</text>
+<text x="3090.0" y="1412.0" class="team-name" text-anchor="start">🇨🇻 Cape Verde</text>
+<text x="3390.0" y="1412.0" class="prob" text-anchor="end">51.9%</text>
+<text x="3090.0" y="1427.0" class="team-name" text-anchor="start">🇸🇦 Saudi Arabia</text>
+<text x="3390.0" y="1427.0" class="prob" text-anchor="end">29.9%</text>
+<text x="3090.0" y="1442.0" class="team-name" text-anchor="start">🇪🇸 Spain</text>
+<text x="3390.0" y="1442.0" class="prob" text-anchor="end">10.6%</text>
+<text x="3090.0" y="1457.0" class="team-name" text-anchor="start">🇺🇾 Uruguay</text>
+<text x="3390.0" y="1457.0" class="prob" text-anchor="end">7.7%</text><rect class="card r32-card" x="3080" y="1569" width="320" height="226" rx="8" />
+<text x="3090.0" y="1587.0" class="match-title" text-anchor="start">Match 87</text>
+<text x="3390.0" y="1587.0" class="match-meta" text-anchor="end">to W96</text>
+<line class="slot-rule" x1="3090" y1="1601.0" x2="3390" y2="1601.0" />
+<text x="3090.0" y="1614.0" class="slot-source" text-anchor="start">1J</text>
+<text x="3090.0" y="1623.0" class="team-name" text-anchor="start">🇦🇷 Argentina</text>
+<text x="3390.0" y="1623.0" class="prob" text-anchor="end">100.0%</text>
+<line class="slot-rule" x1="3090" y1="1638.0" x2="3390" y2="1638.0" />
+<text x="3090.0" y="1651.0" class="slot-source" text-anchor="start">2H</text>
+<text x="3090.0" y="1660.0" class="team-name" text-anchor="start">🇧🇪 Belgium</text>
+<text x="3390.0" y="1660.0" class="prob" text-anchor="end">57.6%</text>
+<text x="3090.0" y="1675.0" class="team-name" text-anchor="start">🇮🇷 Iran</text>
+<text x="3390.0" y="1675.0" class="prob" text-anchor="end">19.0%</text>
+<text x="3090.0" y="1690.0" class="team-name" text-anchor="start">🇪🇬 Egypt</text>
+<text x="3390.0" y="1690.0" class="prob" text-anchor="end">18.5%</text>
+<text x="3090.0" y="1705.0" class="team-name" text-anchor="start">🇳🇿 New Zealand</text>
+<text x="3390.0" y="1705.0" class="prob" text-anchor="end">4.9%</text><rect class="card r32-card" x="3080" y="1817" width="320" height="247" rx="8" />
+<text x="3090.0" y="1835.0" class="match-title" text-anchor="start">Match 88</text>
+<text x="3390.0" y="1835.0" class="match-meta" text-anchor="end">to W96</text>
+<line class="slot-rule" x1="3090" y1="1849.0" x2="3390" y2="1849.0" />
+<text x="3090.0" y="1862.0" class="slot-source" text-anchor="start">1K</text>
+<text x="3090.0" y="1871.0" class="team-name" text-anchor="start">🇵🇹 Portugal</text>
+<text x="3390.0" y="1871.0" class="prob" text-anchor="end">51.0%</text>
+<text x="3090.0" y="1886.0" class="team-name" text-anchor="start">🇨🇴 Colombia</text>
+<text x="3390.0" y="1886.0" class="prob" text-anchor="end">49.0%</text>
+<line class="slot-rule" x1="3090" y1="1901.0" x2="3390" y2="1901.0" />
+<text x="3090.0" y="1914.0" class="slot-source" text-anchor="start">3D|3E|3I|3J|3L</text>
+<text x="3090.0" y="1923.0" class="team-name" text-anchor="start">🇬🇭 Ghana</text>
+<text x="3390.0" y="1923.0" class="prob" text-anchor="end">55.0%</text>
+<text x="3090.0" y="1938.0" class="team-name" text-anchor="start">🇭🇷 Croatia</text>
+<text x="3390.0" y="1938.0" class="prob" text-anchor="end">32.7%</text>
+<text x="3090.0" y="1953.0" class="team-name" text-anchor="start">🇸🇳 Senegal</text>
+<text x="3390.0" y="1953.0" class="prob" text-anchor="end">6.3%</text>
+<text x="3090.0" y="1968.0" class="team-name" text-anchor="start">🇪🇨 Ecuador</text>
+<text x="3390.0" y="1968.0" class="prob" text-anchor="end">5.5%</text>
+<text x="3090.0" y="1983.0" class="team-name" text-anchor="start">🇩🇿 Algeria</text>
+<text x="3390.0" y="1983.0" class="prob" text-anchor="end">0.24%</text>
+<text x="3090.0" y="1998.0" class="team-name" text-anchor="start">🇦🇹 Austria</text>
+<text x="3390.0" y="1998.0" class="prob" text-anchor="end">0.17%</text>
+<text x="3090.0" y="2013.0" class="team-name" text-anchor="start">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland</text>
+<text x="3390.0" y="2013.0" class="prob" text-anchor="end">0.07%</text>
+<text x="3090.0" y="2028.0" class="team-name" text-anchor="start">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</text>
+<text x="3390.0" y="2028.0" class="prob" text-anchor="end">0.07%</text>
+<text x="3090.0" y="2043.0" class="team-name" text-anchor="start">🇮🇶 Iraq</text>
+<text x="3390.0" y="2043.0" class="prob" text-anchor="end">0.01%</text><rect class="card placeholder-card r16" x="406" y="166" width="320" height="226" rx="8" />
+<text x="566.0" y="257.0" class="round-label" text-anchor="middle">R16</text>
+<text x="566.0" y="279.0" class="match-id" text-anchor="middle">Match 89</text>
+<text x="566.0" y="301.0" class="sources" text-anchor="middle">W73 v W74</text><rect class="card placeholder-card r16" x="406" y="680" width="320" height="226" rx="8" />
+<text x="566.0" y="771.0" class="round-label" text-anchor="middle">R16</text>
+<text x="566.0" y="793.0" class="match-id" text-anchor="middle">Match 90</text>
+<text x="566.0" y="815.0" class="sources" text-anchor="middle">W75 v W76</text><rect class="card placeholder-card r16" x="406" y="1186" width="320" height="226" rx="8" />
+<text x="566.0" y="1277.0" class="round-label" text-anchor="middle">R16</text>
+<text x="566.0" y="1299.0" class="match-id" text-anchor="middle">Match 91</text>
+<text x="566.0" y="1321.0" class="sources" text-anchor="middle">W77 v W78</text><rect class="card placeholder-card r16" x="406" y="1704" width="320" height="226" rx="8" />
+<text x="566.0" y="1795.0" class="round-label" text-anchor="middle">R16</text>
+<text x="566.0" y="1817.0" class="match-id" text-anchor="middle">Match 92</text>
+<text x="566.0" y="1839.0" class="sources" text-anchor="middle">W79 v W80</text><rect class="card placeholder-card qf" x="788" y="414" width="320" height="226" rx="8" />
+<text x="948.0" y="505.0" class="round-label" text-anchor="middle">QF</text>
+<text x="948.0" y="527.0" class="match-id" text-anchor="middle">Match 97</text>
+<text x="948.0" y="549.0" class="sources" text-anchor="middle">W89 v W90</text><rect class="card placeholder-card qf" x="788" y="1445" width="320" height="226" rx="8" />
+<text x="948.0" y="1536.0" class="round-label" text-anchor="middle">QF</text>
+<text x="948.0" y="1558.0" class="match-id" text-anchor="middle">Match 98</text>
+<text x="948.0" y="1580.0" class="sources" text-anchor="middle">W91 v W92</text><rect class="card placeholder-card sf" x="1170" y="931" width="320" height="226" rx="8" />
+<text x="1330.0" y="1022.0" class="round-label" text-anchor="middle">SF</text>
+<text x="1330.0" y="1044.0" class="match-id" text-anchor="middle">Match 101</text>
+<text x="1330.0" y="1066.0" class="sources" text-anchor="middle">W97 v W98</text><rect class="card placeholder-card f" x="1552" y="931" width="320" height="226" rx="8" />
+<text x="1712.0" y="1022.0" class="round-label" text-anchor="middle">Final</text>
+<text x="1712.0" y="1044.0" class="match-id" text-anchor="middle">Match 103</text>
+<text x="1712.0" y="1066.0" class="sources" text-anchor="middle">W101 v W102</text><rect class="card placeholder-card sf" x="1934" y="931" width="320" height="226" rx="8" />
+<text x="2094.0" y="1022.0" class="round-label" text-anchor="middle">SF</text>
+<text x="2094.0" y="1044.0" class="match-id" text-anchor="middle">Match 102</text>
+<text x="2094.0" y="1066.0" class="sources" text-anchor="middle">W99 v W100</text><rect class="card placeholder-card qf" x="2316" y="414" width="320" height="226" rx="8" />
+<text x="2476.0" y="505.0" class="round-label" text-anchor="middle">QF</text>
+<text x="2476.0" y="527.0" class="match-id" text-anchor="middle">Match 99</text>
+<text x="2476.0" y="549.0" class="sources" text-anchor="middle">W93 v W94</text><rect class="card placeholder-card qf" x="2316" y="1445" width="320" height="226" rx="8" />
+<text x="2476.0" y="1536.0" class="round-label" text-anchor="middle">QF</text>
+<text x="2476.0" y="1558.0" class="match-id" text-anchor="middle">Match 100</text>
+<text x="2476.0" y="1580.0" class="sources" text-anchor="middle">W95 v W96</text><rect class="card placeholder-card r16" x="2698" y="166" width="320" height="226" rx="8" />
+<text x="2858.0" y="257.0" class="round-label" text-anchor="middle">R16</text>
+<text x="2858.0" y="279.0" class="match-id" text-anchor="middle">Match 93</text>
+<text x="2858.0" y="301.0" class="sources" text-anchor="middle">W81 v W82</text><rect class="card placeholder-card r16" x="2698" y="680" width="320" height="226" rx="8" />
+<text x="2858.0" y="771.0" class="round-label" text-anchor="middle">R16</text>
+<text x="2858.0" y="793.0" class="match-id" text-anchor="middle">Match 94</text>
+<text x="2858.0" y="815.0" class="sources" text-anchor="middle">W83 v W84</text><rect class="card placeholder-card r16" x="2698" y="1186" width="320" height="226" rx="8" />
+<text x="2858.0" y="1277.0" class="round-label" text-anchor="middle">R16</text>
+<text x="2858.0" y="1299.0" class="match-id" text-anchor="middle">Match 95</text>
+<text x="2858.0" y="1321.0" class="sources" text-anchor="middle">W85 v W86</text><rect class="card placeholder-card r16" x="2698" y="1704" width="320" height="226" rx="8" />
+<text x="2858.0" y="1795.0" class="round-label" text-anchor="middle">R16</text>
+<text x="2858.0" y="1817.0" class="match-id" text-anchor="middle">Match 96</text>
+<text x="2858.0" y="1839.0" class="sources" text-anchor="middle">W87 v W88</text><rect class="eliminated-panel" x="24" y="2106" width="3376" height="100" rx="8" />
+<text x="40.0" y="2130.0" class="eliminated-title" text-anchor="start">Eliminated (8)</text>
+<text x="3384.0" y="2130.0" class="eliminated-note" text-anchor="end">No Round of 32 slot paths in the current model output</text>
+<rect class="eliminated-chip" x="40" y="2148" width="92" height="24" rx="12" />
+<text x="51.0" y="2164.0" class="eliminated-team" text-anchor="start">🇨🇼 Curaçao</text>
+<rect class="eliminated-chip" x="139" y="2148" width="92" height="24" rx="12" />
+<text x="150.0" y="2164.0" class="eliminated-team" text-anchor="start">🇨🇿 Czechia</text>
+<rect class="eliminated-chip" x="238" y="2148" width="92" height="24" rx="12" />
+<text x="249.0" y="2164.0" class="eliminated-team" text-anchor="start">🇭🇹 Haiti</text>
+<rect class="eliminated-chip" x="337" y="2148" width="92" height="24" rx="12" />
+<text x="348.0" y="2164.0" class="eliminated-team" text-anchor="start">🇯🇴 Jordan</text>
+<rect class="eliminated-chip" x="436" y="2148" width="92" height="24" rx="12" />
+<text x="447.0" y="2164.0" class="eliminated-team" text-anchor="start">🇵🇦 Panama</text>
+<rect class="eliminated-chip" x="535" y="2148" width="92" height="24" rx="12" />
+<text x="546.0" y="2164.0" class="eliminated-team" text-anchor="start">🇶🇦 Qatar</text>
+<rect class="eliminated-chip" x="634" y="2148" width="92" height="24" rx="12" />
+<text x="645.0" y="2164.0" class="eliminated-team" text-anchor="start">🇹🇳 Tunisia</text>
+<rect class="eliminated-chip" x="733" y="2148" width="92" height="24" rx="12" />
+<text x="744.0" y="2164.0" class="eliminated-team" text-anchor="start">🇹🇷 Türkiye</text></svg>
+      </div>
+    </div>
+    <p class="note">Only the Round of 32 boxes contain probabilities. Later rounds are structural fixture boxes so the bracket keeps the familiar left and right sides meeting in the middle.</p>
+  </main>
+  <script>
+
+    async function svgToPngBlob(svg, stats) {
+      const clone = svg.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+      const viewBox = clone.viewBox.baseVal;
+      const width = viewBox && viewBox.width ? viewBox.width : clone.clientWidth;
+      const height = viewBox && viewBox.height ? viewBox.height : clone.clientHeight;
+      const statTexts = stats
+        ? Array.from(stats.querySelectorAll("span")).map((span) =>
+            span.textContent.trim()
+          )
+        : [];
+      const statsHeight = statTexts.length ? 32 : 0;
+      const exportHeight = height + statsHeight;
+      const scale = Math.max(2, window.devicePixelRatio || 1);
+      clone.setAttribute("width", width);
+      clone.setAttribute("height", exportHeight);
+      clone.setAttribute("viewBox", `0 0 ${width} ${exportHeight}`);
+
+      const background = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "rect"
+      );
+      background.setAttribute("x", "0");
+      background.setAttribute("y", "0");
+      background.setAttribute("width", width);
+      background.setAttribute("height", exportHeight);
+      background.setAttribute("fill", "#ffffff");
+      clone.insertBefore(background, clone.firstChild);
+
+      if (statTexts.length) {
+        const statsGroup = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+        const columnWidth = width / statTexts.length;
+
+        statTexts.forEach((statText, index) => {
+          const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          text.setAttribute("x", columnWidth * index + columnWidth / 2);
+          text.setAttribute("y", height + 21);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("fill", "#667085");
+          text.setAttribute("font-size", "10.5");
+          text.setAttribute("font-weight", "650");
+          text.setAttribute(
+            "font-family",
+            "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          );
+          text.textContent = statText;
+          statsGroup.appendChild(text);
+        });
+
+        clone.appendChild(statsGroup);
+      }
+
+      const serializer = new XMLSerializer();
+      const svgText = serializer.serializeToString(clone);
+      const svgBlob = new Blob([svgText], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+
+      try {
+        const image = new Image();
+        image.decoding = "async";
+        image.src = url;
+        await image.decode();
+
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(width * scale);
+        canvas.height = Math.ceil(exportHeight * scale);
+
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        return await new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error("Could not create PNG"));
+            }
+          }, "image/png");
+        });
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function downloadPngBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename || "chart.png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function copyChartAsPng(button) {
+      const block = button.closest(".chart-block");
+      const svg = block.querySelector("svg");
+      const stats = block.querySelector(".stats");
+      const status = block.querySelector(".copy-status");
+
+      button.disabled = true;
+      status.textContent = "Copying...";
+
+      try {
+        const blob = await svgToPngBlob(svg, stats);
+        if (!navigator.clipboard || !window.ClipboardItem) {
+          downloadPngBlob(blob, button.dataset.filename);
+          status.textContent = "Downloaded";
+          return;
+        }
+
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob }),
+        ]);
+        status.textContent = "Copied";
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Copy failed";
+      } finally {
+        button.disabled = false;
+        window.setTimeout(() => {
+          if (
+            status.textContent === "Copied" ||
+            status.textContent === "Downloaded"
+          ) {
+            status.textContent = "";
+          }
+        }, 2200);
+      }
+    }
+
+    document.querySelectorAll(".copy-chart").forEach((button) => {
+      button.addEventListener("click", () => copyChartAsPng(button));
+    });
+
+  </script>
+</body>
+</html>
