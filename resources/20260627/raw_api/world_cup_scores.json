@@ -1,0 +1,527 @@
+[
+  {
+    "id": "512ac18beb5aa936a59f7ea3e497ada2",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-24T19:00:00Z",
+    "completed": true,
+    "home_team": "Bosnia & Herzegovina",
+    "away_team": "Qatar",
+    "scores": [
+      {
+        "name": "Bosnia & Herzegovina",
+        "score": "3"
+      },
+      {
+        "name": "Qatar",
+        "score": "1"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "c9ef5822ee64fd5275f7c73251bb56c7",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-24T19:00:00Z",
+    "completed": true,
+    "home_team": "Switzerland",
+    "away_team": "Canada",
+    "scores": [
+      {
+        "name": "Switzerland",
+        "score": "2"
+      },
+      {
+        "name": "Canada",
+        "score": "1"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "d1279ce7f33136a33e99ad442fc855e8",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-24T22:00:00Z",
+    "completed": true,
+    "home_team": "Morocco",
+    "away_team": "Haiti",
+    "scores": [
+      {
+        "name": "Morocco",
+        "score": "4"
+      },
+      {
+        "name": "Haiti",
+        "score": "2"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "885ba95805db310a7bcc3fb1a7a6dd28",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-24T22:01:00Z",
+    "completed": true,
+    "home_team": "Scotland",
+    "away_team": "Brazil",
+    "scores": [
+      {
+        "name": "Scotland",
+        "score": "0"
+      },
+      {
+        "name": "Brazil",
+        "score": "3"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "5993bd5196ca09f83990f0c3261e442e",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-25T01:00:00Z",
+    "completed": true,
+    "home_team": "Czech Republic",
+    "away_team": "Mexico",
+    "scores": [
+      {
+        "name": "Czech Republic",
+        "score": "0"
+      },
+      {
+        "name": "Mexico",
+        "score": "3"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "c0355dfc6e26ec327e379b6ef5824a5f",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-25T01:00:00Z",
+    "completed": true,
+    "home_team": "South Africa",
+    "away_team": "South Korea",
+    "scores": [
+      {
+        "name": "South Africa",
+        "score": "1"
+      },
+      {
+        "name": "South Korea",
+        "score": "0"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "a5a0b544a984ab16e564264f3e859b43",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-25T20:00:00Z",
+    "completed": true,
+    "home_team": "Curaçao",
+    "away_team": "Ivory Coast",
+    "scores": [
+      {
+        "name": "Curaçao",
+        "score": "0"
+      },
+      {
+        "name": "Ivory Coast",
+        "score": "2"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "0ec28b84ec399bd4dffbe8d1bc72b3c4",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-25T20:00:00Z",
+    "completed": true,
+    "home_team": "Ecuador",
+    "away_team": "Germany",
+    "scores": [
+      {
+        "name": "Ecuador",
+        "score": "2"
+      },
+      {
+        "name": "Germany",
+        "score": "1"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "0ed0233bddc4eafc8507f86a9c17b998",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-25T23:00:00Z",
+    "completed": true,
+    "home_team": "Japan",
+    "away_team": "Sweden",
+    "scores": [
+      {
+        "name": "Japan",
+        "score": "1"
+      },
+      {
+        "name": "Sweden",
+        "score": "1"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "f3c4657daa143a0c5bd62cb370d01ce4",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-25T23:00:00Z",
+    "completed": true,
+    "home_team": "Tunisia",
+    "away_team": "Netherlands",
+    "scores": [
+      {
+        "name": "Tunisia",
+        "score": "1"
+      },
+      {
+        "name": "Netherlands",
+        "score": "3"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "22f6ac06dfcc88a847920f62633e6459",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-26T02:00:00Z",
+    "completed": true,
+    "home_team": "Paraguay",
+    "away_team": "Australia",
+    "scores": [
+      {
+        "name": "Paraguay",
+        "score": "0"
+      },
+      {
+        "name": "Australia",
+        "score": "0"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "f41aeac9a8343a84b4950f15ea25fba2",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-26T02:00:00Z",
+    "completed": true,
+    "home_team": "Turkey",
+    "away_team": "USA",
+    "scores": [
+      {
+        "name": "Turkey",
+        "score": "3"
+      },
+      {
+        "name": "USA",
+        "score": "2"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "b86b4d60f773e9e3c46c00e9a6496e79",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-26T19:01:00Z",
+    "completed": true,
+    "home_team": "Norway",
+    "away_team": "France",
+    "scores": [
+      {
+        "name": "Norway",
+        "score": "1"
+      },
+      {
+        "name": "France",
+        "score": "4"
+      }
+    ],
+    "last_update": "2026-06-27T03:19:46Z"
+  },
+  {
+    "id": "7e6aee294ea1a4792c59558791084528",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-26T19:02:00Z",
+    "completed": true,
+    "home_team": "Senegal",
+    "away_team": "Iraq",
+    "scores": [
+      {
+        "name": "Senegal",
+        "score": "5"
+      },
+      {
+        "name": "Iraq",
+        "score": "0"
+      }
+    ],
+    "last_update": "2026-06-27T03:19:46Z"
+  },
+  {
+    "id": "e07b1926be5a4d515c7eb108dbcee9c5",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T00:01:00Z",
+    "completed": true,
+    "home_team": "Cape Verde",
+    "away_team": "Saudi Arabia",
+    "scores": [
+      {
+        "name": "Cape Verde",
+        "score": "0"
+      },
+      {
+        "name": "Saudi Arabia",
+        "score": "0"
+      }
+    ],
+    "last_update": "2026-06-27T03:20:34Z"
+  },
+  {
+    "id": "dcff2e31c0bce001a4db5caaf4fa8822",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T00:01:00Z",
+    "completed": true,
+    "home_team": "Uruguay",
+    "away_team": "Spain",
+    "scores": [
+      {
+        "name": "Uruguay",
+        "score": "0"
+      },
+      {
+        "name": "Spain",
+        "score": "1"
+      }
+    ],
+    "last_update": "2026-06-27T03:20:34Z"
+  },
+  {
+    "id": "3e3b5fa2b3c963e74cf044c60db0b573",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T03:00:00Z",
+    "completed": true,
+    "home_team": "Egypt",
+    "away_team": "Iran",
+    "scores": [
+      {
+        "name": "Egypt",
+        "score": "1"
+      },
+      {
+        "name": "Iran",
+        "score": "1"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "581691da05dcd75b5c6d3be91ee9d2ab",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T03:01:00Z",
+    "completed": true,
+    "home_team": "New Zealand",
+    "away_team": "Belgium",
+    "scores": [
+      {
+        "name": "New Zealand",
+        "score": "1"
+      },
+      {
+        "name": "Belgium",
+        "score": "5"
+      }
+    ],
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "537c0997cd899394f47f16545b7068b2",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T21:00:00Z",
+    "completed": false,
+    "home_team": "Croatia",
+    "away_team": "Ghana",
+    "scores": null,
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "4be17c8e1ccfecb0f2a5ef79e045c415",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T21:00:00Z",
+    "completed": false,
+    "home_team": "Panama",
+    "away_team": "England",
+    "scores": null,
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "67ae5751c401a98409b8566ae4897069",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T23:30:00Z",
+    "completed": false,
+    "home_team": "Colombia",
+    "away_team": "Portugal",
+    "scores": null,
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "13eab94a136b9c264ba974cf437a5f71",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-27T23:30:00Z",
+    "completed": false,
+    "home_team": "DR Congo",
+    "away_team": "Uzbekistan",
+    "scores": null,
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "8756200e539155e571557c4f2e0d7f05",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-28T02:00:00Z",
+    "completed": false,
+    "home_team": "Algeria",
+    "away_team": "Austria",
+    "scores": null,
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "54697f453437ab26276d773be1d72e9b",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-28T02:00:00Z",
+    "completed": false,
+    "home_team": "Jordan",
+    "away_team": "Argentina",
+    "scores": null,
+    "last_update": "2026-06-27T10:27:18Z"
+  },
+  {
+    "id": "def55b09ef3d6854e3c01e74b5c63415",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-28T19:00:00Z",
+    "completed": false,
+    "home_team": "South Africa",
+    "away_team": "Canada",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "4f3d72fba877939d36a5315618184093",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-29T17:00:00Z",
+    "completed": false,
+    "home_team": "Brazil",
+    "away_team": "Japan",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "4930db8e83436874d09e59bd0e29c1a5",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-29T20:30:00Z",
+    "completed": false,
+    "home_team": "Germany",
+    "away_team": "Paraguay",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "5a34afe2de99513ba48360b983cfe80c",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-30T01:00:00Z",
+    "completed": false,
+    "home_team": "Netherlands",
+    "away_team": "Morocco",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "ce017bea1a26252278053ce759e2416b",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-30T17:00:00Z",
+    "completed": false,
+    "home_team": "Ivory Coast",
+    "away_team": "Norway",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "0b5491529142c9bcc3f88bf45ccb0a7b",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-06-30T21:00:00Z",
+    "completed": false,
+    "home_team": "France",
+    "away_team": "Sweden",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "9eeb4876001f5a52ce3c3641bd5f1f2f",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-07-02T00:00:00Z",
+    "completed": false,
+    "home_team": "USA",
+    "away_team": "Bosnia & Herzegovina",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "fb270a3dac2b682c861bd674a5ff4a04",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-07-03T18:00:00Z",
+    "completed": false,
+    "home_team": "Australia",
+    "away_team": "Egypt",
+    "scores": null,
+    "last_update": null
+  },
+  {
+    "id": "3e161b2448ed76d6b0c0f5bda6fd5bf2",
+    "sport_key": "soccer_fifa_world_cup",
+    "sport_title": "FIFA World Cup",
+    "commence_time": "2026-07-03T22:00:00Z",
+    "completed": false,
+    "home_team": "Argentina",
+    "away_team": "Cape Verde",
+    "scores": null,
+    "last_update": null
+  }
+]
