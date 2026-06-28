@@ -27,7 +27,7 @@ from wc_pool_2026.paths import (
     default_resources_path,
 )
 
-N_SIMULATIONS = 10000000
+N_SIMULATIONS = 10
 RANDOM_SEED = 42
 
 
