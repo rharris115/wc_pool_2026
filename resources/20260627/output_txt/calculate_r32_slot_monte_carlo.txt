@@ -29,12 +29,12 @@ home 1A: 🇲🇽 Mexico (100.0%)
 away 3C|3E|3F|3H|3I: 🇪🇨 Ecuador (99.9%), 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (0.1%)
 
 Match 80
-home 1L: 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (85.3%), 🇭🇷 Croatia (9.0%), 🇬🇭 Ghana (5.7%)
-away 3E|3H|3I|3J|3K: 🇨🇩 DR Congo (58.8%), 🇸🇳 Senegal (35.4%), 🇩🇿 Algeria (3.1%), 🇦🇹 Austria (2.1%), 🇵🇹 Portugal (0.6%)
+home 1L: 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (85.2%), 🇭🇷 Croatia (9.1%), 🇬🇭 Ghana (5.7%)
+away 3E|3H|3I|3J|3K: 🇨🇩 DR Congo (58.9%), 🇸🇳 Senegal (35.4%), 🇩🇿 Algeria (3.0%), 🇦🇹 Austria (2.1%), 🇵🇹 Portugal (0.6%)
 
 Match 81
 home 1G: 🇧🇪 Belgium (100.0%)
-away 3A|3E|3H|3I|3J: 🇸🇳 Senegal (46.8%), 🇰🇷 South Korea (29.9%), 🇩🇿 Algeria (14.6%), 🇦🇹 Austria (8.7%)
+away 3A|3E|3H|3I|3J: 🇸🇳 Senegal (46.9%), 🇰🇷 South Korea (29.9%), 🇩🇿 Algeria (14.6%), 🇦🇹 Austria (8.7%)
 
 Match 82
 home 1D: 🇺🇸 USA (100.0%)
@@ -45,12 +45,12 @@ home 1H: 🇪🇸 Spain (100.0%)
 away 2J: 🇦🇹 Austria (71.3%), 🇩🇿 Algeria (28.7%)
 
 Match 84
-home 2K: 🇵🇹 Portugal (51.4%), 🇨🇴 Colombia (47.9%), 🇨🇩 DR Congo (0.6%)
-away 2L: 🇬🇭 Ghana (42.8%), 🇭🇷 Croatia (42.6%), 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (14.6%)
+home 2K: 🇵🇹 Portugal (51.4%), 🇨🇴 Colombia (48.0%), 🇨🇩 DR Congo (0.6%)
+away 2L: 🇭🇷 Croatia (42.7%), 🇬🇭 Ghana (42.6%), 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (14.8%)
 
 Match 85
 home 1B: 🇨🇭 Switzerland (100.0%)
-away 3E|3F|3G|3I|3J: 🇮🇷 Iran (84.6%), 🇩🇿 Algeria (15.4%)
+away 3E|3F|3G|3I|3J: 🇮🇷 Iran (84.7%), 🇩🇿 Algeria (15.3%)
 
 Match 86
 home 2D: 🇦🇺 Australia (100.0%)
@@ -61,7 +61,7 @@ home 1J: 🇦🇷 Argentina (100.0%)
 away 2H: 🇨🇻 Cape Verde (100.0%)
 
 Match 88
-home 1K: 🇨🇴 Colombia (52.1%), 🇵🇹 Portugal (47.9%)
-away 3D|3E|3I|3J|3L: 🇬🇭 Ghana (51.6%), 🇭🇷 Croatia (30.4%), 🇸🇳 Senegal (17.8%), 🇪🇨 Ecuador (0.1%), 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (0.1%)
+home 1K: 🇨🇴 Colombia (52.0%), 🇵🇹 Portugal (48.0%)
+away 3D|3E|3I|3J|3L: 🇬🇭 Ghana (51.8%), 🇭🇷 Croatia (30.4%), 🇸🇳 Senegal (17.7%), 🇪🇨 Ecuador (0.1%), 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (0.1%)
 
 Third-place ranking: points, goal difference, then goals scored. Any remaining ties are split randomly because team conduct scores and FIFA ranking tie-break data are not currently available in the input CSVs. Group-position ties use points, then head-to-head points, head-to-head goal difference, and head-to-head goals scored between the tied teams. If teams remain tied, overall goal difference and overall goals scored are used. Remaining ties are split randomly because conduct scores and FIFA ranking data are not currently available in the input CSVs.
