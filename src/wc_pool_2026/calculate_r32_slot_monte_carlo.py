@@ -23,9 +23,9 @@ from wc_pool_2026.group_stage_monte_carlo import (
     SimulatedGroupMatch,
     filter_group_stage_matches,
     find_match_results_file,
-    infer_groups,
     load_completed_results,
     load_fixtures,
+    load_groups,
     simulate_group_stage_state,
 )
 
@@ -567,10 +567,7 @@ def calculate_r32_slot_monte_carlo(
 
     fixtures = load_fixtures(match_xg_file)
     completed_results = load_completed_results(match_results_file)
-    groups = infer_groups(
-        fixtures=fixtures,
-        completed_results=completed_results,
-    )
+    groups = load_groups(resources_path)
     fixtures, completed_results = filter_group_stage_matches(
         fixtures=fixtures,
         completed_results=completed_results,

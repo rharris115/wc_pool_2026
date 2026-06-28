@@ -1,5 +1,4 @@
 from pathlib import Path
-from itertools import combinations
 from dataclasses import dataclass
 
 import numpy as np
@@ -7,6 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from wc_pool_2026.common import (
+    normalise_team,
     outcome_probs_from_xg,
     require_columns,
     snapshot_date_stamp as infer_snapshot_date_stamp,
@@ -14,6 +14,7 @@ from wc_pool_2026.common import (
 from wc_pool_2026.paths import build_dated_resource_paths
 
 GROUP_LETTERS = tuple("ABCDEFGHIJKL")
+GROUPS_FILE = "world_cup_2026_groups.csv"
 
 
 @dataclass(frozen=True)
@@ -175,90 +176,48 @@ def load_completed_results(match_results_file: Path) -> pd.DataFrame:
     return pd.DataFrame(results, columns=result_columns).reset_index(drop=True)
 
 
-def infer_groups(
-    fixtures: pd.DataFrame,
-    completed_results: pd.DataFrame,
-) -> dict[str, list[str]]:
-    match_rows = pd.concat(
-        [
-            fixtures[["commence_time", "team_1", "team_2"]],
-            completed_results[["commence_time", "team_1", "team_2"]],
-        ],
-        ignore_index=True,
+def load_groups(resources_path: Path) -> dict[str, list[str]]:
+    groups_path = resources_path / GROUPS_FILE
+    rows = pd.read_csv(groups_path)
+    require_columns(
+        df=rows,
+        columns={"group", "team"},
+        source=groups_path,
     )
-    teams = sorted(set(match_rows["team_1"]) | set(match_rows["team_2"]))
-    edges = {
-        frozenset((row["team_1"], row["team_2"]))
-        for row in match_rows.to_dict("records")
-    }
 
-    group_candidates = [
-        frozenset(candidate)
-        for candidate in combinations(teams, 4)
-        if all(frozenset(pair) in edges for pair in combinations(candidate, 2))
-    ]
-    groups = find_group_cover(teams=teams, group_candidates=group_candidates)
-    first_match_time_by_group = {
-        group: min(
-            row["commence_time"]
-            for row in match_rows.to_dict("records")
-            if row["team_1"] in group and row["team_2"] in group
-        )
-        for group in groups
-    }
+    rows = rows[["group", "team"]].copy()
+    rows["group"] = rows["group"].astype(str)
+    rows["team"] = rows["team"].astype(str).map(normalise_team)
 
-    return {
-        group_letter: sorted(group)
-        for group_letter, group in zip(
-            GROUP_LETTERS,
-            sorted(groups, key=lambda group: first_match_time_by_group[group]),
-            strict=True,
-        )
-    }
+    invalid_groups = sorted(set(rows["group"]) - set(GROUP_LETTERS))
+    if invalid_groups:
+        raise ValueError(f"Invalid group letters in {groups_path}: {invalid_groups}")
 
+    missing_groups = sorted(set(GROUP_LETTERS) - set(rows["group"]))
+    if missing_groups:
+        raise ValueError(f"Missing group letters in {groups_path}: {missing_groups}")
 
-def find_group_cover(
-    teams: list[str],
-    group_candidates: list[frozenset[str]],
-) -> list[frozenset[str]]:
-    target_team_count = len(GROUP_LETTERS) * 4
-    if len(teams) != target_team_count:
+    if rows.duplicated(["group", "team"]).any():
+        duplicates = rows[rows.duplicated(["group", "team"], keep=False)]
+        raise ValueError(f"Duplicate group/team rows in {groups_path}: {duplicates}")
+
+    if rows["team"].duplicated().any():
+        duplicates = sorted(rows.loc[rows["team"].duplicated(keep=False), "team"])
         raise ValueError(
-            f"Expected {target_team_count} teams for group-stage inference, "
-            f"got {len(teams)}"
+            f"Teams assigned to multiple groups in {groups_path}: {duplicates}"
         )
 
-    candidates_by_team = {
-        team: [candidate for candidate in group_candidates if team in candidate]
-        for team in teams
+    groups = {
+        group: sorted(rows.loc[rows["group"] == group, "team"].tolist())
+        for group in GROUP_LETTERS
     }
 
-    def search(uncovered: frozenset[str]) -> list[frozenset[str]] | None:
-        if not uncovered:
-            return []
-
-        seed = min(
-            uncovered,
-            key=lambda team: sum(
-                candidate <= uncovered for candidate in candidates_by_team[team]
-            ),
-        )
-
-        for candidate in candidates_by_team[seed]:
-            if not candidate <= uncovered:
-                continue
-
-            remainder = search(uncovered - candidate)
-            if remainder is not None:
-                return [candidate, *remainder]
-
-        return None
-
-    groups = search(frozenset(teams))
-    if groups is None or len(groups) != len(GROUP_LETTERS):
+    invalid_sizes = {
+        group: len(teams) for group, teams in groups.items() if len(teams) != 4
+    }
+    if invalid_sizes:
         raise ValueError(
-            "Could not infer 12 four-team groups from complete internal "
-            "group-stage match cliques"
+            f"Expected exactly 4 teams per group in {groups_path}, got {invalid_sizes}"
         )
 
     return groups
