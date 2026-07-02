@@ -31,7 +31,7 @@ from wc_pool_2026.group_stage_monte_carlo import (
 
 GROUP_LETTERS = tuple("ABCDEFGHIJKL")
 GROUP_SLOT_PATTERN = re.compile(r"^([123])([A-L])$")
-N_SIMULATIONS = 10000000
+N_SIMULATIONS = 1
 THIRD_PLACE_CRITERIA_NOTE = (
     "Third-place ranking: points, goal difference, then goals scored. "
     "Any remaining ties are split randomly because team conduct scores and "
