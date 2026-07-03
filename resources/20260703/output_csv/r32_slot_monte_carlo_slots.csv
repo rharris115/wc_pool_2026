@@ -1,0 +1,33 @@
+match_id,round,slot,source,team,appearances,probability
+73,R32,away,2B,Canada,1,1.0
+73,R32,home,2A,South Africa,1,1.0
+74,R32,away,2F,Japan,1,1.0
+74,R32,home,1C,Brazil,1,1.0
+75,R32,away,3A|3B|3C|3D|3F,Paraguay,1,1.0
+75,R32,home,1E,Germany,1,1.0
+76,R32,away,2C,Morocco,1,1.0
+76,R32,home,1F,Netherlands,1,1.0
+77,R32,away,2I,Norway,1,1.0
+77,R32,home,2E,Ivory Coast,1,1.0
+78,R32,away,3C|3D|3F|3G|3H,Sweden,1,1.0
+78,R32,home,1I,France,1,1.0
+79,R32,away,3C|3E|3F|3H|3I,Ecuador,1,1.0
+79,R32,home,1A,Mexico,1,1.0
+80,R32,away,3E|3H|3I|3J|3K,DR Congo,1,1.0
+80,R32,home,1L,England,1,1.0
+81,R32,away,3A|3E|3H|3I|3J,Senegal,1,1.0
+81,R32,home,1G,Belgium,1,1.0
+82,R32,away,3B|3E|3F|3I|3J,Bosnia & Herzegovina,1,1.0
+82,R32,home,1D,USA,1,1.0
+83,R32,away,2J,Austria,1,1.0
+83,R32,home,1H,Spain,1,1.0
+84,R32,away,2L,Croatia,1,1.0
+84,R32,home,2K,Portugal,1,1.0
+85,R32,away,3E|3F|3G|3I|3J,Algeria,1,1.0
+85,R32,home,1B,Switzerland,1,1.0
+86,R32,away,2G,Egypt,1,1.0
+86,R32,home,2D,Australia,1,1.0
+87,R32,away,2H,Cape Verde,1,1.0
+87,R32,home,1J,Argentina,1,1.0
+88,R32,away,3D|3E|3I|3J|3L,Ghana,1,1.0
+88,R32,home,1K,Colombia,1,1.0
