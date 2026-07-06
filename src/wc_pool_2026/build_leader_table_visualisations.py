@@ -1,3 +1,4 @@
+from datetime import datetime
 from html import escape
 import math
 import re
@@ -117,15 +118,22 @@ def parse_probability_pct(value: str) -> float:
 
 
 def snapshot_metadata(resources_path: Path) -> list[dict[str, str | int | Path]]:
+    snapshot_dirs = dated_snapshot_dirs(resources_path)
+
+    if not snapshot_dirs:
+        return []
+
+    # Match days follow the calendar rather than a running snapshot count, so a
+    # day with no downloaded results leaves a numbered gap (e.g. two missed days
+    # between MD23 and MD26) instead of silently collapsing the timeline.
+    start_date = datetime.strptime(snapshot_dirs[0].name, "%Y%m%d").date()
     snapshots = []
 
-    for match_day, snapshot_dir in enumerate(
-        dated_snapshot_dirs(resources_path),
-        start=1,
-    ):
+    for snapshot_dir in snapshot_dirs:
+        snapshot_date = datetime.strptime(snapshot_dir.name, "%Y%m%d").date()
         snapshots.append(
             {
-                "match_day": match_day,
+                "match_day": (snapshot_date - start_date).days + 1,
                 "snapshot_date": snapshot_dir.name,
                 "snapshot_dir": snapshot_dir,
             }
@@ -246,6 +254,27 @@ def load_team_history(resources_path: Path, resources: PoolResources) -> pd.Data
             )
 
     return pd.DataFrame(rows).sort_values(["match_day", "team"]).reset_index(drop=True)
+
+
+def contiguous_line_segments(
+    points_by_day: list[tuple[int, str]],
+) -> list[list[str]]:
+    """Group ``"x,y"`` point strings into runs of consecutive match days.
+
+    A gap of more than one calendar day starts a new segment, so a missing day
+    breaks the line rather than drawing a straight interpolation across the hole.
+    ``points_by_day`` must be sorted by match day.
+    """
+    segments: list[list[str]] = []
+    previous_day: int | None = None
+
+    for day, point in points_by_day:
+        if previous_day is None or day - previous_day > 1:
+            segments.append([])
+        segments[-1].append(point)
+        previous_day = day
+
+    return segments
 
 
 def nice_axis_max(max_value: float) -> float:
@@ -461,18 +490,23 @@ def build_svg_line_chart(
             if label_detail_column is not None
             else None
         )
-        points = [
+        points_by_day = [
             (
+                int(row.match_day),
                 f"{x_for_day(int(row.match_day)):.1f},"
-                f"{y_for_value(float(getattr(row, value_column))):.1f}"
+                f"{y_for_value(float(getattr(row, value_column))):.1f}",
             )
             for row in entity_rows.itertuples()
         ]
 
-        elements.append(
-            f'<polyline class="series-line" points="{" ".join(points)}" '
-            f'stroke="{color}" />'
-        )
+        for segment in contiguous_line_segments(points_by_day):
+            if len(segment) < 2:
+                continue
+
+            elements.append(
+                f'<polyline class="series-line" points="{" ".join(segment)}" '
+                f'stroke="{color}" />'
+            )
 
         for row in entity_rows.itertuples():
             value = float(getattr(row, value_column))
@@ -650,20 +684,25 @@ def build_two_series_svg(
         column = str(item["column"])
         color = str(item["color"])
         label = str(item["label"])
-        points = [
+        points_by_day = [
             (
+                int(row.match_day),
                 f"{x_for_day(int(row.match_day)):.1f},"
-                f"{y_for_value(float(getattr(row, column))):.1f}"
+                f"{y_for_value(float(getattr(row, column))):.1f}",
             )
             for row in history.itertuples()
         ]
         latest = history.iloc[-1]
         latest_value = float(latest[column])
 
-        elements.append(
-            f'<polyline class="series-line" points="{" ".join(points)}" '
-            f'stroke="{color}" />'
-        )
+        for segment in contiguous_line_segments(points_by_day):
+            if len(segment) < 2:
+                continue
+
+            elements.append(
+                f'<polyline class="series-line" points="{" ".join(segment)}" '
+                f'stroke="{color}" />'
+            )
 
         for row in history.itertuples():
             value = float(getattr(row, column))
