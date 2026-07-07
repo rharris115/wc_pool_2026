@@ -1,0 +1,165 @@
+[
+  {
+    "id": "94d798388a4dab6d081114ad5e83db38",
+    "has_outrights": true,
+    "sport_key": "soccer_fifa_world_cup_winner",
+    "sport_title": "FIFA World Cup Winner",
+    "commence_time": "2026-07-19T19:00:00Z",
+    "home_team": null,
+    "away_team": null,
+    "bookmakers": [
+      {
+        "key": "betfair_ex_uk",
+        "title": "Betfair",
+        "last_update": "2026-07-07T12:56:19Z",
+        "markets": [
+          {
+            "key": "outrights",
+            "last_update": "2026-07-07T12:56:19Z",
+            "outcomes": [
+              {
+                "name": "France",
+                "price": 3.0
+              },
+              {
+                "name": "Spain",
+                "price": 5.1
+              },
+              {
+                "name": "Argentina",
+                "price": 5.8
+              },
+              {
+                "name": "England",
+                "price": 6.6
+              },
+              {
+                "name": "Norway",
+                "price": 18.5
+              },
+              {
+                "name": "Colombia",
+                "price": 27.0
+              },
+              {
+                "name": "Morocco",
+                "price": 36.0
+              },
+              {
+                "name": "Belgium",
+                "price": 40.0
+              },
+              {
+                "name": "Switzerland",
+                "price": 90.0
+              },
+              {
+                "name": "Egypt",
+                "price": 370.0
+              }
+            ]
+          },
+          {
+            "key": "outrights_lay",
+            "last_update": "2026-07-07T12:56:19Z",
+            "outcomes": [
+              {
+                "name": "France",
+                "price": 3.05
+              },
+              {
+                "name": "Spain",
+                "price": 5.2
+              },
+              {
+                "name": "Argentina",
+                "price": 5.9
+              },
+              {
+                "name": "England",
+                "price": 6.8
+              },
+              {
+                "name": "Norway",
+                "price": 19.0
+              },
+              {
+                "name": "Colombia",
+                "price": 28.0
+              },
+              {
+                "name": "Morocco",
+                "price": 38.0
+              },
+              {
+                "name": "Belgium",
+                "price": 42.0
+              },
+              {
+                "name": "Switzerland",
+                "price": 95.0
+              },
+              {
+                "name": "Egypt",
+                "price": 390.0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "williamhill",
+        "title": "William Hill",
+        "last_update": "2026-07-07T12:57:18Z",
+        "markets": [
+          {
+            "key": "outrights",
+            "last_update": "2026-07-07T12:57:18Z",
+            "outcomes": [
+              {
+                "name": "France",
+                "price": 2.75
+              },
+              {
+                "name": "Spain",
+                "price": 4.5
+              },
+              {
+                "name": "Argentina",
+                "price": 5.5
+              },
+              {
+                "name": "England",
+                "price": 6.0
+              },
+              {
+                "name": "Norway",
+                "price": 17.0
+              },
+              {
+                "name": "Colombia",
+                "price": 26.0
+              },
+              {
+                "name": "Morocco",
+                "price": 29.0
+              },
+              {
+                "name": "Belgium",
+                "price": 34.0
+              },
+              {
+                "name": "Switzerland",
+                "price": 67.0
+              },
+              {
+                "name": "Egypt",
+                "price": 201.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
