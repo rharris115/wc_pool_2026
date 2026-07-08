@@ -1,0 +1,67 @@
+*WORLD CUP ROUND OF 32 SLOT MONTE CARLO*
+
+Match 73
+home 2A: 🇿🇦 South Africa (100.0%)
+away 2B: 🇨🇦 Canada (100.0%)
+
+Match 74
+home 1C: 🇧🇷 Brazil (100.0%)
+away 2F: 🇯🇵 Japan (100.0%)
+
+Match 75
+home 1E: 🇩🇪 Germany (100.0%)
+away 3A|3B|3C|3D|3F: 🇵🇾 Paraguay (100.0%)
+
+Match 76
+home 1F: 🇳🇱 Netherlands (100.0%)
+away 2C: 🇲🇦 Morocco (100.0%)
+
+Match 77
+home 2E: 🇨🇮 Ivory Coast (100.0%)
+away 2I: 🇳🇴 Norway (100.0%)
+
+Match 78
+home 1I: 🇫🇷 France (100.0%)
+away 3C|3D|3F|3G|3H: 🇸🇪 Sweden (100.0%)
+
+Match 79
+home 1A: 🇲🇽 Mexico (100.0%)
+away 3C|3E|3F|3H|3I: 🇪🇨 Ecuador (100.0%)
+
+Match 80
+home 1L: 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (100.0%)
+away 3E|3H|3I|3J|3K: 🇨🇩 DR Congo (100.0%)
+
+Match 81
+home 1G: 🇧🇪 Belgium (100.0%)
+away 3A|3E|3H|3I|3J: 🇸🇳 Senegal (100.0%)
+
+Match 82
+home 1D: 🇺🇸 USA (100.0%)
+away 3B|3E|3F|3I|3J: 🇧🇦 Bosnia & Herzegovina (100.0%)
+
+Match 83
+home 1H: 🇪🇸 Spain (100.0%)
+away 2J: 🇦🇹 Austria (100.0%)
+
+Match 84
+home 2K: 🇵🇹 Portugal (100.0%)
+away 2L: 🇭🇷 Croatia (100.0%)
+
+Match 85
+home 1B: 🇨🇭 Switzerland (100.0%)
+away 3E|3F|3G|3I|3J: 🇩🇿 Algeria (100.0%)
+
+Match 86
+home 2D: 🇦🇺 Australia (100.0%)
+away 2G: 🇪🇬 Egypt (100.0%)
+
+Match 87
+home 1J: 🇦🇷 Argentina (100.0%)
+away 2H: 🇨🇻 Cape Verde (100.0%)
+
+Match 88
+home 1K: 🇨🇴 Colombia (100.0%)
+away 3D|3E|3I|3J|3L: 🇬🇭 Ghana (100.0%)
+
+Third-place ranking: points, goal difference, then goals scored. Any remaining ties are split randomly because team conduct scores and FIFA ranking tie-break data are not currently available in the input CSVs. Group-position ties use points, then head-to-head points, head-to-head goal difference, and head-to-head goals scored between the tied teams. If teams remain tied, overall goal difference and overall goals scored are used. Remaining ties are split randomly because conduct scores and FIFA ranking data are not currently available in the input CSVs.
